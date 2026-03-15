@@ -15,6 +15,16 @@
   <!-- Cinematic Vignette -->
   <div class="scene-vignette"></div>
 
+  <!-- Custom Leaf Cursor -->
+  <div class="custom-cursor" id="custom-cursor">
+    <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M16 2C16 2 8 8 6 16C4 24 10 30 16 30C16 30 14 22 16 16C18 10 26 6 26 6C26 6 22 4 16 2Z" fill="#a8c49a" stroke="#7a9a6e" stroke-width="0.5"/>
+      <path d="M16 2C16 6 15 12 16 16C17 20 16 26 16 30" stroke="#7a9a6e" stroke-width="0.8" opacity="0.6"/>
+      <path d="M10 14C12 14 14 15 16 16" stroke="#7a9a6e" stroke-width="0.5" opacity="0.4"/>
+      <path d="M22 10C20 12 18 14 16 16" stroke="#7a9a6e" stroke-width="0.5" opacity="0.4"/>
+    </svg>
+  </div>
+
   <!-- Loading Screen -->
   <div id="loading-screen" class="loading-screen">
     <div class="loading-inner">
@@ -25,11 +35,7 @@
 
   <!-- Splash Overlay (over 3D scene) -->
   <div id="splash-overlay" class="splash-overlay">
-    <p class="splash-text">
-      Welcome, dear traveler.<br>
-      Step into the forest and discover<br>
-      your own path.
-    </p>
+    <p class="splash-text" id="typewriter-text"></p>
     <div class="splash-divider"></div>
     <button id="enter-btn" class="splash-enter">ENTER</button>
   </div>

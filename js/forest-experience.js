@@ -222,6 +222,20 @@
       this.fireflyParticles = null;
       this.fireflyVelocities = [];
 
+      /* Cursor trail */
+      this.cursorTrail = null;
+      this.cursorTrailPositions = [];
+      this.cursorTrailSizes = [];
+      this.cursorWorld = new THREE.Vector3();
+
+      /* Branch hover scatter particles */
+      this.scatterParticles = null;
+      this.scatterVelocities = [];
+      this.scatterLife = [];
+
+      /* Breathing tree */
+      this.worldTreeBreathTime = 0;
+
       /* Camera targets */
       this.cameraTarget = new THREE.Vector3(0, 4, -10);
       this.cameraLookTarget = new THREE.Vector3(0, 4, -10);
@@ -250,6 +264,8 @@
       this.createDustParticles();
       this.createMistParticles();
       this.createFireflies();
+      this.createCursorTrail();
+      this.createScatterParticles();
       this.createWorldTree();
       this.setupEvents();
       this.animate();
@@ -978,6 +994,106 @@
     }
 
     /* ============================================
+       CURSOR TRAIL — Golden fairy dust following mouse
+       ============================================ */
+    createCursorTrail() {
+      const count = 50;
+      const positions = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = 0;
+        positions[i * 3 + 1] = -100; /* hidden off-screen */
+        positions[i * 3 + 2] = 0;
+        sizes[i] = 0;
+        this.cursorTrailPositions.push({ x: 0, y: -100, z: 0, life: 0 });
+        this.cursorTrailSizes.push(0);
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const tex = createFireflyTexture();
+      const mat = new THREE.PointsMaterial({
+        map: tex,
+        size: 0.35,
+        sizeAttenuation: true,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        color: 0xffd870,
+        opacity: 0.8,
+      });
+
+      this.cursorTrail = new THREE.Points(geo, mat);
+      this.scene.add(this.cursorTrail);
+      this._trailIndex = 0;
+    }
+
+    /* ============================================
+       SCATTER PARTICLES — Burst from branch on hover
+       ============================================ */
+    createScatterParticles() {
+      const count = 40;
+      const positions = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3 + 1] = -100;
+        sizes[i] = 0;
+        this.scatterVelocities.push({ x: 0, y: 0, z: 0 });
+        this.scatterLife.push(0);
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const tex = createLeafTexture();
+      const mat = new THREE.PointsMaterial({
+        map: tex,
+        size: 0.3,
+        sizeAttenuation: true,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.NormalBlending,
+        color: 0x80c050,
+        opacity: 0.9,
+      });
+
+      this.scatterParticles = new THREE.Points(geo, mat);
+      this.scene.add(this.scatterParticles);
+    }
+
+    /* Trigger scatter burst at a branch endpoint */
+    triggerScatter(branchIndex) {
+      if (!this.scatterParticles || branchIndex < 0) return;
+      const endpoint = this.branchEndpoints[branchIndex];
+      if (!endpoint) return;
+
+      const pos = this.scatterParticles.geometry.attributes.position.array;
+      const sizes = this.scatterParticles.geometry.attributes.size.array;
+      const count = pos.length / 3;
+
+      for (let i = 0; i < count; i++) {
+        pos[i * 3]     = endpoint.x + (Math.random() - 0.5) * 0.5;
+        pos[i * 3 + 1] = endpoint.y + (Math.random() - 0.5) * 0.5;
+        pos[i * 3 + 2] = endpoint.z + (Math.random() - 0.5) * 0.5;
+        sizes[i] = 0.15 + Math.random() * 0.25;
+
+        this.scatterVelocities[i] = {
+          x: (Math.random() - 0.5) * 0.08,
+          y: (Math.random() - 0.3) * 0.06,
+          z: (Math.random() - 0.5) * 0.08,
+        };
+        this.scatterLife[i] = 1.0;
+      }
+      this.scatterParticles.geometry.attributes.position.needsUpdate = true;
+      this.scatterParticles.geometry.attributes.size.needsUpdate = true;
+    }
+
+    /* ============================================
        WORLD TREE — Central trunk + 9 branches
        Hidden initially, revealed after ENTER
        ============================================ */
@@ -1172,9 +1288,10 @@
       }
       if (splash) {
         gsap.fromTo(splash, { opacity: 0 }, { opacity: 1, duration: 1.2, delay: 0.5 });
-        gsap.fromTo('.splash-text', { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1.5, delay: 0.8 });
-        gsap.fromTo('.splash-divider', { width: 0, opacity: 0 }, { width: 60, opacity: 0.5, duration: 1, delay: 1.5 });
-        gsap.fromTo('.splash-enter', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 1.8 });
+        /* Splash text is handled by typewriter in app.js */
+        gsap.fromTo('.splash-text', { opacity: 0 }, { opacity: 1, duration: 0.5, delay: 0.8 });
+        gsap.fromTo('.splash-divider', { width: 0, opacity: 0 }, { width: 60, opacity: 0.5, duration: 1, delay: 3.5 });
+        gsap.fromTo('.splash-enter', { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 1, delay: 4.0 });
       }
     }
 
@@ -1353,6 +1470,10 @@
       if (this.state !== 'branches') return;
       this.state = 'navigating';
 
+      /* Chime + whoosh on navigation */
+      if (window.playChime) window.playChime();
+      setTimeout(() => { if (window.playWhoosh) window.playWhoosh(); }, 300);
+
       const endpoint = this.branchEndpoints[index];
       const data = BRANCH_DATA[index];
 
@@ -1509,6 +1630,9 @@
       this.updateDustParticles(time);
       this.updateMistParticles(time);
       this.updateFireflies(time);
+      this.updateCursorTrail(time);
+      this.updateScatterParticles(time);
+      this.updateBreathingTree(time);
       this.updateGodRays(time);
       this.updateBranchInteraction();
       this.updateBranchLabels();
@@ -1666,6 +1790,108 @@
     }
 
     /* ============================================
+       UPDATE: Cursor trail
+       ============================================ */
+    updateCursorTrail(time) {
+      if (!this.cursorTrail) return;
+
+      /* Project mouse position to 3D world at a fixed depth */
+      const vec = new THREE.Vector3(this.mouse.x, this.mouse.y, 0.5);
+      vec.unproject(this.camera);
+      const dir = vec.sub(this.camera.position).normalize();
+      const dist = 8;
+      this.cursorWorld.copy(this.camera.position).add(dir.multiplyScalar(dist));
+
+      /* Spawn a new trail particle at cursor position */
+      const pos = this.cursorTrail.geometry.attributes.position.array;
+      const sizes = this.cursorTrail.geometry.attributes.size.array;
+      const idx = this._trailIndex % this.cursorTrailPositions.length;
+
+      pos[idx * 3]     = this.cursorWorld.x + (Math.random() - 0.5) * 0.15;
+      pos[idx * 3 + 1] = this.cursorWorld.y + (Math.random() - 0.5) * 0.15;
+      pos[idx * 3 + 2] = this.cursorWorld.z + (Math.random() - 0.5) * 0.15;
+      this.cursorTrailPositions[idx] = {
+        x: pos[idx * 3], y: pos[idx * 3 + 1], z: pos[idx * 3 + 2],
+        life: 1.0,
+        vy: 0.003 + Math.random() * 0.005,
+      };
+      sizes[idx] = 0.25 + Math.random() * 0.15;
+      this._trailIndex++;
+
+      /* Update all trail particles — fade and drift upward */
+      const count = this.cursorTrailPositions.length;
+      for (let i = 0; i < count; i++) {
+        const p = this.cursorTrailPositions[i];
+        if (p.life > 0) {
+          p.life -= 0.025;
+          pos[i * 3 + 1] += p.vy || 0.004;
+          pos[i * 3] += (Math.random() - 0.5) * 0.003;
+          sizes[i] = Math.max(0, sizes[i] * 0.98 * p.life);
+        } else {
+          sizes[i] = 0;
+        }
+      }
+
+      this.cursorTrail.geometry.attributes.position.needsUpdate = true;
+      this.cursorTrail.geometry.attributes.size.needsUpdate = true;
+    }
+
+    /* ============================================
+       UPDATE: Scatter particles (branch hover burst)
+       ============================================ */
+    updateScatterParticles(time) {
+      if (!this.scatterParticles) return;
+      const pos = this.scatterParticles.geometry.attributes.position.array;
+      const sizes = this.scatterParticles.geometry.attributes.size.array;
+      const count = pos.length / 3;
+      let anyAlive = false;
+
+      for (let i = 0; i < count; i++) {
+        if (this.scatterLife[i] > 0) {
+          anyAlive = true;
+          this.scatterLife[i] -= 0.015;
+          const v = this.scatterVelocities[i];
+          pos[i * 3]     += v.x;
+          pos[i * 3 + 1] += v.y;
+          pos[i * 3 + 2] += v.z;
+          v.y -= 0.001; /* gravity */
+          sizes[i] = Math.max(0, sizes[i] * 0.99 * this.scatterLife[i]);
+        } else {
+          sizes[i] = 0;
+        }
+      }
+
+      if (anyAlive) {
+        this.scatterParticles.geometry.attributes.position.needsUpdate = true;
+        this.scatterParticles.geometry.attributes.size.needsUpdate = true;
+      }
+    }
+
+    /* ============================================
+       UPDATE: Breathing tree — gentle sway
+       ============================================ */
+    updateBreathingTree(time) {
+      if (!this.worldTreeGroup || !this.worldTreeGroup.visible) return;
+
+      /* Subtle rotation sway */
+      this.worldTreeGroup.rotation.z = Math.sin(time * 0.3) * 0.008;
+      this.worldTreeGroup.rotation.x = Math.cos(time * 0.25) * 0.005;
+
+      /* Branch children sway independently */
+      const branchChildren = this.worldTreeGroup.children.filter(
+        c => c.userData.branchIndex !== undefined
+      );
+      branchChildren.forEach((group, i) => {
+        const phase = i * 0.7;
+        group.rotation.z = Math.sin(time * 0.4 + phase) * 0.015;
+        group.rotation.x = Math.cos(time * 0.35 + phase) * 0.01;
+        /* Subtle scale breathing */
+        const breath = 1.0 + Math.sin(time * 0.5 + phase) * 0.008;
+        group.scale.setScalar(breath);
+      });
+    }
+
+    /* ============================================
        UPDATE: God rays shimmer
        ============================================ */
     updateGodRays(time) {
@@ -1707,7 +1933,13 @@
           gsap.to(cur.material, { emissiveIntensity: 0.5, duration: 0.3 });
           gsap.to(cur.material.emissive, { r: 0.2, g: 0.15, b: 0.05, duration: 0.3 });
           gsap.to(cur.glow.material, { opacity: 0.9, duration: 0.3 });
-          gsap.to(cur.glow.scale, { x: 2, y: 2, z: 2, duration: 0.3 });
+          gsap.to(cur.glow.scale, { x: 2.5, y: 2.5, z: 2.5, duration: 0.3 });
+
+          /* Scatter leaves from branch */
+          this.triggerScatter(newHover);
+
+          /* Subtle rustle sound */
+          if (window.playRustle) window.playRustle();
 
           document.body.style.cursor = 'pointer';
         } else {

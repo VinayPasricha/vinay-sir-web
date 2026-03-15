@@ -252,6 +252,192 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Initialize Three.js scene */
     forest3D = new ForestExperience('canvas-container');
 
+    /* ---- CUSTOM LEAF CURSOR (homepage only) ---- */
+    const customCursor = document.getElementById('custom-cursor');
+    if (customCursor) {
+      let cursorX = 0, cursorY = 0;
+      let cursorTargetX = 0, cursorTargetY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        cursorTargetX = e.clientX;
+        cursorTargetY = e.clientY;
+      });
+
+      document.addEventListener('mousedown', () => customCursor.classList.add('clicking'));
+      document.addEventListener('mouseup', () => customCursor.classList.remove('clicking'));
+
+      function updateCursor() {
+        cursorX += (cursorTargetX - cursorX) * 0.15;
+        cursorY += (cursorTargetY - cursorY) * 0.15;
+        customCursor.style.left = cursorX + 'px';
+        customCursor.style.top = cursorY + 'px';
+        requestAnimationFrame(updateCursor);
+      }
+      updateCursor();
+    }
+
+    /* ---- TYPEWRITER SPLASH TEXT ---- */
+    const typewriterEl = document.getElementById('typewriter-text');
+    if (typewriterEl) {
+      const lines = [
+        'Welcome, dear traveler.',
+        'Step into the forest and discover',
+        'your own path.'
+      ];
+
+      function typewriterEffect() {
+        typewriterEl.innerHTML = '';
+        let charIndex = 0;
+        let lineIndex = 0;
+        const cursor = document.createElement('span');
+        cursor.className = 'typewriter-cursor';
+
+        function typeNext() {
+          if (lineIndex >= lines.length) {
+            /* Done typing — remove cursor after a beat */
+            setTimeout(() => cursor.remove(), 1500);
+            return;
+          }
+
+          const line = lines[lineIndex];
+          if (charIndex < line.length) {
+            /* Remove cursor temporarily, add char, re-add cursor */
+            cursor.remove();
+            /* Get or create the current line span */
+            let lineSpan = typewriterEl.querySelector(`[data-line="${lineIndex}"]`);
+            if (!lineSpan) {
+              if (lineIndex > 0) typewriterEl.appendChild(document.createElement('br'));
+              lineSpan = document.createElement('span');
+              lineSpan.dataset.line = lineIndex;
+              typewriterEl.appendChild(lineSpan);
+            }
+            lineSpan.textContent += line[charIndex];
+            typewriterEl.appendChild(cursor);
+            charIndex++;
+            setTimeout(typeNext, 35 + Math.random() * 30);
+          } else {
+            /* Next line */
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(typeNext, 300);
+          }
+        }
+
+        typeNext();
+      }
+
+      /* Start typewriter after splash fades in */
+      const waitForSplash = setInterval(() => {
+        if (forest3D && forest3D.state === 'splash') {
+          clearInterval(waitForSplash);
+          setTimeout(typewriterEffect, 1200);
+        }
+      }, 100);
+    }
+
+    /* ---- MICRO SOUND EFFECTS ---- */
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+
+    function ensureAudioCtx() {
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    /* Soft chime — two gentle sine tones */
+    window.playChime = function() {
+      try {
+        const ctx = ensureAudioCtx();
+        const now = ctx.currentTime;
+
+        [520, 780].forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.linearRampToValueAtTime(0.06, now + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + i * 0.12);
+          osc.stop(now + 1.5);
+        });
+      } catch(e) {}
+    };
+
+    /* Soft rustle — filtered noise burst */
+    window.playRustle = function() {
+      try {
+        const ctx = ensureAudioCtx();
+        const now = ctx.currentTime;
+        const duration = 0.3;
+        const bufferSize = ctx.sampleRate * duration;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * 0.3;
+        }
+
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 2000;
+        filter.Q.value = 0.5;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.04, now + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        source.start(now);
+        source.stop(now + duration);
+      } catch(e) {}
+    };
+
+    /* Whoosh — for transitions */
+    window.playWhoosh = function() {
+      try {
+        const ctx = ensureAudioCtx();
+        const now = ctx.currentTime;
+        const duration = 0.6;
+        const bufferSize = ctx.sampleRate * duration;
+        const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1);
+        }
+
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.linearRampToValueAtTime(200, now + duration);
+        filter.Q.value = 1.0;
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        source.start(now);
+        source.stop(now + duration);
+      } catch(e) {}
+    };
+
     /* Show audio toggle after entering the forest */
     function onForestEnter() {
       setTimeout(() => {
@@ -280,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (forest3D) {
           forest3D.enter();
           onForestEnter();
+          if (window.playWhoosh) window.playWhoosh();
         }
       });
     }

@@ -67,6 +67,49 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 ::selection { background: var(--moss); color: var(--warm-cream); }
 
 /* ============================================
+   CUSTOM LEAF CURSOR
+   ============================================ */
+#canvas-container {
+  cursor: none;
+}
+#canvas-container ~ * {
+  cursor: none;
+}
+.custom-cursor {
+  position: fixed;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%) rotate(-30deg);
+  transition: transform 0.1s ease;
+  opacity: 0.9;
+}
+.custom-cursor svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(240, 216, 112, 0.5));
+}
+.custom-cursor.clicking {
+  transform: translate(-50%, -50%) rotate(-30deg) scale(0.8);
+}
+
+/* Typewriter cursor blink */
+.typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--sunlight-soft);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: cursorBlink 0.8s ease infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ============================================
    FOREST CANOPY — Real Photo Layers
    ============================================ */
 .forest-canopy {
