@@ -100,19 +100,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Attach leaf transitions to bottom nav items and forest-btn links */
   document.querySelectorAll('.bottom-nav-item').forEach(item => {
-    item.style.cursor = 'pointer';
-    item.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const link = item.querySelector('a');
-      const href = item.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]
-                   || (link ? link.getAttribute('href') : null);
-      if (href && href !== '#') {
-        leafNavigate(href);
-      }
-    });
+    /* Capture href before removing onclick */
+    const onclickStr = item.getAttribute('onclick') || '';
+    const link = item.querySelector('a');
+    const href = onclickStr.match(/'([^']+)'/)?.[1]
+                 || (link ? link.getAttribute('href') : null);
+
     /* Remove inline onclick to prevent double navigation */
     item.removeAttribute('onclick');
+    item.style.cursor = 'pointer';
+
+    if (href && href !== '#') {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        leafNavigate(href);
+      });
+    }
   });
 
   document.querySelectorAll('.forest-btn').forEach(btn => {
