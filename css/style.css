@@ -371,9 +371,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .menu-overlay-left {
   width: 45%; padding: 3rem;
-  display: flex; flex-direction: column;
+  display: flex; flex-direction: column; justify-content: space-between;
   border-right: 1px solid rgba(122,154,110,0.06);
-  overflow: hidden;
 }
 .menu-overlay-right {
   width: 55%; padding: 4rem 5rem;
@@ -410,20 +409,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .menu-links li a:hover { color: var(--parchment); }
 
-.menu-avatar {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  overflow: hidden;
-  min-height: 0;
-}
-.menu-avatar img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  object-position: bottom center;
-}
+/* Avatar removed from menu */
+.menu-avatar { display: none; }
 
 .menu-credits {
   color: var(--text-muted);
@@ -1737,7 +1724,6 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .timeline-col { min-width: 280px; padding: 3rem 1.5rem; }
   .menu-overlay { flex-direction: column; }
   .menu-overlay-left, .menu-overlay-right { width: 100%; padding: 2rem; border: none; }
-  .menu-avatar { max-height: 30vh; }
   .menu-nav-items li a .nav-title { font-size: 2rem; }
   .venture-card { min-width: 260px; max-width: 280px; height: 55vh; padding: 2rem 1.5rem; }
 
