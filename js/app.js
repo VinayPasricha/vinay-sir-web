@@ -6,6 +6,130 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   /* ============================================
+     LEAF COVER + NAVIGATE — Reusable transition for all links
+     ============================================ */
+  function leafNavigate(url) {
+    const overlay = document.createElement('div');
+    overlay.id = 'leaf-transition';
+    document.body.appendChild(overlay);
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'leaf-backdrop';
+    overlay.appendChild(backdrop);
+
+    const leafCount = 280;
+    const greens = [
+      '#1a3a12', '#2a5a20', '#1e4a18', '#3a6a30', '#244a1e',
+      '#1c3c14', '#2e5e28', '#3a7a30', '#1a4a1a', '#2c4c1c',
+      '#1d4518', '#335d26', '#183a14', '#204820', '#2a5528',
+      '#163210', '#284e1e', '#30602a', '#1a4020', '#224a18',
+    ];
+    const leafShapes = [
+      'polygon(50% 0%, 65% 8%, 75% 5%, 80% 18%, 95% 22%, 85% 35%, 98% 45%, 82% 52%, 90% 65%, 75% 68%, 78% 82%, 60% 78%, 50% 100%, 40% 78%, 22% 82%, 25% 68%, 10% 65%, 18% 52%, 2% 45%, 15% 35%, 5% 22%, 20% 18%, 25% 5%, 35% 8%)',
+      'polygon(50% 0%, 60% 15%, 85% 5%, 72% 28%, 100% 35%, 75% 45%, 90% 65%, 65% 55%, 60% 80%, 50% 100%, 40% 80%, 35% 55%, 10% 65%, 25% 45%, 0% 35%, 28% 28%, 15% 5%, 40% 15%)',
+      'polygon(50% 0%, 62% 12%, 70% 8%, 72% 22%, 82% 20%, 80% 35%, 90% 38%, 82% 50%, 88% 58%, 78% 65%, 80% 75%, 65% 78%, 62% 90%, 50% 100%, 38% 90%, 35% 78%, 20% 75%, 22% 65%, 12% 58%, 18% 50%, 10% 38%, 20% 35%, 18% 20%, 28% 22%, 30% 8%, 38% 12%)',
+      'ellipse(42% 50% at 50% 50%)',
+      'polygon(50% 0%, 75% 30%, 80% 55%, 70% 75%, 50% 100%, 30% 75%, 20% 55%, 25% 30%)',
+      'polygon(50% 0%, 62% 15%, 68% 35%, 65% 55%, 60% 75%, 50% 100%, 40% 75%, 35% 55%, 32% 35%, 38% 15%)',
+      'polygon(50% 0%, 58% 6%, 72% 4%, 68% 18%, 85% 25%, 78% 38%, 92% 48%, 80% 55%, 85% 70%, 72% 72%, 68% 88%, 55% 82%, 50% 100%, 45% 82%, 32% 88%, 28% 72%, 15% 70%, 20% 55%, 8% 48%, 22% 38%, 15% 25%, 32% 18%, 28% 4%, 42% 6%)',
+      'polygon(50% 8%, 60% 0%, 75% 2%, 88% 15%, 92% 32%, 82% 52%, 68% 70%, 50% 100%, 32% 70%, 18% 52%, 8% 32%, 12% 15%, 25% 2%, 40% 0%)',
+    ];
+
+    const W = window.innerWidth;
+    const H = window.innerHeight;
+    const cols = 16;
+    const rows = Math.ceil(leafCount / cols);
+
+    for (let i = 0; i < leafCount; i++) {
+      const leaf = document.createElement('div');
+      leaf.className = 'transition-leaf';
+      const size = 40 + Math.random() * 80;
+      const color = greens[Math.floor(Math.random() * greens.length)];
+      const shape = leafShapes[Math.floor(Math.random() * leafShapes.length)];
+      leaf.style.width = size + 'px';
+      leaf.style.height = size * (1.0 + Math.random() * 0.5) + 'px';
+      leaf.style.background = color;
+      leaf.style.clipPath = shape;
+
+      const vein = document.createElement('div');
+      vein.className = 'leaf-vein';
+      leaf.appendChild(vein);
+
+      /* Start from edges, converge to center */
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.max(W, H) * 0.9;
+      const startX = W / 2 + Math.cos(angle) * dist;
+      const startY = H / 2 + Math.sin(angle) * dist;
+
+      /* End at grid position (covering the screen) */
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      const cellW = W / (cols - 1);
+      const cellH = H / (rows - 1);
+      const endX = col * cellW + (Math.random() - 0.5) * cellW * 0.8;
+      const endY = row * cellH + (Math.random() - 0.5) * cellH * 0.8;
+
+      leaf.style.left = startX + 'px';
+      leaf.style.top = startY + 'px';
+      leaf.style.transform = 'rotate(' + (Math.random() * 360) + 'deg) scale(0.3)';
+      leaf.style.opacity = '0';
+      overlay.appendChild(leaf);
+
+      gsap.to(leaf, {
+        left: endX,
+        top: endY,
+        opacity: 1,
+        rotation: Math.random() * 360,
+        scale: 1 + Math.random() * 0.4,
+        duration: 0.6 + Math.random() * 0.4,
+        delay: Math.random() * 0.3,
+        ease: 'power2.in',
+      });
+    }
+
+    gsap.to(backdrop, { opacity: 1, duration: 0.8, delay: 0.3 });
+
+    setTimeout(() => {
+      sessionStorage.setItem('leaf-transition', 'true');
+      window.location.href = url;
+    }, 1000);
+  }
+
+  /* Make it globally accessible */
+  window.leafNavigate = leafNavigate;
+
+  /* Attach leaf transitions to bottom nav items and forest-btn links */
+  document.querySelectorAll('.bottom-nav-item').forEach(item => {
+    item.style.cursor = 'pointer';
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const link = item.querySelector('a');
+      const href = item.getAttribute('onclick')?.match(/'([^']+)'/)?.[1]
+                   || (link ? link.getAttribute('href') : null);
+      if (href && href !== '#') {
+        leafNavigate(href);
+      }
+    });
+    /* Remove inline onclick to prevent double navigation */
+    item.removeAttribute('onclick');
+  });
+
+  document.querySelectorAll('.forest-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = btn.getAttribute('href');
+      if (href) {
+        /* For "Return to Tree", skip splash */
+        if (href.includes('index.html') || href === '../index.html') {
+          sessionStorage.setItem('skip-splash', 'true');
+        }
+        leafNavigate(href);
+      }
+    });
+  });
+
+  /* ============================================
      LEAF UNCOVER — Plays on pages entered via leaf transition
      ============================================ */
   const hasLeafTransition = sessionStorage.getItem('leaf-transition') === 'true';
@@ -123,6 +247,21 @@ document.addEventListener('DOMContentLoaded', () => {
   if (canvasContainer && typeof ForestExperience !== 'undefined') {
     /* Initialize Three.js scene */
     forest3D = new ForestExperience('canvas-container');
+
+    /* Check if returning from a path page — skip splash, go straight to tree */
+    const skipSplash = sessionStorage.getItem('skip-splash') === 'true';
+    if (skipSplash) {
+      sessionStorage.removeItem('skip-splash');
+      /* Auto-enter once scene is ready */
+      const waitForReady = setInterval(() => {
+        if (forest3D && forest3D.state === 'splash') {
+          clearInterval(waitForReady);
+          forest3D.enter();
+        }
+      }, 100);
+      /* Safety timeout */
+      setTimeout(() => clearInterval(waitForReady), 10000);
+    }
 
     /* Wire up ENTER button */
     const enterBtn = document.getElementById('enter-btn');
