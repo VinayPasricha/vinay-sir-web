@@ -645,6 +645,25 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .home-body .body-text p:last-child { margin-bottom: 0; }
 
 /* ============================================
+   PATH PAGE BACKGROUND — Forest hero image
+   ============================================ */
+.path-page-bg {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  background: url('../assets/images/forest-hero.jpg') center center / cover no-repeat;
+  pointer-events: none;
+}
+.path-page-bg::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(8, 20, 10, 0.55);
+}
+
+/* ============================================
    PATH SECTIONS (inner path pages)
    ============================================ */
 .path-section {
@@ -681,7 +700,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .path-section-final {
-  background: var(--forest-deep);
+  background: rgba(10, 26, 13, 0.85);
   border-top: 1px solid rgba(122,154,110,0.06);
 }
 
@@ -721,7 +740,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .inner-hero {
   position: relative; width: 100vw; height: 100vh;
   display: flex; align-items: center; justify-content: center;
-  background: var(--forest-deep); overflow: hidden;
+  background: rgba(10, 26, 13, 0.6); overflow: hidden;
 }
 .inner-hero-content { text-align: center; z-index: 5; }
 
@@ -797,11 +816,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .scroll-section {
   position: relative;
   padding: var(--space-xl) var(--space-lg);
-  background: var(--forest-deep);
+  background: rgba(10, 26, 13, 0.78);
   color: var(--text-primary);
 }
 .scroll-section.dark {
-  background: var(--forest-panel);
+  background: rgba(13, 32, 15, 0.85);
   color: var(--text-primary);
 }
 
