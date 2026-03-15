@@ -252,18 +252,24 @@ document.addEventListener('DOMContentLoaded', () => {
     /* Initialize Three.js scene */
     forest3D = new ForestExperience('canvas-container');
 
+    /* Show audio toggle after entering the forest */
+    function onForestEnter() {
+      setTimeout(() => {
+        if (window.showAudioToggle) window.showAudioToggle();
+      }, 1500);
+    }
+
     /* Check if returning from a path page — skip splash, go straight to tree */
     const skipSplash = sessionStorage.getItem('skip-splash') === 'true';
     if (skipSplash) {
       sessionStorage.removeItem('skip-splash');
-      /* Auto-enter once scene is ready */
       const waitForReady = setInterval(() => {
         if (forest3D && forest3D.state === 'splash') {
           clearInterval(waitForReady);
           forest3D.enter();
+          onForestEnter();
         }
       }, 100);
-      /* Safety timeout */
       setTimeout(() => clearInterval(waitForReady), 10000);
     }
 
@@ -271,7 +277,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const enterBtn = document.getElementById('enter-btn');
     if (enterBtn) {
       enterBtn.addEventListener('click', () => {
-        if (forest3D) forest3D.enter();
+        if (forest3D) {
+          forest3D.enter();
+          onForestEnter();
+        }
       });
     }
   }
@@ -363,6 +372,60 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof AmbientParticles !== 'undefined') {
         new AmbientParticles('ambient-particles');
       }
+    }
+  }
+
+  /* ============================================
+     AMBIENT AUDIO PLAYER
+     ============================================ */
+  const audioToggle = document.querySelector('.audio-toggle');
+  const ambientAudio = document.getElementById('ambient-audio');
+
+  if (audioToggle && ambientAudio) {
+    ambientAudio.volume = 0.3;
+    ambientAudio.loop = true;
+
+    const wasPlaying = localStorage.getItem('forest-audio') === 'playing';
+    const isHomepage = !!document.getElementById('canvas-container');
+
+    /* Show audio toggle — on homepage: after entering the forest; on inner pages: after 2s */
+    window.showAudioToggle = function() {
+      audioToggle.classList.add('visible');
+      /* If user had music on, auto-play */
+      if (wasPlaying) {
+        ambientAudio.play().then(() => {
+          audioToggle.classList.add('playing');
+        }).catch(() => {});
+      }
+    };
+
+    if (!isHomepage) {
+      setTimeout(() => window.showAudioToggle(), 2000);
+    }
+    /* Homepage: showAudioToggle() is called after forest3D.enter() below */
+
+    audioToggle.addEventListener('click', () => {
+      if (ambientAudio.paused) {
+        ambientAudio.play().then(() => {
+          audioToggle.classList.add('playing');
+          localStorage.setItem('forest-audio', 'playing');
+        }).catch(() => {});
+      } else {
+        ambientAudio.pause();
+        audioToggle.classList.remove('playing');
+        localStorage.setItem('forest-audio', 'paused');
+      }
+    });
+
+    /* Fade out audio during leaf transitions */
+    const originalLeafNavigate = window.leafNavigate;
+    if (originalLeafNavigate) {
+      window.leafNavigate = function(url) {
+        if (!ambientAudio.paused) {
+          gsap.to(ambientAudio, { volume: 0, duration: 0.8 });
+        }
+        originalLeafNavigate(url);
+      };
     }
   }
 
