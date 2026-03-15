@@ -944,12 +944,12 @@
         this.worldTreeGroup.add(root);
       }
 
-      /* 9 Branches */
+      /* Branches */
       this.branchMeshes = [];
       this.branchEndpoints = [];
       this.branchHitTargets = [];
 
-      for (let i = 0; i < 9; i++) {
+      for (let i = 0; i < BRANCH_DATA.length; i++) {
         const branchGroup = this.createBranch(i);
         this.worldTreeGroup.add(branchGroup);
       }
@@ -1624,7 +1624,7 @@
       /* Initialize smoothed positions on first call */
       if (!this._labelPositions) {
         this._labelPositions = [];
-        for (let i = 0; i < 9; i++) {
+        for (let i = 0; i < BRANCH_DATA.length; i++) {
           this._labelPositions.push({ x: this.width / 2, y: this.height / 2 });
         }
       }
