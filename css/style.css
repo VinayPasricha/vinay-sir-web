@@ -66,32 +66,9 @@ img { max-width: 100%; display: block; }
 button { cursor: pointer; border: none; background: none; font-family: inherit; }
 ::selection { background: var(--moss); color: var(--warm-cream); }
 
-/* ============================================
-   CUSTOM LEAF CURSOR
-   ============================================ */
-#canvas-container {
-  cursor: none;
-}
-#canvas-container ~ * {
-  cursor: none;
-}
+/* Custom cursor element hidden — trail still active via JS */
 .custom-cursor {
-  position: fixed;
-  width: 28px;
-  height: 28px;
-  pointer-events: none;
-  z-index: 10000;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  transition: transform 0.1s ease;
-  opacity: 0.9;
-}
-.custom-cursor svg {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 6px rgba(240, 216, 112, 0.5));
-}
-.custom-cursor.clicking {
-  transform: translate(-50%, -50%) rotate(-30deg) scale(0.8);
+  display: none;
 }
 
 /* Typewriter cursor blink */
