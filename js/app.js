@@ -133,6 +133,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  /* Intercept menu overlay path links with leaf transition */
+  document.querySelectorAll('.menu-nav-items a, .menu-links a').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const href = link.getAttribute('href');
+      if (href) {
+        /* Close menu first */
+        const overlay = document.querySelector('.menu-overlay');
+        if (overlay) overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        leafNavigate(href);
+      }
+    });
+  });
+
   /* ============================================
      LEAF UNCOVER — Plays on pages entered via leaf transition
      ============================================ */
