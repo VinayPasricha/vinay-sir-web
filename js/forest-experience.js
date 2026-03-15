@@ -117,6 +117,23 @@
     return new THREE.CanvasTexture(c);
   }
 
+  function createFireflyTexture() {
+    const c = document.createElement('canvas');
+    c.width = 32; c.height = 32;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 32, 32);
+    /* Outer warm glow */
+    const g1 = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    g1.addColorStop(0, 'rgba(255,240,140,1.0)');
+    g1.addColorStop(0.15, 'rgba(255,220,80,0.8)');
+    g1.addColorStop(0.35, 'rgba(240,200,60,0.3)');
+    g1.addColorStop(0.6, 'rgba(200,180,40,0.08)');
+    g1.addColorStop(1, 'rgba(180,160,30,0)');
+    ctx.fillStyle = g1;
+    ctx.fillRect(0, 0, 32, 32);
+    return new THREE.CanvasTexture(c);
+  }
+
   function createGodRayTexture() {
     const c = document.createElement('canvas');
     c.width = 128; c.height = 512;
@@ -202,6 +219,8 @@
       this.mistParticles = null;
       this.mistVelocities = [];
       this.godRays = [];
+      this.fireflyParticles = null;
+      this.fireflyVelocities = [];
 
       /* Camera targets */
       this.cameraTarget = new THREE.Vector3(0, 4, -10);
@@ -230,6 +249,7 @@
       this.createLeafParticles();
       this.createDustParticles();
       this.createMistParticles();
+      this.createFireflies();
       this.createWorldTree();
       this.setupEvents();
       this.animate();
@@ -856,13 +876,13 @@
 
       const mat = new THREE.PointsMaterial({
         map: tex,
-        size: 0.12,
+        size: 0.1,
         sizeAttenuation: true,
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        color: 0xf0e8a0,
-        opacity: 0.7,
+        color: 0xf5e090,
+        opacity: 0.5,
       });
 
       this.dustParticles = new THREE.Points(geo, mat);
@@ -909,6 +929,52 @@
 
       this.mistParticles = new THREE.Points(geo, mat);
       this.scene.add(this.mistParticles);
+    }
+
+    /* ============================================
+       FIREFLIES — Warm golden pulsing lights
+       ============================================ */
+    createFireflies() {
+      const count = 80;
+      const tex = createFireflyTexture();
+      const positions = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      this.fireflyVelocities = [];
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3]     = (Math.random() - 0.5) * 30;
+        positions[i * 3 + 1] = 1 + Math.random() * 10;
+        positions[i * 3 + 2] = -18 + Math.random() * 28;
+        sizes[i] = 0.15 + Math.random() * 0.25;
+
+        this.fireflyVelocities.push({
+          x: (Math.random() - 0.5) * 0.015,
+          y: (Math.random() - 0.5) * 0.008,
+          z: (Math.random() - 0.5) * 0.012,
+          phase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.5 + Math.random() * 1.5,
+          baseSize: sizes[i],
+        });
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const mat = new THREE.PointsMaterial({
+        map: tex,
+        size: 0.5,
+        sizeAttenuation: true,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        color: 0xffe880,
+        opacity: 0.9,
+      });
+
+      this.fireflyParticles = new THREE.Points(geo, mat);
+      this.scene.add(this.fireflyParticles);
     }
 
     /* ============================================
@@ -1442,6 +1508,7 @@
       this.updateLeafParticles(time);
       this.updateDustParticles(time);
       this.updateMistParticles(time);
+      this.updateFireflies(time);
       this.updateGodRays(time);
       this.updateBranchInteraction();
       this.updateBranchLabels();
@@ -1555,6 +1622,47 @@
         }
       }
       this.mistParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    /* ============================================
+       UPDATE: Fireflies — drift + pulse
+       ============================================ */
+    updateFireflies(time) {
+      if (!this.fireflyParticles) return;
+      const pos = this.fireflyParticles.geometry.attributes.position.array;
+      const sizes = this.fireflyParticles.geometry.attributes.size.array;
+      const count = pos.length / 3;
+
+      for (let i = 0; i < count; i++) {
+        const v = this.fireflyVelocities[i];
+
+        /* Gentle wandering motion */
+        const wanderX = Math.sin(time * 0.3 + v.phase) * 0.008;
+        const wanderY = Math.cos(time * 0.25 + v.phase * 1.4) * 0.005;
+        const wanderZ = Math.sin(time * 0.2 + v.phase * 0.7) * 0.006;
+
+        pos[i * 3]     += v.x + wanderX;
+        pos[i * 3 + 1] += v.y + wanderY;
+        pos[i * 3 + 2] += v.z + wanderZ;
+
+        /* Pulsing glow — smooth fade in/out */
+        const pulse = Math.sin(time * v.pulseSpeed + v.phase);
+        const glow = Math.max(0, pulse * 0.5 + 0.5); /* 0 to 1 */
+        sizes[i] = v.baseSize * (0.3 + glow * 0.7);
+
+        /* Wrap around bounds */
+        if (Math.abs(pos[i * 3]) > 18) pos[i * 3] *= -0.9;
+        if (pos[i * 3 + 1] < 0.5 || pos[i * 3 + 1] > 13) v.y *= -1;
+        if (pos[i * 3 + 2] > 12 || pos[i * 3 + 2] < -20) v.z *= -1;
+
+        /* Occasionally change direction for organic feel */
+        if (Math.random() < 0.002) {
+          v.x = (Math.random() - 0.5) * 0.015;
+          v.z = (Math.random() - 0.5) * 0.012;
+        }
+      }
+      this.fireflyParticles.geometry.attributes.position.needsUpdate = true;
+      this.fireflyParticles.geometry.attributes.size.needsUpdate = true;
     }
 
     /* ============================================
