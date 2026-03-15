@@ -355,6 +355,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   opacity: 0;
   transition: opacity 1s cubic-bezier(0.25,0.46,0.45,0.94);
 }
+/* Path pages: transparent main-content so forest bg shows through */
+.path-page-bg ~ .main-content {
+  background: transparent;
+}
 .main-content.visible { opacity: 1; }
 
 /* Subtle grain overlay */
@@ -670,6 +674,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   position: relative;
   padding: 6rem 4rem;
   z-index: 2;
+  background: rgba(10, 26, 13, 0.55);
 }
 .path-section-inner {
   max-width: 720px;
