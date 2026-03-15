@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinay Pasricha – Explorer of Emergence</title>
+  <meta name="description" content="Life as an Experiment. Ideas, ventures, systems, and questions discovered along the way.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Three.js Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-inner">
+      <div class="loading-ring"></div>
+      <p class="loading-text">Entering the forest...</p>
+    </div>
+  </div>
+
+  <!-- Splash Overlay (over 3D scene) -->
+  <div id="splash-overlay" class="splash-overlay">
+    <p class="splash-text">
+      Welcome, dear traveler.<br>
+      Step into the forest and discover<br>
+      your own path.
+    </p>
+    <div class="splash-divider"></div>
+    <button id="enter-btn" class="splash-enter">ENTER</button>
+  </div>
+
+  <!-- Branch Labels (positioned dynamically by JS) -->
+  <div id="branch-labels" class="branch-labels"></div>
+
+  <!-- Site Header (appears after entering) -->
+  <header id="site-header" class="site-header">
+    <div class="site-logo">
+      <a href="index.html">VINAY PASRICHA</a>
+    </div>
+    <button class="menu-btn">
+      MENU
+      <div class="bar-wrap"><span></span><span></span></div>
+    </button>
+  </header>
+
+  <!-- Full Screen Menu Overlay -->
+  <div class="menu-overlay">
+    <div class="menu-overlay-left">
+      <button class="menu-close">Close</button>
+      <ul class="menu-links">
+        <li><a href="pages/faq.html">FAQ</a></li>
+        <li><a href="pages/connect.html">Connect</a></li>
+      </ul>
+      <div class="menu-credits">
+        Built with care<br>
+        <a href="https://vinaypasricha.com" target="_blank" style="opacity:0.7; border-bottom: 1px solid rgba(255,255,255,0.15);">vinaypasricha.com</a>
+      </div>
+    </div>
+    <div class="menu-overlay-right">
+      <ul class="menu-nav-items">
+        <li><a href="pages/path1.html"><span class="nav-num">i.</span><span class="nav-title">The Human</span><span class="nav-sub">Inner Landscape</span></a></li>
+        <li><a href="#"><span class="nav-num">ii.</span><span class="nav-title">The Thinker</span><span class="nav-sub">Coming Soon</span></a></li>
+        <li><a href="#"><span class="nav-num">iii.</span><span class="nav-title">The Builder</span><span class="nav-sub">Coming Soon</span></a></li>
+        <li><a href="#"><span class="nav-num">iv.</span><span class="nav-title">The Writer</span><span class="nav-sub">Coming Soon</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- CDN Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <!-- Forest Experience -->
+  <script src="js/forest-experience.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

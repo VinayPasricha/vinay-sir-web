@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:omswami.com)",
+      "WebFetch(domain:vinaypasricha.com)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(curl -s http://localhost:3000/index.html)",
+      "Bash(curl -s http://localhost:3000/)",
+      "Bash(curl -s http://localhost:3000/css/style.css)",
+      "Bash(curl -s http://localhost:3000/js/clouds.js)",
+      "Bash(done)",
+      "mcp__653c2c97-89b0-4c67-9057-ce121e5d861b__deploy_to_vercel",
+      "Bash(npx vercel --version)",
+      "Bash(npx vercel deploy --prod --yes)"
+    ]
+  }
+}
