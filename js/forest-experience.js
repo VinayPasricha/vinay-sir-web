@@ -10,15 +10,13 @@
      BRANCH DATA — The 9 Paths
      ============================================ */
   const BRANCH_DATA = [
-    { name: 'The Human',     sub: 'Inner Landscape',  url: 'pages/path1.html', num: 'I' },
-    { name: 'The Thinker',   sub: 'Coming soon',      url: '#', num: 'II' },
-    { name: 'The Builder',   sub: 'Coming soon',      url: '#', num: 'III' },
-    { name: 'The Writer',    sub: 'Coming soon',      url: '#', num: 'IV' },
-    { name: 'The Seeker',    sub: 'Coming soon',      url: '#', num: 'V' },
-    { name: 'The Connector', sub: 'Coming soon',      url: '#', num: 'VI' },
-    { name: 'The Voyager',   sub: 'Coming soon',      url: '#', num: 'VII' },
-    { name: 'The Visionary', sub: 'Coming soon',      url: '#', num: 'VIII' },
-    { name: 'The Journey',   sub: 'Coming soon',      url: '#', num: 'IX' },
+    { name: 'The Human',       sub: 'Inner Landscape',    url: 'pages/path1.html', num: 'I' },
+    { name: 'The Builder',     sub: 'Systems & Ventures', url: 'pages/path2.html', num: 'II' },
+    { name: 'The Thinker',     sub: 'Ideas & Frameworks', url: 'pages/path3.html', num: 'III' },
+    { name: 'The Technologist',sub: 'Technology & Future', url: 'pages/path4.html', num: 'IV' },
+    { name: 'The Future',      sub: 'Long Horizon',       url: 'pages/path5.html', num: 'V' },
+    { name: 'The Writer',      sub: 'Essays & Books',     url: 'pages/path6.html', num: 'VI' },
+    { name: 'The Social Being',sub: 'Society & Systems',  url: 'pages/path7.html', num: 'VII' },
   ];
 
   /* Branch angles — spread like a real tree crown
@@ -32,9 +30,7 @@
     { azimuth:  55, elevation: 46, length: 5.5 },
     { azimuth:  90, elevation: 32, length: 6.0 },
     { azimuth: -65, elevation: 15, length: 5.5 },
-    { azimuth:  -5, elevation: 22, length: 5.2 },
-    { azimuth:  45, elevation: 12, length: 5.8 },
-    { azimuth:  85, elevation: 8,  length: 5.5 },
+    { azimuth:  25, elevation: 18, length: 5.5 },
   ];
 
   /* ============================================
