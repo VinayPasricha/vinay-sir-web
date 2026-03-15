@@ -674,7 +674,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   position: relative;
   padding: 6rem 4rem;
   z-index: 2;
-  background: rgba(10, 26, 13, 0.55);
+  background: rgba(10, 26, 13, 0.45);
 }
 .path-section-inner {
   max-width: 720px;
@@ -682,6 +682,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .path-section .section-text p {
   margin-bottom: 1.2rem;
+  color: var(--text-secondary);
 }
 .path-section .section-text p:last-child { margin-bottom: 0; }
 
@@ -692,7 +693,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .path-list li {
   font-family: var(--font-accent);
   font-size: 1rem;
-  color: var(--sage);
+  color: var(--leaf-light);
   padding: 0.3rem 0;
   position: relative;
 }
@@ -705,8 +706,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 .path-section-final {
-  background: rgba(10, 26, 13, 0.7);
-  border-top: 1px solid rgba(122,154,110,0.06);
+  background: rgba(10, 26, 13, 0.45);
+  border-top: none;
 }
 
 .path-return {
@@ -718,7 +719,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .page-intro {
   font-family: var(--font-accent);
   font-size: 1.05rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   line-height: 1.7;
   max-width: 520px;
   margin: 1.5rem auto 0;
@@ -771,12 +772,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
    ============================================ */
 .split-section {
   display: flex; min-height: 80vh; align-items: center;
-  padding: var(--space-lg); background: var(--forest-deep);
-  border-bottom: 1px solid rgba(122,154,110,0.06);
+  padding: var(--space-lg); background: transparent;
+  border-bottom: none;
 }
 .split-section:nth-child(even) {
   flex-direction: row-reverse;
-  background: var(--forest-panel);
+  background: transparent;
 }
 .split-text { flex: 1; padding: var(--space-md) var(--space-lg); }
 .split-visual { flex: 1; display: flex; align-items: center; justify-content: center; }
@@ -805,14 +806,14 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   font-size: clamp(1.8rem,4vw,3.5rem);
   font-weight: 300; line-height: 1.15;
   letter-spacing: -0.01em; margin-bottom: 1.5rem;
-  color: var(--text-primary);
+  color: #f0ece4;
 }
-.section-heading em { font-weight: 400; font-style: italic; color: var(--sage); }
+.section-heading em { font-weight: 400; font-style: italic; color: var(--leaf-light); }
 
 .section-text {
   font-family: var(--font-accent);
   font-size: 1rem; line-height: 1.75;
-  max-width: 550px; color: var(--text-muted);
+  max-width: 550px; color: var(--text-secondary);
 }
 
 /* ============================================
@@ -821,11 +822,11 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .scroll-section {
   position: relative;
   padding: var(--space-xl) var(--space-lg);
-  background: rgba(10, 26, 13, 0.6);
+  background: rgba(10, 26, 13, 0.45);
   color: var(--text-primary);
 }
 .scroll-section.dark {
-  background: rgba(13, 32, 15, 0.7);
+  background: rgba(10, 26, 13, 0.45);
   color: var(--text-primary);
 }
 
