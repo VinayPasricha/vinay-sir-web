@@ -240,6 +240,8 @@
       this.leafEndpoints = [];
       this.instancedLeaves = null;
       this._leafData = [];
+      this._leafDummy = new THREE.Object3D();
+      this._leafFrame = 0;
 
       /* Camera targets */
       this.cameraTarget = new THREE.Vector3(0, 4, -10);
@@ -1262,7 +1264,7 @@
         group.add(sub);
         this.leafEndpoints.push(subEnd.clone());
 
-        /* ── TWIGS (Level 3): 1-2 per sub-branch ── */
+        /* ── TWIGS (Level 3): 1-2 simple cylinders per sub-branch ── */
         const twigCount = 1 + Math.floor(Math.random() * 2);
         for (let tw = 0; tw < twigCount; tw++) {
           const twigStart = subCurve.getPoint(0.5 + Math.random() * 0.4);
@@ -1272,26 +1274,16 @@
             (Math.random() - 0.5) * 0.8
           ).normalize();
           const twigLen = 0.4 + Math.random() * 0.8;
-          const twigEnd = twigStart.clone().add(twigDir.multiplyScalar(twigLen));
+          const twigEnd = twigStart.clone().add(twigDir.clone().multiplyScalar(twigLen));
 
-          const twigCurve = new THREE.CatmullRomCurve3([twigStart, twigEnd]);
-          const twigGeo = new THREE.TubeGeometry(twigCurve, 4, 0.02, 4, false);
+          const twigGeo = new THREE.CylinderGeometry(0.008, 0.025, twigLen, 4);
           const twig = new THREE.Mesh(twigGeo, this.worldBarkMaterial);
+          const twigMid = new THREE.Vector3().lerpVectors(twigStart, twigEnd, 0.5);
+          twig.position.copy(twigMid);
+          twig.lookAt(twigEnd);
+          twig.rotateX(Math.PI / 2);
           group.add(twig);
           this.leafEndpoints.push(twigEnd.clone());
-
-          /* ── MICRO-TWIGS (Level 4): 0-1 per twig ── */
-          if (Math.random() > 0.4) {
-            const mDir = new THREE.Vector3(
-              (Math.random() - 0.5), 0.3 + Math.random() * 0.4, (Math.random() - 0.5)
-            ).normalize();
-            const mEnd = twigEnd.clone().add(mDir.multiplyScalar(0.2 + Math.random() * 0.4));
-            const mGeo = new THREE.TubeGeometry(
-              new THREE.CatmullRomCurve3([twigEnd, mEnd]), 3, 0.01, 3, false
-            );
-            group.add(new THREE.Mesh(mGeo, this.worldBarkMaterial));
-            this.leafEndpoints.push(mEnd.clone());
-          }
         }
       }
 
@@ -1333,11 +1325,9 @@
        ============================================ */
     addDecorativeBranches() {
       const decorAngles = [
-        { az: -50, el: 42, len: 4.0 }, { az: 70, el: 40, len: 3.5 },
-        { az: -15, el: 60, len: 3.0 }, { az: 45, el: 25, len: 4.5 },
-        { az: -90, el: 20, len: 3.5 }, { az: 0, el: 50, len: 2.5 },
-        { az: 80, el: 55, len: 3.0 }, { az: -40, el: 10, len: 4.0 },
-        { az: 60, el: 15, len: 3.5 }, { az: -25, el: 45, len: 3.0 },
+        { az: -50, el: 42, len: 3.5 }, { az: 70, el: 40, len: 3.0 },
+        { az: -15, el: 60, len: 2.5 }, { az: 45, el: 25, len: 3.5 },
+        { az: -90, el: 20, len: 3.0 }, { az: 0, el: 50, len: 2.5 },
       ];
 
       for (const da of decorAngles) {
@@ -1361,18 +1351,21 @@
         this.worldTreeGroup.add(mesh);
         this.leafEndpoints.push(end.clone());
 
-        /* Add 1-2 twigs per decorative branch */
-        const twigCount = 1 + Math.floor(Math.random() * 2);
-        for (let tw = 0; tw < twigCount; tw++) {
-          const tp = curve.getPoint(0.5 + Math.random() * 0.4);
-          const td = new THREE.Vector3(
-            (Math.random() - 0.5), 0.3 + Math.random() * 0.4, (Math.random() - 0.5)
-          ).normalize();
-          const te = tp.clone().add(td.multiplyScalar(0.5 + Math.random() * 0.6));
-          const tg = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([tp, te]), 4, 0.015, 3, false);
-          this.worldTreeGroup.add(new THREE.Mesh(tg, this.worldBarkMaterial));
-          this.leafEndpoints.push(te.clone());
-        }
+        /* Add 1 simple twig per decorative branch */
+        const tp = curve.getPoint(0.6 + Math.random() * 0.3);
+        const td = new THREE.Vector3(
+          (Math.random() - 0.5), 0.3 + Math.random() * 0.4, (Math.random() - 0.5)
+        ).normalize();
+        const twLen = 0.4 + Math.random() * 0.5;
+        const te = tp.clone().add(td.clone().multiplyScalar(twLen));
+        const twGeo = new THREE.CylinderGeometry(0.005, 0.015, twLen, 3);
+        const twMesh = new THREE.Mesh(twGeo, this.worldBarkMaterial);
+        const twMid = new THREE.Vector3().lerpVectors(tp, te, 0.5);
+        twMesh.position.copy(twMid);
+        twMesh.lookAt(te);
+        twMesh.rotateX(Math.PI / 2);
+        this.worldTreeGroup.add(twMesh);
+        this.leafEndpoints.push(te.clone());
       }
     }
 
@@ -1382,7 +1375,7 @@
        with per-frame wind animation
        ============================================ */
     createInstancedLeaves() {
-      const leavesPerCluster = 45;
+      const leavesPerCluster = 25;
       const totalLeaves = this.leafEndpoints.length * leavesPerCluster;
 
       /* Leaf geometry: small quad */
@@ -1393,8 +1386,7 @@
 
       const leafMat = new THREE.MeshStandardMaterial({
         map: leafTex,
-        alphaMap: leafTex,
-        alphaTest: 0.3,
+        alphaTest: 0.2,
         transparent: true,
         side: THREE.DoubleSide,
         color: 0x3a8a28,
@@ -1507,9 +1499,7 @@
         ctx.stroke();
       }
 
-      const tex = new THREE.CanvasTexture(c);
-      tex.premultiplyAlpha = true;
-      return tex;
+      return new THREE.CanvasTexture(c);
     }
 
     /* ============================================
@@ -2196,7 +2186,11 @@
     updateInstancedLeaves(time) {
       if (!this.instancedLeaves || !this.instancedLeaves.visible) return;
 
-      const dummy = new THREE.Object3D();
+      /* Only update every 3rd frame for performance */
+      this._leafFrame++;
+      if (this._leafFrame % 3 !== 0) return;
+
+      const dummy = this._leafDummy;
       const windTime = time * 1.2;
 
       for (let i = 0; i < this._leafData.length; i++) {
