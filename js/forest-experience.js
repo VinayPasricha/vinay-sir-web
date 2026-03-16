@@ -236,6 +236,11 @@
       /* Breathing tree */
       this.worldTreeBreathTime = 0;
 
+      /* L-system tree leaf endpoints + instanced leaves */
+      this.leafEndpoints = [];
+      this.instancedLeaves = null;
+      this._leafData = [];
+
       /* Camera targets */
       this.cameraTarget = new THREE.Vector3(0, 4, -10);
       this.cameraLookTarget = new THREE.Vector3(0, 4, -10);
@@ -1094,39 +1099,55 @@
     }
 
     /* ============================================
-       WORLD TREE — Central trunk + 9 branches
-       Hidden initially, revealed after ENTER
+       WORLD TREE — L-system procedural tree
+       Realistic trunk with organic deformation,
+       7 main branches with 4-5 levels of sub-branching,
+       instanced leaf mesh at terminal endpoints
        ============================================ */
     createWorldTree() {
       this.worldTreeGroup = new THREE.Group();
       this.worldTreeGroup.visible = false;
       this.worldTreeGroup.position.set(0, 0, -8);
+      this.leafEndpoints = [];
 
-      /* Central trunk */
+      /* ── TRUNK — Organic tapered cylinder with deformation ── */
       const trunkH = 8;
-      const trunkGeo = new THREE.CylinderGeometry(0.4, 1.0, trunkH, 10, 4);
+      const trunkGeo = new THREE.CylinderGeometry(0.3, 1.0, trunkH, 12, 12);
+      const trunkPos = trunkGeo.attributes.position.array;
+      for (let i = 0; i < trunkPos.length; i += 3) {
+        const y = trunkPos[i + 1];
+        const ny = (y + trunkH / 2) / trunkH;
+        /* Organic twist + knots */
+        const twist = Math.sin(ny * Math.PI * 3) * 0.12 * (1 - ny);
+        const knot = Math.sin(ny * 12) * 0.04 * (1 - ny * 0.5);
+        trunkPos[i] += twist + knot;
+        trunkPos[i + 2] += Math.cos(ny * Math.PI * 2.5) * 0.08 * (1 - ny);
+      }
+      trunkGeo.computeVertexNormals();
       const trunk = new THREE.Mesh(trunkGeo, this.worldBarkMaterial);
       trunk.position.y = trunkH / 2;
       trunk.castShadow = true;
       this.worldTreeGroup.add(trunk);
 
-      /* Root flare */
-      for (let r = 0; r < 5; r++) {
-        const rootAngle = (r / 5) * Math.PI * 2 + Math.random() * 0.4;
-        const rootLen = 1.5 + Math.random() * 1.5;
-        const rootGeo = new THREE.CylinderGeometry(0.05, 0.25, rootLen, 5);
+      /* ── ROOT BUTTRESSES — Thicker, more dramatic ── */
+      for (let r = 0; r < 7; r++) {
+        const rootAngle = (r / 7) * Math.PI * 2 + Math.random() * 0.3;
+        const rootLen = 2.0 + Math.random() * 2.0;
+        const rootThick = 0.15 + Math.random() * 0.15;
+        const rootCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(Math.sin(rootAngle) * 0.7, 0.8, Math.cos(rootAngle) * 0.7),
+          new THREE.Vector3(Math.sin(rootAngle) * 1.2, 0.2, Math.cos(rootAngle) * 1.2),
+          new THREE.Vector3(Math.sin(rootAngle) * (1.5 + rootLen * 0.3), -0.1, Math.cos(rootAngle) * (1.5 + rootLen * 0.3)),
+        ]);
+        const rootGeo = new THREE.TubeGeometry(rootCurve, 8, rootThick, 5, false);
+        /* Taper the root */
+        this.taperTube(rootGeo, rootCurve, rootThick * 1.5, 0.03, 8, 5);
         const root = new THREE.Mesh(rootGeo, this.worldBarkMaterial);
-        root.position.set(
-          Math.sin(rootAngle) * 0.8,
-          0.3,
-          Math.cos(rootAngle) * 0.8
-        );
-        root.rotation.z = Math.sin(rootAngle) * 0.8;
-        root.rotation.x = Math.cos(rootAngle) * 0.8;
+        root.castShadow = true;
         this.worldTreeGroup.add(root);
       }
 
-      /* Branches */
+      /* ── MAIN BRANCHES + SUB-BRANCHING ── */
       this.branchMeshes = [];
       this.branchEndpoints = [];
       this.branchHitTargets = [];
@@ -1136,9 +1157,42 @@
         this.worldTreeGroup.add(branchGroup);
       }
 
+      /* ── DECORATIVE BRANCHES (fill out the canopy) ── */
+      this.addDecorativeBranches();
+
       this.scene.add(this.worldTreeGroup);
+
+      /* ── INSTANCED LEAVES at all collected endpoints ── */
+      this.createInstancedLeaves();
     }
 
+    /* Helper: taper a TubeGeometry from startRadius to endRadius */
+    taperTube(geometry, curve, startRadius, endRadius, segments, radialSegments) {
+      const pos = geometry.attributes.position.array;
+      const ringSize = radialSegments + 1;
+      const segCount = segments + 1;
+      for (let s = 0; s < segCount; s++) {
+        const t = s / segments;
+        const targetR = startRadius + (endRadius - startRadius) * t;
+        const center = curve.getPoint(t);
+        for (let r = 0; r < ringSize; r++) {
+          const idx = (s * ringSize + r) * 3;
+          const dx = pos[idx] - center.x;
+          const dy = pos[idx + 1] - center.y;
+          const dz = pos[idx + 2] - center.z;
+          const currentR = Math.sqrt(dx * dx + dy * dy + dz * dz);
+          if (currentR > 0.001) {
+            const scale = targetR / currentR;
+            pos[idx] = center.x + dx * scale;
+            pos[idx + 1] = center.y + dy * scale;
+            pos[idx + 2] = center.z + dz * scale;
+          }
+        }
+      }
+      geometry.computeVertexNormals();
+    }
+
+    /* L-system branch creation with sub-branches and twigs */
     createBranch(index) {
       const group = new THREE.Group();
       const a = BRANCH_ANGLES[index];
@@ -1148,35 +1202,30 @@
       /* Start point on trunk */
       const startY = 4.5 + (index < 5 ? 2.0 : 0);
       const start = new THREE.Vector3(
-        Math.sin(azRad) * 0.6,
-        startY,
-        Math.cos(azRad) * 0.6
+        Math.sin(azRad) * 0.6, startY, Math.cos(azRad) * 0.6
       );
 
       /* End point */
       const dx = Math.sin(azRad) * Math.cos(elRad) * a.length;
       const dy = Math.sin(elRad) * a.length;
       const dz = Math.cos(azRad) * Math.cos(elRad) * a.length;
-      const end = new THREE.Vector3(
-        start.x + dx,
-        start.y + dy,
-        start.z + dz
-      );
+      const end = new THREE.Vector3(start.x + dx, start.y + dy, start.z + dz);
 
-      /* Midpoints for organic curve */
-      const mid1 = new THREE.Vector3().lerpVectors(start, end, 0.35);
-      mid1.y += 0.5 + Math.random() * 0.8;
-      mid1.x += (Math.random() - 0.5) * 0.8;
+      /* Organic curve with 4 control points */
+      const mid1 = new THREE.Vector3().lerpVectors(start, end, 0.25);
+      mid1.y += 0.4 + Math.random() * 0.6;
+      mid1.x += (Math.random() - 0.5) * 0.6;
+      const mid2 = new THREE.Vector3().lerpVectors(start, end, 0.55);
+      mid2.y += 0.5 + Math.random() * 0.8;
+      mid2.z += (Math.random() - 0.5) * 0.4;
+      const mid3 = new THREE.Vector3().lerpVectors(start, end, 0.8);
+      mid3.y += 0.2 + Math.random() * 0.4;
 
-      const mid2 = new THREE.Vector3().lerpVectors(start, end, 0.7);
-      mid2.y += 0.3 + Math.random() * 0.5;
-      mid2.z += (Math.random() - 0.5) * 0.5;
+      const curve = new THREE.CatmullRomCurve3([start, mid1, mid2, mid3, end]);
+      const tubeGeo = new THREE.TubeGeometry(curve, 20, 0.15, 8, false);
+      /* Taper: thick at trunk, thin at tip */
+      this.taperTube(tubeGeo, curve, 0.22, 0.06, 20, 8);
 
-      /* Create tube along curve */
-      const curve = new THREE.CatmullRomCurve3([start, mid1, mid2, end]);
-      const tubeGeo = new THREE.TubeGeometry(curve, 16, 0.12, 6, false);
-
-      /* Custom material per branch for hover glow */
       const branchMat = this.worldBarkMaterial.clone();
       branchMat.emissive = new THREE.Color(0x0a0500);
       branchMat.emissiveIntensity = 0.1;
@@ -1186,37 +1235,82 @@
       branchMesh.userData.branchIndex = index;
       group.add(branchMesh);
 
-      /* Small canopy cluster at end */
-      for (let c = 0; c < 2; c++) {
-        const cSize = 0.6 + Math.random() * 0.8;
-        const cGeo = new THREE.IcosahedronGeometry(cSize, 1);
-        const cMat = this.canopyMaterial.clone();
-        const canopy = new THREE.Mesh(cGeo, cMat);
-        canopy.position.copy(end);
-        canopy.position.x += (Math.random() - 0.5) * 1;
-        canopy.position.y += Math.random() * 0.8;
-        canopy.position.z += (Math.random() - 0.5) * 1;
-        canopy.userData.branchIndex = index;
-        group.add(canopy);
+      /* ── SUB-BRANCHES (Level 2): 2-3 per main branch ── */
+      const subCount = 2 + Math.floor(Math.random() * 2);
+      for (let s = 0; s < subCount; s++) {
+        const t = 0.35 + (s / subCount) * 0.5;
+        const branchPt = curve.getPoint(t);
+        const tangent = curve.getTangent(t);
+
+        const subDir = new THREE.Vector3(
+          tangent.z * 0.6 + (Math.random() - 0.5) * 0.8,
+          0.3 + Math.random() * 0.5,
+          -tangent.x * 0.6 + (Math.random() - 0.5) * 0.8
+        ).normalize();
+
+        const subLen = 1.2 + Math.random() * 1.8;
+        const subEnd = branchPt.clone().add(subDir.clone().multiplyScalar(subLen));
+        const subMid = new THREE.Vector3().lerpVectors(branchPt, subEnd, 0.5);
+        subMid.y += Math.random() * 0.5;
+        subMid.x += (Math.random() - 0.5) * 0.3;
+
+        const subCurve = new THREE.CatmullRomCurve3([branchPt, subMid, subEnd]);
+        const subGeo = new THREE.TubeGeometry(subCurve, 10, 0.08, 5, false);
+        this.taperTube(subGeo, subCurve, 0.08, 0.025, 10, 5);
+        const sub = new THREE.Mesh(subGeo, this.worldBarkMaterial);
+        sub.castShadow = true;
+        group.add(sub);
+        this.leafEndpoints.push(subEnd.clone());
+
+        /* ── TWIGS (Level 3): 1-2 per sub-branch ── */
+        const twigCount = 1 + Math.floor(Math.random() * 2);
+        for (let tw = 0; tw < twigCount; tw++) {
+          const twigStart = subCurve.getPoint(0.5 + Math.random() * 0.4);
+          const twigDir = new THREE.Vector3(
+            (Math.random() - 0.5) * 0.8,
+            0.2 + Math.random() * 0.6,
+            (Math.random() - 0.5) * 0.8
+          ).normalize();
+          const twigLen = 0.4 + Math.random() * 0.8;
+          const twigEnd = twigStart.clone().add(twigDir.multiplyScalar(twigLen));
+
+          const twigCurve = new THREE.CatmullRomCurve3([twigStart, twigEnd]);
+          const twigGeo = new THREE.TubeGeometry(twigCurve, 4, 0.02, 4, false);
+          const twig = new THREE.Mesh(twigGeo, this.worldBarkMaterial);
+          group.add(twig);
+          this.leafEndpoints.push(twigEnd.clone());
+
+          /* ── MICRO-TWIGS (Level 4): 0-1 per twig ── */
+          if (Math.random() > 0.4) {
+            const mDir = new THREE.Vector3(
+              (Math.random() - 0.5), 0.3 + Math.random() * 0.4, (Math.random() - 0.5)
+            ).normalize();
+            const mEnd = twigEnd.clone().add(mDir.multiplyScalar(0.2 + Math.random() * 0.4));
+            const mGeo = new THREE.TubeGeometry(
+              new THREE.CatmullRomCurve3([twigEnd, mEnd]), 3, 0.01, 3, false
+            );
+            group.add(new THREE.Mesh(mGeo, this.worldBarkMaterial));
+            this.leafEndpoints.push(mEnd.clone());
+          }
+        }
       }
+
+      /* Collect main branch endpoint for leaves */
+      this.leafEndpoints.push(end.clone());
 
       /* Glowing endpoint sphere */
       const glowGeo = new THREE.SphereGeometry(0.15, 12, 12);
       const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xddb855,
-        transparent: true,
-        opacity: 0.55,
+        color: 0xddb855, transparent: true, opacity: 0.55,
       });
       const glowSphere = new THREE.Mesh(glowGeo, glowMat);
       glowSphere.position.copy(end);
       glowSphere.userData.branchIndex = index;
       group.add(glowSphere);
 
-      /* Invisible hit target (larger sphere for raycasting) */
+      /* Invisible hit target */
       const hitGeo = new THREE.SphereGeometry(1.0, 8, 8);
-      const hitMat = new THREE.MeshBasicMaterial({
-        visible: false,
-      });
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
       const hitTarget = new THREE.Mesh(hitGeo, hitMat);
       hitTarget.position.copy(end);
       hitTarget.userData.branchIndex = index;
@@ -1227,11 +1321,195 @@
       this.branchEndpoints.push(end.clone().add(this.worldTreeGroup.position));
       this.branchHitTargets.push(hitTarget);
 
-      /* Scale to 0 initially (will be animated in) */
+      /* Scale to 0 initially */
       group.scale.set(0, 0, 0);
       group.userData.branchIndex = index;
-
       return group;
+    }
+
+    /* ============================================
+       DECORATIVE BRANCHES — Fill out the canopy
+       Non-interactive branches between the 7 paths
+       ============================================ */
+    addDecorativeBranches() {
+      const decorAngles = [
+        { az: -50, el: 42, len: 4.0 }, { az: 70, el: 40, len: 3.5 },
+        { az: -15, el: 60, len: 3.0 }, { az: 45, el: 25, len: 4.5 },
+        { az: -90, el: 20, len: 3.5 }, { az: 0, el: 50, len: 2.5 },
+        { az: 80, el: 55, len: 3.0 }, { az: -40, el: 10, len: 4.0 },
+        { az: 60, el: 15, len: 3.5 }, { az: -25, el: 45, len: 3.0 },
+      ];
+
+      for (const da of decorAngles) {
+        const azRad = da.az * Math.PI / 180;
+        const elRad = da.el * Math.PI / 180;
+        const startY = 3.5 + Math.random() * 4;
+        const start = new THREE.Vector3(Math.sin(azRad) * 0.5, startY, Math.cos(azRad) * 0.5);
+        const end = new THREE.Vector3(
+          start.x + Math.sin(azRad) * Math.cos(elRad) * da.len,
+          start.y + Math.sin(elRad) * da.len,
+          start.z + Math.cos(azRad) * Math.cos(elRad) * da.len
+        );
+        const mid = new THREE.Vector3().lerpVectors(start, end, 0.5);
+        mid.y += Math.random() * 0.6;
+
+        const curve = new THREE.CatmullRomCurve3([start, mid, end]);
+        const geo = new THREE.TubeGeometry(curve, 8, 0.06, 5, false);
+        this.taperTube(geo, curve, 0.06, 0.015, 8, 5);
+        const mesh = new THREE.Mesh(geo, this.worldBarkMaterial);
+        mesh.castShadow = true;
+        this.worldTreeGroup.add(mesh);
+        this.leafEndpoints.push(end.clone());
+
+        /* Add 1-2 twigs per decorative branch */
+        const twigCount = 1 + Math.floor(Math.random() * 2);
+        for (let tw = 0; tw < twigCount; tw++) {
+          const tp = curve.getPoint(0.5 + Math.random() * 0.4);
+          const td = new THREE.Vector3(
+            (Math.random() - 0.5), 0.3 + Math.random() * 0.4, (Math.random() - 0.5)
+          ).normalize();
+          const te = tp.clone().add(td.multiplyScalar(0.5 + Math.random() * 0.6));
+          const tg = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([tp, te]), 4, 0.015, 3, false);
+          this.worldTreeGroup.add(new THREE.Mesh(tg, this.worldBarkMaterial));
+          this.leafEndpoints.push(te.clone());
+        }
+      }
+    }
+
+    /* ============================================
+       INSTANCED LEAVES — Thousands of alpha-masked
+       leaf planes scattered at branch endpoints
+       with per-frame wind animation
+       ============================================ */
+    createInstancedLeaves() {
+      const leavesPerCluster = 45;
+      const totalLeaves = this.leafEndpoints.length * leavesPerCluster;
+
+      /* Leaf geometry: small quad */
+      const leafGeo = new THREE.PlaneGeometry(0.12, 0.18);
+
+      /* Procedural leaf texture with alpha */
+      const leafTex = this.createAlphaLeafTexture();
+
+      const leafMat = new THREE.MeshStandardMaterial({
+        map: leafTex,
+        alphaMap: leafTex,
+        alphaTest: 0.3,
+        transparent: true,
+        side: THREE.DoubleSide,
+        color: 0x3a8a28,
+        roughness: 0.8,
+        metalness: 0.0,
+      });
+
+      this.instancedLeaves = new THREE.InstancedMesh(leafGeo, leafMat, totalLeaves);
+      this.instancedLeaves.castShadow = true;
+
+      const dummy = new THREE.Object3D();
+      const colorAttr = new Float32Array(totalLeaves * 3);
+      this._leafData = [];
+
+      const leafColors = [
+        new THREE.Color(0x2a7a22), new THREE.Color(0x3a8a2a),
+        new THREE.Color(0x4a9a35), new THREE.Color(0x358a28),
+        new THREE.Color(0x2a6a20), new THREE.Color(0x408a30),
+        new THREE.Color(0x2d7025), new THREE.Color(0x4b8838),
+      ];
+
+      let idx = 0;
+      for (const ep of this.leafEndpoints) {
+        for (let l = 0; l < leavesPerCluster; l++) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.random() * Math.PI;
+          const r = 0.2 + Math.random() * 1.0;
+
+          const x = ep.x + r * Math.sin(phi) * Math.cos(theta);
+          const y = ep.y + r * Math.sin(phi) * Math.sin(theta) + Math.random() * 0.4;
+          const z = ep.z + r * Math.cos(phi);
+
+          dummy.position.set(x, y, z);
+          dummy.rotation.set(
+            Math.random() * Math.PI,
+            Math.random() * Math.PI,
+            Math.random() * Math.PI
+          );
+          const scale = 0.6 + Math.random() * 1.2;
+          dummy.scale.set(scale, scale, scale);
+          dummy.updateMatrix();
+          this.instancedLeaves.setMatrixAt(idx, dummy.matrix);
+
+          this._leafData.push({
+            baseX: x, baseY: y, baseZ: z,
+            rx: dummy.rotation.x, ry: dummy.rotation.y, rz: dummy.rotation.z,
+            scale: scale,
+            phase: Math.random() * Math.PI * 2,
+            windStrength: 0.03 + Math.random() * 0.08,
+          });
+
+          const c = leafColors[Math.floor(Math.random() * leafColors.length)];
+          const lv = 0.8 + Math.random() * 0.4;
+          colorAttr[idx * 3] = c.r * lv;
+          colorAttr[idx * 3 + 1] = c.g * lv;
+          colorAttr[idx * 3 + 2] = c.b * lv;
+          idx++;
+        }
+      }
+
+      this.instancedLeaves.instanceMatrix.needsUpdate = true;
+      this.instancedLeaves.instanceColor = new THREE.InstancedBufferAttribute(colorAttr, 3);
+      this.instancedLeaves.visible = false;
+      this.worldTreeGroup.add(this.instancedLeaves);
+    }
+
+    /* Procedural leaf texture with alpha channel */
+    createAlphaLeafTexture() {
+      const c = document.createElement('canvas');
+      c.width = 64; c.height = 64;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, 64, 64);
+
+      /* Leaf shape */
+      ctx.beginPath();
+      ctx.moveTo(32, 4);
+      ctx.bezierCurveTo(48, 12, 56, 28, 52, 40);
+      ctx.bezierCurveTo(48, 52, 40, 60, 32, 62);
+      ctx.bezierCurveTo(24, 60, 16, 52, 12, 40);
+      ctx.bezierCurveTo(8, 28, 16, 12, 32, 4);
+      ctx.closePath();
+
+      const g = ctx.createLinearGradient(0, 0, 64, 64);
+      g.addColorStop(0, 'rgba(80,160,50,1)');
+      g.addColorStop(0.5, 'rgba(60,130,40,0.95)');
+      g.addColorStop(1, 'rgba(40,100,25,0.9)');
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      /* Central vein */
+      ctx.strokeStyle = 'rgba(35,80,20,0.6)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(32, 8);
+      ctx.lineTo(32, 58);
+      ctx.stroke();
+
+      /* Side veins */
+      ctx.lineWidth = 0.5;
+      ctx.strokeStyle = 'rgba(35,80,20,0.3)';
+      for (let v = 0; v < 4; v++) {
+        const vy = 18 + v * 10;
+        ctx.beginPath();
+        ctx.moveTo(32, vy);
+        ctx.lineTo(18 - v, vy + 6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(32, vy);
+        ctx.lineTo(46 + v, vy + 6);
+        ctx.stroke();
+      }
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.premultiplyAlpha = true;
+      return tex;
     }
 
     /* ============================================
@@ -1405,7 +1683,16 @@
         }, 3.5 + i * 0.12);
       });
 
-      /* 9. Show header */
+      /* 9. Reveal instanced leaves with fade-in */
+      tl.call(() => {
+        if (this.instancedLeaves) {
+          this.instancedLeaves.visible = true;
+          this.instancedLeaves.material.opacity = 0;
+          gsap.to(this.instancedLeaves.material, { opacity: 0.95, duration: 1.5 });
+        }
+      }, null, 4.2);
+
+      /* 10. Show header */
       tl.call(() => {
         if (header) header.classList.add('visible');
       }, null, 4.8);
@@ -1634,6 +1921,7 @@
       this.updateScatterParticles(time);
       this.updateBreathingTree(time);
       this.updateGodRays(time);
+      this.updateInstancedLeaves(time);
       this.updateBranchInteraction();
       this.updateBranchLabels();
 
@@ -1900,6 +2188,34 @@
         const mult = ray.userData.opacityMult !== undefined ? ray.userData.opacityMult : 1;
         ray.material.opacity = ray.userData.baseOpacity * (0.7 + shimmer * 0.3) * mult;
       });
+    }
+
+    /* ============================================
+       UPDATE: Instanced leaves wind animation
+       ============================================ */
+    updateInstancedLeaves(time) {
+      if (!this.instancedLeaves || !this.instancedLeaves.visible) return;
+
+      const dummy = new THREE.Object3D();
+      const windTime = time * 1.2;
+
+      for (let i = 0; i < this._leafData.length; i++) {
+        const leaf = this._leafData[i];
+        const windX = Math.sin(windTime + leaf.baseX * 0.5 + leaf.phase) * leaf.windStrength;
+        const windY = Math.cos(windTime * 0.7 + leaf.baseZ * 0.3 + leaf.phase) * leaf.windStrength * 0.4;
+        const windZ = Math.sin(windTime * 0.8 + leaf.baseY * 0.4 + leaf.phase * 1.3) * leaf.windStrength * 0.3;
+
+        dummy.position.set(leaf.baseX + windX, leaf.baseY + windY, leaf.baseZ + windZ);
+        dummy.rotation.set(
+          leaf.rx + Math.sin(windTime + leaf.phase) * 0.08,
+          leaf.ry + Math.cos(windTime * 0.8 + leaf.phase) * 0.04,
+          leaf.rz + Math.sin(windTime * 0.6 + leaf.phase) * 0.06
+        );
+        dummy.scale.setScalar(leaf.scale);
+        dummy.updateMatrix();
+        this.instancedLeaves.setMatrixAt(i, dummy.matrix);
+      }
+      this.instancedLeaves.instanceMatrix.needsUpdate = true;
     }
 
     /* ============================================
