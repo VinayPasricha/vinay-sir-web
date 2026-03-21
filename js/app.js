@@ -264,63 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let forestPaths = null;
 
   if (pathsContainer && typeof ForestPaths !== 'undefined') {
-    /* Initialize Forest Paths scene */
+    /* Initialize Forest Paths scene — it handles its own splash/entry overlay */
     forestPaths = new ForestPaths('forest-paths-container');
-
-    /* ---- TYPEWRITER SPLASH TEXT ---- */
-    const typewriterEl = document.getElementById('typewriter-text');
-    if (typewriterEl) {
-      const lines = [
-        'Welcome, dear traveler.',
-        'Seven paths stretch before you.',
-        'Choose the one that calls.'
-      ];
-
-      function typewriterEffect() {
-        typewriterEl.innerHTML = '';
-        let charIndex = 0;
-        let lineIndex = 0;
-        const cursor = document.createElement('span');
-        cursor.className = 'typewriter-cursor';
-
-        function typeNext() {
-          if (lineIndex >= lines.length) {
-            setTimeout(() => cursor.remove(), 1500);
-            return;
-          }
-
-          const line = lines[lineIndex];
-          if (charIndex < line.length) {
-            cursor.remove();
-            let lineSpan = typewriterEl.querySelector(`[data-line="${lineIndex}"]`);
-            if (!lineSpan) {
-              if (lineIndex > 0) typewriterEl.appendChild(document.createElement('br'));
-              lineSpan = document.createElement('span');
-              lineSpan.dataset.line = lineIndex;
-              typewriterEl.appendChild(lineSpan);
-            }
-            lineSpan.textContent += line[charIndex];
-            typewriterEl.appendChild(cursor);
-            charIndex++;
-            setTimeout(typeNext, 35 + Math.random() * 30);
-          } else {
-            lineIndex++;
-            charIndex = 0;
-            setTimeout(typeNext, 300);
-          }
-        }
-
-        typeNext();
-      }
-
-      /* Start typewriter after splash fades in */
-      const waitForSplash = setInterval(() => {
-        if (forestPaths && forestPaths.state === 'splash') {
-          clearInterval(waitForSplash);
-          setTimeout(typewriterEffect, 800);
-        }
-      }, 100);
-    }
 
     /* ---- MICRO SOUND EFFECTS ---- */
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -411,48 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch(e) {}
     };
 
-    function onForestEnter() {
-      setTimeout(() => {
-        if (window.showAudioToggle) window.showAudioToggle();
-      }, 1500);
-    }
-
-    /* Check if returning from a path page — skip splash */
-    const skipSplash = sessionStorage.getItem('skip-splash') === 'true';
-    if (skipSplash) {
-      sessionStorage.removeItem('skip-splash');
-      const waitForReady = setInterval(() => {
-        if (forestPaths && forestPaths.state === 'splash') {
-          clearInterval(waitForReady);
-          /* Hide splash immediately */
-          const splashOverlay = document.getElementById('splash-overlay');
-          if (splashOverlay) splashOverlay.style.display = 'none';
-          forestPaths.enter();
-          onForestEnter();
-        }
-      }, 100);
-      setTimeout(() => clearInterval(waitForReady), 10000);
-    }
-
-    /* Wire up ENTER button */
-    const enterBtn = document.getElementById('enter-btn');
-    if (enterBtn) {
-      enterBtn.addEventListener('click', () => {
-        if (forestPaths) {
-          /* Fade out splash overlay */
-          const splashOverlay = document.getElementById('splash-overlay');
-          if (splashOverlay) {
-            gsap.to(splashOverlay, {
-              opacity: 0, duration: 0.8,
-              onComplete: () => splashOverlay.style.display = 'none'
-            });
-          }
-          forestPaths.enter();
-          onForestEnter();
-          if (window.playWhoosh) window.playWhoosh();
-        }
-      });
-    }
   }
 
   /* ============================================

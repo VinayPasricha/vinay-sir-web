@@ -83,33 +83,13 @@
       this.animate();
       } catch(e) { console.error('ForestPaths init error:', e); }
 
-      /* Scene is ready — hide loader, show splash */
-      const showSplash = () => {
-        if (this.state !== 'loading') return;
+      /* Build entry overlay directly — no reliance on external HTML/CSS */
+      this.createEntryOverlay();
+
+      setTimeout(() => {
         this.state = 'splash';
-
-        /* Force-remove loading screen */
-        const ls = document.getElementById('loading-screen');
-        if (ls) ls.remove();
-
-        /* Force-show splash overlay */
-        const splash = document.getElementById('splash-overlay');
-        if (splash) {
-          splash.style.opacity = '0';
-          splash.style.pointerEvents = 'auto';
-          /* Use requestAnimationFrame to ensure style applies before transition */
-          requestAnimationFrame(() => {
-            splash.style.transition = 'opacity 1s ease';
-            requestAnimationFrame(() => {
-              splash.style.opacity = '1';
-            });
-          });
-        }
-      };
-
-      setTimeout(showSplash, 1000);
-      /* Fallback */
-      setTimeout(() => { if (this.state === 'loading') showSplash(); }, 3000);
+        this.showEntryOverlay();
+      }, 1200);
     }
 
     setupRenderer() {
@@ -432,6 +412,118 @@
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffe880,
       }));
       this.scene.add(this.fireflies);
+    }
+
+    /* ── ENTRY OVERLAY — Built entirely in JS ── */
+    createEntryOverlay() {
+      this.entryOverlay = document.createElement('div');
+      Object.assign(this.entryOverlay.style, {
+        position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+        zIndex: '2000', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        background: 'rgba(5,10,4,0.6)',
+        opacity: '0', transition: 'opacity 1s ease',
+      });
+
+      const text = document.createElement('p');
+      Object.assign(text.style, {
+        color: '#f2ece0', fontFamily: "'Cormorant Garamond', serif",
+        fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)', fontWeight: '300',
+        lineHeight: '1.6', textAlign: 'center', maxWidth: '600px',
+        padding: '0 2rem', textShadow: '0 2px 30px rgba(0,0,0,0.7)',
+      });
+      this.entryText = text;
+      this.entryOverlay.appendChild(text);
+
+      const divider = document.createElement('div');
+      Object.assign(divider.style, {
+        width: '60px', height: '1px', background: '#e8d090',
+        margin: '2rem auto', opacity: '0', transition: 'opacity 0.8s ease, width 0.8s ease',
+      });
+      this.entryDivider = divider;
+      this.entryOverlay.appendChild(divider);
+
+      const btn = document.createElement('button');
+      btn.textContent = 'EXPLORE THE PATHS';
+      Object.assign(btn.style, {
+        marginTop: '1rem', padding: '14px 52px', background: 'transparent',
+        color: '#f2ece0', fontFamily: "'Inter', sans-serif", fontSize: '0.7rem',
+        fontWeight: '500', letterSpacing: '4px', textTransform: 'uppercase',
+        border: '1px solid rgba(242,236,224,0.25)', borderRadius: '0',
+        cursor: 'pointer', opacity: '0', transition: 'all 0.4s ease',
+      });
+      btn.addEventListener('mouseenter', () => {
+        btn.style.background = 'rgba(242,236,224,0.08)';
+        btn.style.borderColor = 'rgba(242,236,224,0.5)';
+      });
+      btn.addEventListener('mouseleave', () => {
+        btn.style.background = 'transparent';
+        btn.style.borderColor = 'rgba(242,236,224,0.25)';
+      });
+      btn.addEventListener('click', () => {
+        /* Fade out overlay then enter */
+        this.entryOverlay.style.opacity = '0';
+        this.entryOverlay.style.pointerEvents = 'none';
+        setTimeout(() => {
+          this.entryOverlay.remove();
+          this.enter();
+          if (window.showAudioToggle) setTimeout(() => window.showAudioToggle(), 1500);
+          if (window.playWhoosh) window.playWhoosh();
+        }, 800);
+      });
+      this.entryBtn = btn;
+      this.entryOverlay.appendChild(btn);
+
+      document.body.appendChild(this.entryOverlay);
+    }
+
+    showEntryOverlay() {
+      if (!this.entryOverlay) return;
+
+      /* Remove any old loading screen */
+      const ls = document.getElementById('loading-screen');
+      if (ls) ls.remove();
+      const oldSplash = document.getElementById('splash-overlay');
+      if (oldSplash) oldSplash.remove();
+
+      /* Fade in overlay */
+      requestAnimationFrame(() => { this.entryOverlay.style.opacity = '1'; });
+
+      /* Typewriter effect */
+      const lines = ['Welcome, dear traveler.', 'Seven paths stretch before you.', 'Choose the one that calls.'];
+      let lineIdx = 0, charIdx = 0;
+      const type = () => {
+        if (lineIdx >= lines.length) {
+          /* Show divider and button */
+          this.entryDivider.style.opacity = '1';
+          this.entryDivider.style.width = '60px';
+          setTimeout(() => { this.entryBtn.style.opacity = '1'; }, 400);
+          return;
+        }
+        const line = lines[lineIdx];
+        if (charIdx === 0 && lineIdx > 0) {
+          this.entryText.innerHTML += '<br>';
+        }
+        if (charIdx < line.length) {
+          this.entryText.innerHTML += line[charIdx];
+          charIdx++;
+          setTimeout(type, 35 + Math.random() * 30);
+        } else {
+          lineIdx++;
+          charIdx = 0;
+          setTimeout(type, 300);
+        }
+      };
+      setTimeout(type, 600);
+
+      /* Handle skip-splash (returning from path page) */
+      const skipSplash = sessionStorage.getItem('skip-splash') === 'true';
+      if (skipSplash) {
+        sessionStorage.removeItem('skip-splash');
+        this.entryOverlay.remove();
+        this.enter();
+        if (window.showAudioToggle) setTimeout(() => window.showAudioToggle(), 1500);
+      }
     }
 
     /* ── FLOATING PATH MARKERS — visible from ground level ── */
