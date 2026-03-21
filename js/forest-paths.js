@@ -85,6 +85,10 @@
         this.state = 'splash';
         const ls = document.getElementById('loading-screen');
         if (ls) gsap.to(ls, { opacity: 0, duration: 0.8, onComplete: () => ls.style.display = 'none' });
+
+        /* Show splash overlay */
+        const splash = document.getElementById('splash-overlay');
+        if (splash) gsap.to(splash, { opacity: 1, duration: 1.2, delay: 0.5 });
       }, 800);
     }
 
