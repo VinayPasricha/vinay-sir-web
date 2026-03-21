@@ -16,18 +16,13 @@
     { name: 'The Social Being', sub: 'Society & Systems',   url: 'pages/path7.html', num: 'VII' },
   ];
 
-  /* 7 path angles radiating from center (in radians) */
-  const PATH_ANGLES = [
-    Math.PI * 0.5,        // I   — down
-    Math.PI * 0.75,       // II  — lower-left
-    Math.PI * 1.0,        // III — left
-    Math.PI * 1.3,        // IV  — upper-left
-    Math.PI * 1.6,        // V   — upper-center-left
-    Math.PI * 1.85,       // VI  — upper-center-right
-    Math.PI * 0.15,       // VII — right
-  ];
+  /* 7 paths evenly spread, angles in radians */
+  const PATH_ANGLES = [];
+  for (let i = 0; i < 7; i++) {
+    PATH_ANGLES.push((i / 7) * Math.PI * 2 - Math.PI / 2);
+  }
 
-  const PATH_LENGTHS = [28, 24, 26, 22, 24, 22, 25];
+  const PATH_LENGTHS = [18, 16, 17, 15, 16, 15, 17];
 
   class ForestPaths {
     constructor(containerId) {
@@ -39,7 +34,6 @@
       this.mouseY = 0;
       this.hoveredPath = -1;
       this.clock = new THREE.Clock();
-      this.pathEndScreenPos = [];
 
       this.init();
     }
@@ -54,11 +48,10 @@
       this.createCenterGlow();
       this.createFireflies();
       this.createLabels();
-      this.setupRaycasting();
       this.setupEvents();
       this.animate();
 
-      /* Ready */
+      /* Ready after short delay */
       setTimeout(() => {
         this.state = 'splash';
         const loadScreen = document.getElementById('loading-screen');
@@ -68,343 +61,314 @@
             onComplete: () => loadScreen.style.display = 'none'
           });
         }
-      }, 500);
+      }, 600);
     }
 
     setupRenderer() {
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 1.1;
-      this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+      this.renderer.toneMappingExposure = 1.4;
       this.container.appendChild(this.renderer.domElement);
     }
 
     setupCamera() {
       this.camera = new THREE.PerspectiveCamera(
-        50, window.innerWidth / window.innerHeight, 0.1, 200
+        55, window.innerWidth / window.innerHeight, 0.1, 200
       );
-      /* Overhead angled view */
-      this.camera.position.set(0, 45, 18);
-      this.camera.lookAt(0, 0, -2);
-
+      /* Bird's eye view looking straight down with slight tilt */
+      this.camera.position.set(0, 32, 12);
+      this.camera.lookAt(0, 0, 0);
       this.baseCamPos = this.camera.position.clone();
-      this.baseLookAt = new THREE.Vector3(0, 0, -2);
+      this.lookTarget = new THREE.Vector3(0, 0, 0);
     }
 
     setupScene() {
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0x050a06);
-      this.scene.fog = new THREE.FogExp2(0x0a1a0d, 0.012);
+      this.scene.background = new THREE.Color(0x081208);
+      /* Light fog — not too dense */
+      this.scene.fog = new THREE.FogExp2(0x0a1a0d, 0.006);
 
-      /* Ambient light — green forest tint */
-      const ambient = new THREE.AmbientLight(0x1a3a1a, 0.6);
-      this.scene.add(ambient);
+      /* Strong ambient so trees are always visible */
+      this.scene.add(new THREE.AmbientLight(0x3a6a3a, 1.2));
 
-      /* Main directional light — warm sunlight from above */
-      const sun = new THREE.DirectionalLight(0xffe8a0, 1.2);
-      sun.position.set(-10, 40, 10);
+      /* Warm sunlight from above-left */
+      const sun = new THREE.DirectionalLight(0xfff0c0, 2.0);
+      sun.position.set(-8, 35, 8);
       sun.castShadow = true;
       sun.shadow.mapSize.set(1024, 1024);
-      sun.shadow.camera.left = -40;
-      sun.shadow.camera.right = 40;
-      sun.shadow.camera.top = 40;
-      sun.shadow.camera.bottom = -40;
-      sun.shadow.camera.near = 1;
-      sun.shadow.camera.far = 80;
+      sun.shadow.camera.left = -35;
+      sun.shadow.camera.right = 35;
+      sun.shadow.camera.top = 35;
+      sun.shadow.camera.bottom = -35;
       this.scene.add(sun);
 
-      /* Warm fill from below */
-      const fill = new THREE.DirectionalLight(0x2a4a20, 0.3);
-      fill.position.set(5, 10, -5);
+      /* Fill light from other side */
+      const fill = new THREE.DirectionalLight(0x4a8a4a, 0.8);
+      fill.position.set(10, 20, -10);
       this.scene.add(fill);
+
+      /* Hemisphere light for natural sky/ground color */
+      this.scene.add(new THREE.HemisphereLight(0x4488aa, 0x1a3a10, 0.6));
     }
 
     createGround() {
-      /* Procedural forest floor texture */
-      const canvas = document.createElement('canvas');
-      canvas.width = 1024; canvas.height = 1024;
-      const ctx = canvas.getContext('2d');
+      /* Procedural ground texture */
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 512;
+      const ctx = c.getContext('2d');
 
-      /* Dark forest green base */
-      ctx.fillStyle = '#0a1a0a';
-      ctx.fillRect(0, 0, 1024, 1024);
+      /* Dark earthy green */
+      ctx.fillStyle = '#1a2e14';
+      ctx.fillRect(0, 0, 512, 512);
 
-      /* Mossy patches */
-      for (let i = 0; i < 8000; i++) {
-        const x = Math.random() * 1024;
-        const y = Math.random() * 1024;
-        const r = 1 + Math.random() * 4;
-        const g = 15 + Math.random() * 30;
-        const b = 8 + Math.random() * 15;
-        ctx.fillStyle = `rgba(${g * 0.6}, ${g}, ${b}, ${0.15 + Math.random() * 0.25})`;
+      /* Moss and grass patches */
+      for (let i = 0; i < 5000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        const r = 1 + Math.random() * 5;
+        const green = 30 + Math.random() * 50;
+        ctx.fillStyle = `rgba(${green * 0.5}, ${green}, ${10 + Math.random() * 15}, ${0.2 + Math.random() * 0.3})`;
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      /* Brown earth spots */
-      for (let i = 0; i < 1500; i++) {
-        const x = Math.random() * 1024;
-        const y = Math.random() * 1024;
-        const r = 1 + Math.random() * 3;
-        ctx.fillStyle = `rgba(${30 + Math.random() * 20}, ${20 + Math.random() * 15}, ${10 + Math.random() * 8}, ${0.1 + Math.random() * 0.15})`;
+      /* Brown dirt spots */
+      for (let i = 0; i < 1000; i++) {
+        const x = Math.random() * 512;
+        const y = Math.random() * 512;
+        ctx.fillStyle = `rgba(${40 + Math.random() * 30}, ${25 + Math.random() * 20}, ${10 + Math.random() * 10}, ${0.1 + Math.random() * 0.15})`;
         ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.arc(x, y, 1 + Math.random() * 3, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      const groundTex = new THREE.CanvasTexture(canvas);
-      groundTex.wrapS = groundTex.wrapT = THREE.RepeatWrapping;
-      groundTex.repeat.set(4, 4);
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(6, 6);
 
-      const groundGeo = new THREE.PlaneGeometry(100, 100, 64, 64);
-      /* Subtle displacement */
-      const pos = groundGeo.attributes.position.array;
-      for (let i = 0; i < pos.length; i += 3) {
-        pos[i + 2] += (Math.random() - 0.5) * 0.3;
+      const geo = new THREE.PlaneGeometry(80, 80, 32, 32);
+      /* Subtle terrain bumps */
+      const pos = geo.attributes.position.array;
+      for (let i = 2; i < pos.length; i += 3) {
+        pos[i] += (Math.random() - 0.5) * 0.15;
       }
-      groundGeo.computeVertexNormals();
+      geo.computeVertexNormals();
 
-      const groundMat = new THREE.MeshStandardMaterial({
-        map: groundTex,
+      const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+        map: tex,
+        color: 0x1a3a14,
         roughness: 0.95,
-        metalness: 0.0,
-        color: 0x0f2810,
-      });
-
-      this.ground = new THREE.Mesh(groundGeo, groundMat);
-      this.ground.rotation.x = -Math.PI / 2;
-      this.ground.receiveShadow = true;
-      this.scene.add(this.ground);
+        metalness: 0,
+      }));
+      ground.rotation.x = -Math.PI / 2;
+      ground.receiveShadow = true;
+      this.scene.add(ground);
     }
 
     createPaths() {
-      /* 7 glowing trails radiating from center */
       this.pathMeshes = [];
       this.pathEndpoints = [];
 
-      const pathMat = new THREE.MeshStandardMaterial({
-        color: 0xc4a050,
-        roughness: 0.4,
-        metalness: 0.1,
-        emissive: 0xc4a050,
-        emissiveIntensity: 0.3,
-      });
-
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xffe880,
-        transparent: true,
-        opacity: 0.15,
-      });
-
       PATH_ANGLES.forEach((angle, i) => {
         const len = PATH_LENGTHS[i];
-        const points = [];
-        const segments = 20;
+        const curvePoints = [];
+        const segments = 30;
 
-        /* Create organic curved path */
         for (let s = 0; s <= segments; s++) {
           const t = s / segments;
           const dist = t * len;
-          /* Add organic waviness */
-          const waveX = Math.sin(t * 3 + i * 1.7) * 1.2 * t;
-          const waveZ = Math.cos(t * 2.5 + i * 2.1) * 0.8 * t;
-
-          const x = Math.cos(angle) * dist + waveX;
-          const z = Math.sin(angle) * dist + waveZ;
-          points.push(new THREE.Vector3(x, 0, z));
+          /* Organic curve */
+          const wave = Math.sin(t * 2.5 + i * 1.3) * 1.5 * t;
+          const x = Math.cos(angle) * dist + Math.sin(angle + Math.PI / 2) * wave;
+          const z = Math.sin(angle) * dist + Math.cos(angle + Math.PI / 2) * wave;
+          curvePoints.push(new THREE.Vector3(x, 0, z));
         }
 
-        const curve = new THREE.CatmullRomCurve3(points);
+        const curve = new THREE.CatmullRomCurve3(curvePoints);
+        const pts = curve.getPoints(80);
 
-        /* Main path — narrow dirt trail */
-        const pathWidth = 0.6 + Math.random() * 0.3;
-        const shape = new THREE.Shape();
-        shape.moveTo(-pathWidth / 2, 0);
-        shape.lineTo(pathWidth / 2, 0);
+        /* Build wide smooth ribbon */
+        const verts = [];
+        const uvs = [];
+        const indices = [];
 
-        const extrudeSettings = {
-          steps: 60,
-          extrudePath: curve,
-        };
-
-        /* Use a flat ribbon geometry instead */
-        const ribbonPoints = [];
-        const ribbonFaces = [];
-        const curvePoints = curve.getPoints(60);
-
-        for (let p = 0; p < curvePoints.length; p++) {
-          const pt = curvePoints[p];
-          const t = p / (curvePoints.length - 1);
-          /* Width tapers from center outward */
-          const w = (1.0 - t * 0.6) * pathWidth;
-
-          /* Get tangent for perpendicular */
+        for (let p = 0; p < pts.length; p++) {
+          const pt = pts[p];
+          const t = p / (pts.length - 1);
+          /* Path widens from center then narrows at end */
+          const width = (0.4 + Math.sin(t * Math.PI) * 0.8) * 1.8;
           const tangent = curve.getTangent(Math.min(t, 0.999));
           const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
 
-          ribbonPoints.push(
-            pt.x + perp.x * w, 0.05, pt.z + perp.z * w,
-            pt.x - perp.x * w, 0.05, pt.z - perp.z * w
+          verts.push(
+            pt.x + perp.x * width, 0.08, pt.z + perp.z * width,
+            pt.x - perp.x * width, 0.08, pt.z - perp.z * width
           );
+          uvs.push(0, t, 1, t);
         }
 
-        const ribbonGeo = new THREE.BufferGeometry();
-        const vertices = new Float32Array(ribbonPoints);
-        const indices = [];
-        for (let p = 0; p < curvePoints.length - 1; p++) {
-          const a = p * 2;
-          const b = p * 2 + 1;
-          const c = (p + 1) * 2;
-          const d = (p + 1) * 2 + 1;
+        for (let p = 0; p < pts.length - 1; p++) {
+          const a = p * 2, b = p * 2 + 1, c = (p + 1) * 2, d = (p + 1) * 2 + 1;
           indices.push(a, c, b, b, c, d);
         }
 
-        ribbonGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-        ribbonGeo.setIndex(indices);
-        ribbonGeo.computeVertexNormals();
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
+        geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+        geo.setIndex(indices);
+        geo.computeVertexNormals();
 
-        const pathMesh = new THREE.Mesh(ribbonGeo, pathMat.clone());
+        /* Main path — sandy/earthy with golden glow */
+        const pathMat = new THREE.MeshStandardMaterial({
+          color: 0xc8a860,
+          roughness: 0.5,
+          metalness: 0.05,
+          emissive: 0xc8a860,
+          emissiveIntensity: 0.4,
+        });
+
+        const pathMesh = new THREE.Mesh(geo, pathMat);
         pathMesh.receiveShadow = true;
-        pathMesh.userData.pathIndex = i;
         this.scene.add(pathMesh);
 
-        /* Wider glow underneath */
-        const glowRibbon = [];
-        for (let p = 0; p < curvePoints.length; p++) {
-          const pt = curvePoints[p];
-          const t = p / (curvePoints.length - 1);
-          const gw = (1.0 - t * 0.5) * pathWidth * 2.5;
+        /* Soft glow underneath — wider */
+        const glowVerts = [];
+        for (let p = 0; p < pts.length; p++) {
+          const pt = pts[p];
+          const t = p / (pts.length - 1);
+          const gw = (0.4 + Math.sin(t * Math.PI) * 0.8) * 3.5;
           const tangent = curve.getTangent(Math.min(t, 0.999));
           const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-
-          glowRibbon.push(
-            pt.x + perp.x * gw, 0.02, pt.z + perp.z * gw,
-            pt.x - perp.x * gw, 0.02, pt.z - perp.z * gw
+          glowVerts.push(
+            pt.x + perp.x * gw, 0.04, pt.z + perp.z * gw,
+            pt.x - perp.x * gw, 0.04, pt.z - perp.z * gw
           );
         }
 
         const glowGeo = new THREE.BufferGeometry();
-        glowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(glowRibbon), 3));
+        glowGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(glowVerts), 3));
         glowGeo.setIndex(indices.slice());
         glowGeo.computeVertexNormals();
 
-        const glow = new THREE.Mesh(glowGeo, glowMat.clone());
-        glow.userData.pathIndex = i;
-        this.scene.add(glow);
+        const glowMesh = new THREE.Mesh(glowGeo, new THREE.MeshBasicMaterial({
+          color: 0xffe880,
+          transparent: true,
+          opacity: 0.1,
+          depthWrite: false,
+        }));
+        this.scene.add(glowMesh);
 
-        /* Store endpoint and meshes */
-        const endpoint = curvePoints[curvePoints.length - 1];
+        /* Store */
+        const endpoint = pts[pts.length - 1];
         this.pathEndpoints.push(endpoint);
-        this.pathMeshes.push({
-          main: pathMesh,
-          glow: glow,
-          curve: curve,
-          endpoint: endpoint,
-        });
+        this.pathMeshes.push({ main: pathMesh, glow: glowMesh, mat: pathMat });
+
+        /* Point light along path for glow */
+        const midPt = pts[Math.floor(pts.length * 0.4)];
+        const pl = new THREE.PointLight(0xffe080, 1.0, 15, 2);
+        pl.position.set(midPt.x, 1.5, midPt.z);
+        this.scene.add(pl);
       });
     }
 
     createTrees() {
-      /* Two types: tall conifers and shorter round trees */
-
-      /* Conifer: cone on cylinder */
-      const trunkGeo = new THREE.CylinderGeometry(0.08, 0.12, 0.8, 5);
-      const coneGeo = new THREE.ConeGeometry(0.8, 2.5, 6);
-
-      /* Round tree: sphere on cylinder */
-      const roundTrunkGeo = new THREE.CylinderGeometry(0.06, 0.1, 0.6, 4);
-      const sphereGeo = new THREE.SphereGeometry(0.6, 6, 5);
-
-      /* Materials */
+      /* Multiple tree types for variety */
       const trunkMat = new THREE.MeshStandardMaterial({
-        color: 0x2a1a0c, roughness: 0.9, metalness: 0.0,
+        color: 0x3a2510, roughness: 0.9, metalness: 0,
       });
 
-      /* Several green shades for variety */
-      const foliageColors = [0x1a4a18, 0x1e5520, 0x163e14, 0x225a22, 0x184818, 0x2a6a28];
+      const greens = [
+        new THREE.MeshStandardMaterial({ color: 0x1e5a1e, roughness: 0.8, metalness: 0 }),
+        new THREE.MeshStandardMaterial({ color: 0x2a6e28, roughness: 0.8, metalness: 0 }),
+        new THREE.MeshStandardMaterial({ color: 0x184a16, roughness: 0.85, metalness: 0 }),
+        new THREE.MeshStandardMaterial({ color: 0x226422, roughness: 0.8, metalness: 0 }),
+        new THREE.MeshStandardMaterial({ color: 0x1a5420, roughness: 0.85, metalness: 0 }),
+        new THREE.MeshStandardMaterial({ color: 0x306a2e, roughness: 0.75, metalness: 0 }),
+      ];
 
-      /* Generate tree positions avoiding paths */
-      const treeCount = 600;
       this.treeGroup = new THREE.Group();
+      const treeCount = 500;
 
+      /* Check if position is too close to any path */
       const isOnPath = (x, z) => {
+        const distFromCenter = Math.sqrt(x * x + z * z);
+        if (distFromCenter < 3) return true;
+
         for (let i = 0; i < PATH_ANGLES.length; i++) {
           const angle = PATH_ANGLES[i];
           const len = PATH_LENGTHS[i];
-          /* Check distance from path line */
           const dx = Math.cos(angle);
           const dz = Math.sin(angle);
-          /* Project point onto path direction */
           const proj = x * dx + z * dz;
-          if (proj < -1 || proj > len + 2) continue;
-          /* Perpendicular distance */
+          if (proj < -1 || proj > len + 1) continue;
           const perpDist = Math.abs(x * dz - z * dx);
-          /* Wider clearance near center, narrower at edges */
-          const clearance = 2.0 + (1.0 - Math.min(proj / len, 1)) * 1.5;
+          const clearance = 3.0 - Math.min(proj / len, 1) * 1.0;
           if (perpDist < clearance) return true;
         }
-        /* Also clear center area */
-        if (Math.sqrt(x * x + z * z) < 3.5) return true;
         return false;
       };
 
       for (let i = 0; i < treeCount; i++) {
-        const x = (Math.random() - 0.5) * 80;
-        const z = (Math.random() - 0.5) * 80;
+        const x = (Math.random() - 0.5) * 65;
+        const z = (Math.random() - 0.5) * 65;
 
         if (isOnPath(x, z)) continue;
 
-        const isConifer = Math.random() > 0.3;
-        const scale = 0.7 + Math.random() * 0.8;
-        const foliageColor = foliageColors[Math.floor(Math.random() * foliageColors.length)];
-
-        const foliageMat = new THREE.MeshStandardMaterial({
-          color: foliageColor,
-          roughness: 0.85,
-          metalness: 0.0,
-        });
-
         const tree = new THREE.Group();
+        const scale = 0.8 + Math.random() * 1.0;
+        const foliageMat = greens[Math.floor(Math.random() * greens.length)];
 
-        if (isConifer) {
-          /* Layered conifer — 2-3 cone layers */
-          const trunk = new THREE.Mesh(trunkGeo, trunkMat);
-          trunk.position.y = 0.4;
+        if (Math.random() > 0.25) {
+          /* CONIFER — stacked cones */
+          const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.08, 0.15, 1.2, 5),
+            trunkMat
+          );
+          trunk.position.y = 0.6;
           trunk.castShadow = true;
           tree.add(trunk);
 
           const layers = 2 + Math.floor(Math.random() * 2);
           for (let l = 0; l < layers; l++) {
-            const layerScale = 1.0 - l * 0.25;
-            const cone = new THREE.Mesh(coneGeo, foliageMat);
-            cone.position.y = 1.2 + l * 1.0;
-            cone.scale.set(layerScale, layerScale * (0.8 + Math.random() * 0.4), layerScale);
+            const s = 1.0 - l * 0.2;
+            const cone = new THREE.Mesh(
+              new THREE.ConeGeometry(1.0 * s, 2.0, 7),
+              foliageMat
+            );
+            cone.position.y = 1.8 + l * 1.2;
             cone.castShadow = true;
+            cone.receiveShadow = true;
             tree.add(cone);
           }
         } else {
-          /* Round tree */
-          const trunk = new THREE.Mesh(roundTrunkGeo, trunkMat);
-          trunk.position.y = 0.3;
+          /* ROUND tree — sphere crown */
+          const trunk = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.06, 0.12, 0.8, 4),
+            trunkMat
+          );
+          trunk.position.y = 0.4;
           trunk.castShadow = true;
           tree.add(trunk);
 
-          const crown = new THREE.Mesh(sphereGeo, foliageMat);
-          crown.position.y = 0.9;
-          crown.scale.set(1 + Math.random() * 0.5, 0.8 + Math.random() * 0.4, 1 + Math.random() * 0.5);
+          const crown = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(0.9, 1),
+            foliageMat
+          );
+          crown.position.y = 1.3;
+          crown.scale.y = 0.7 + Math.random() * 0.3;
           crown.castShadow = true;
+          crown.receiveShadow = true;
           tree.add(crown);
         }
 
         tree.position.set(x, 0, z);
         tree.scale.setScalar(scale);
         tree.rotation.y = Math.random() * Math.PI * 2;
-
         this.treeGroup.add(tree);
       }
 
@@ -412,101 +376,85 @@
     }
 
     createCenterGlow() {
-      /* Central bright glowing point where paths converge */
-      const glowGeo = new THREE.SphereGeometry(1.2, 16, 16);
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xffe880,
-        transparent: true,
-        opacity: 0.7,
-      });
-      this.centerSphere = new THREE.Mesh(glowGeo, glowMat);
-      this.centerSphere.position.y = 0.3;
+      /* Bright center where all paths meet */
+      this.centerSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(1.5, 16, 16),
+        new THREE.MeshBasicMaterial({
+          color: 0xfff0a0,
+          transparent: true,
+          opacity: 0.8,
+        })
+      );
+      this.centerSphere.position.y = 0.5;
       this.scene.add(this.centerSphere);
 
-      /* Outer glow halo */
-      const haloGeo = new THREE.SphereGeometry(3.5, 16, 16);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0xffe880,
-        transparent: true,
-        opacity: 0.12,
-      });
-      this.centerHalo = new THREE.Mesh(haloGeo, haloMat);
-      this.centerHalo.position.y = 0.2;
+      /* Halo */
+      this.centerHalo = new THREE.Mesh(
+        new THREE.SphereGeometry(4, 16, 16),
+        new THREE.MeshBasicMaterial({
+          color: 0xffe880,
+          transparent: true,
+          opacity: 0.15,
+          depthWrite: false,
+        })
+      );
+      this.centerHalo.position.y = 0.3;
       this.scene.add(this.centerHalo);
 
-      /* Point light at center */
-      const centerLight = new THREE.PointLight(0xffe080, 3, 30, 1.5);
-      centerLight.position.set(0, 2, 0);
-      centerLight.castShadow = true;
-      this.scene.add(centerLight);
-      this.centerLight = centerLight;
-
-      /* Additional path lights along each trail */
-      PATH_ANGLES.forEach((angle, i) => {
-        const dist = 5 + Math.random() * 3;
-        const x = Math.cos(angle) * dist;
-        const z = Math.sin(angle) * dist;
-        const pl = new THREE.PointLight(0xffe080, 0.5, 12, 2);
-        pl.position.set(x, 1, z);
-        this.scene.add(pl);
-      });
+      /* Strong point light */
+      this.centerLight = new THREE.PointLight(0xffe080, 5, 25, 1.5);
+      this.centerLight.position.set(0, 3, 0);
+      this.centerLight.castShadow = true;
+      this.scene.add(this.centerLight);
     }
 
     createFireflies() {
-      /* Floating particle system */
-      const count = 80;
+      const count = 100;
       const positions = new Float32Array(count * 3);
       this.fireflyData = [];
 
       for (let i = 0; i < count; i++) {
-        const x = (Math.random() - 0.5) * 60;
-        const y = 1 + Math.random() * 6;
-        const z = (Math.random() - 0.5) * 60;
+        const x = (Math.random() - 0.5) * 50;
+        const y = 1.5 + Math.random() * 5;
+        const z = (Math.random() - 0.5) * 50;
         positions[i * 3] = x;
         positions[i * 3 + 1] = y;
         positions[i * 3 + 2] = z;
-
         this.fireflyData.push({
           baseX: x, baseY: y, baseZ: z,
           phase: Math.random() * Math.PI * 2,
           speed: 0.3 + Math.random() * 0.8,
-          radius: 0.5 + Math.random() * 1.5,
+          radius: 0.5 + Math.random() * 2,
         });
       }
 
-      /* Create glow texture */
-      const glowCanvas = document.createElement('canvas');
-      glowCanvas.width = 64; glowCanvas.height = 64;
-      const gctx = glowCanvas.getContext('2d');
-      const gradient = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-      gradient.addColorStop(0, 'rgba(255, 232, 128, 1)');
-      gradient.addColorStop(0.3, 'rgba(255, 220, 100, 0.5)');
-      gradient.addColorStop(1, 'rgba(255, 200, 80, 0)');
-      gctx.fillStyle = gradient;
+      const glowC = document.createElement('canvas');
+      glowC.width = 64; glowC.height = 64;
+      const gctx = glowC.getContext('2d');
+      const grad = gctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grad.addColorStop(0, 'rgba(255, 232, 128, 1)');
+      grad.addColorStop(0.3, 'rgba(255, 220, 100, 0.5)');
+      grad.addColorStop(1, 'rgba(255, 200, 80, 0)');
+      gctx.fillStyle = grad;
       gctx.fillRect(0, 0, 64, 64);
-
-      const glowTex = new THREE.CanvasTexture(glowCanvas);
 
       const geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
-      const mat = new THREE.PointsMaterial({
-        map: glowTex,
-        size: 0.8,
+      this.fireflies = new THREE.Points(geo, new THREE.PointsMaterial({
+        map: new THREE.CanvasTexture(glowC),
+        size: 1.0,
         sizeAttenuation: true,
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         color: 0xffe880,
         opacity: 0.9,
-      });
-
-      this.fireflies = new THREE.Points(geo, mat);
+      }));
       this.scene.add(this.fireflies);
     }
 
     createLabels() {
-      /* HTML overlay labels at path endpoints */
       this.labelsContainer = document.createElement('div');
       this.labelsContainer.className = 'fp-labels';
       this.container.appendChild(this.labelsContainer);
@@ -521,31 +469,16 @@
         const label = document.createElement('div');
         label.className = 'fp-label';
 
-        const numSpan = document.createElement('span');
-        numSpan.className = 'fp-label-num';
-        numSpan.textContent = path.num;
+        label.innerHTML = `
+          <span class="fp-label-num">${path.num}</span>
+          <span class="fp-label-name">${path.name}</span>
+          <span class="fp-label-sub">${path.sub}</span>
+        `;
 
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'fp-label-name';
-        nameSpan.textContent = path.name;
-
-        const subSpan = document.createElement('span');
-        subSpan.className = 'fp-label-sub';
-        subSpan.textContent = path.sub;
-
-        label.appendChild(numSpan);
-        label.appendChild(nameSpan);
-        label.appendChild(subSpan);
         hotspot.appendChild(label);
-
         this.labelsContainer.appendChild(hotspot);
         this.labelElements.push({ hotspot, label });
       });
-    }
-
-    setupRaycasting() {
-      this.raycaster = new THREE.Raycaster();
-      this.mouseVec = new THREE.Vector2();
     }
 
     setupEvents() {
@@ -554,10 +487,8 @@
       window.addEventListener('mousemove', (e) => {
         this.mouseX = (e.clientX / window.innerWidth) * 2 - 1;
         this.mouseY = (e.clientY / window.innerHeight) * 2 - 1;
-        this.mouseVec.set(this.mouseX, -this.mouseY);
       });
 
-      /* Label hover & click */
       this.labelElements.forEach((el, i) => {
         el.hotspot.addEventListener('mouseenter', () => {
           if (this.state !== 'exploring') return;
@@ -583,13 +514,12 @@
     highlightPath(index, active) {
       const pm = this.pathMeshes[index];
       if (!pm) return;
-
-      gsap.to(pm.main.material, {
-        emissiveIntensity: active ? 0.8 : 0.3,
+      gsap.to(pm.mat, {
+        emissiveIntensity: active ? 1.0 : 0.4,
         duration: 0.4,
       });
       gsap.to(pm.glow.material, {
-        opacity: active ? 0.35 : 0.15,
+        opacity: active ? 0.3 : 0.1,
         duration: 0.4,
       });
     }
@@ -598,20 +528,13 @@
       if (this.state !== 'splash') return;
       this.state = 'exploring';
 
-      /* Reveal labels with stagger */
       this.labelElements.forEach((el, i) => {
         gsap.fromTo(el.hotspot,
           { opacity: 0, scale: 0.5 },
-          {
-            opacity: 1, scale: 1,
-            duration: 0.8,
-            delay: 0.3 + i * 0.12,
-            ease: 'back.out(1.5)',
-          }
+          { opacity: 1, scale: 1, duration: 0.8, delay: 0.3 + i * 0.12, ease: 'back.out(1.5)' }
         );
       });
 
-      /* Show header */
       const header = document.getElementById('site-header');
       if (header) header.classList.add('visible');
     }
@@ -622,36 +545,28 @@
 
       if (window.playChime) window.playChime();
 
-      /* Camera zooms toward the path endpoint */
-      const targetPos = new THREE.Vector3(
-        endpoint.x * 0.6,
-        20,
-        endpoint.z * 0.6 + 8
-      );
-
+      /* Camera zooms toward path */
       gsap.to(this.camera.position, {
-        x: targetPos.x,
-        y: targetPos.y,
-        z: targetPos.z,
+        x: endpoint.x * 0.5,
+        y: 15,
+        z: endpoint.z * 0.5 + 6,
         duration: 1.5,
         ease: 'power2.in',
       });
 
-      gsap.to(this.baseLookAt, {
-        x: endpoint.x,
-        z: endpoint.z,
+      gsap.to(this.lookTarget, {
+        x: endpoint.x * 0.7,
+        z: endpoint.z * 0.7,
         duration: 1.5,
         ease: 'power2.in',
       });
 
       /* Fade out other labels */
-      this.labelElements.forEach((el, i) => {
-        if (i !== index) {
-          gsap.to(el.hotspot, { opacity: 0, duration: 0.4 });
-        }
+      this.labelElements.forEach((el, j) => {
+        if (j !== index) gsap.to(el.hotspot, { opacity: 0, duration: 0.4 });
       });
 
-      /* Fade to dark then navigate */
+      /* Fade to dark */
       const flash = document.createElement('div');
       flash.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:100;background:rgba(10,26,13,0);pointer-events:none;';
       document.body.appendChild(flash);
@@ -669,86 +584,70 @@
     }
 
     onResize() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      this.camera.aspect = w / h;
+      this.camera.aspect = window.innerWidth / window.innerHeight;
       this.camera.updateProjectionMatrix();
-      this.renderer.setSize(w, h);
-    }
-
-    updateLabelPositions() {
-      if (this.state !== 'exploring') return;
-
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-
-      this.pathEndpoints.forEach((ep, i) => {
-        const pos = new THREE.Vector3(ep.x, 1.5, ep.z);
-        pos.project(this.camera);
-
-        const x = (pos.x * 0.5 + 0.5) * w;
-        const y = (-pos.y * 0.5 + 0.5) * h;
-
-        const el = this.labelElements[i];
-        if (el) {
-          el.hotspot.style.left = x + 'px';
-          el.hotspot.style.top = y + 'px';
-        }
-      });
+      this.renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     animate() {
       requestAnimationFrame(() => this.animate());
-
       const time = this.clock.getElapsedTime();
 
-      /* Subtle camera parallax on mouse */
+      /* Camera parallax */
       if (this.state === 'exploring' && !gsap.isTweening(this.camera.position)) {
-        const targetX = this.baseCamPos.x + this.mouseX * 3;
-        const targetZ = this.baseCamPos.z + this.mouseY * 2;
-
-        this.camera.position.x += (targetX - this.camera.position.x) * 0.03;
-        this.camera.position.z += (targetZ - this.camera.position.z) * 0.03;
+        const tx = this.baseCamPos.x + this.mouseX * 4;
+        const tz = this.baseCamPos.z + this.mouseY * 3;
+        this.camera.position.x += (tx - this.camera.position.x) * 0.03;
+        this.camera.position.z += (tz - this.camera.position.z) * 0.03;
       }
 
-      this.camera.lookAt(this.baseLookAt);
+      this.camera.lookAt(this.lookTarget);
 
-      /* Center glow pulse */
+      /* Center pulse */
       if (this.centerSphere) {
-        const pulse = 0.5 + Math.sin(time * 1.5) * 0.2;
-        this.centerSphere.material.opacity = pulse;
-        this.centerSphere.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
+        this.centerSphere.material.opacity = 0.6 + Math.sin(time * 1.5) * 0.2;
+        this.centerSphere.scale.setScalar(1 + Math.sin(time * 2) * 0.06);
       }
       if (this.centerHalo) {
-        this.centerHalo.material.opacity = 0.08 + Math.sin(time * 1.2) * 0.04;
-        this.centerHalo.scale.setScalar(1 + Math.sin(time * 0.8) * 0.08);
+        this.centerHalo.material.opacity = 0.1 + Math.sin(time * 1.2) * 0.05;
       }
       if (this.centerLight) {
-        this.centerLight.intensity = 2.5 + Math.sin(time * 1.5) * 0.5;
+        this.centerLight.intensity = 4 + Math.sin(time * 1.5) * 1;
       }
 
-      /* Animate fireflies */
+      /* Fireflies */
       if (this.fireflies) {
-        const positions = this.fireflies.geometry.attributes.position.array;
+        const pos = this.fireflies.geometry.attributes.position.array;
         for (let i = 0; i < this.fireflyData.length; i++) {
           const f = this.fireflyData[i];
-          positions[i * 3] = f.baseX + Math.sin(time * f.speed + f.phase) * f.radius;
-          positions[i * 3 + 1] = f.baseY + Math.cos(time * f.speed * 0.7 + f.phase) * 0.5;
-          positions[i * 3 + 2] = f.baseZ + Math.cos(time * f.speed + f.phase * 1.3) * f.radius;
+          pos[i * 3]     = f.baseX + Math.sin(time * f.speed + f.phase) * f.radius;
+          pos[i * 3 + 1] = f.baseY + Math.cos(time * f.speed * 0.7 + f.phase) * 0.8;
+          pos[i * 3 + 2] = f.baseZ + Math.cos(time * f.speed + f.phase * 1.3) * f.radius;
         }
         this.fireflies.geometry.attributes.position.needsUpdate = true;
       }
 
-      /* Path glow animation */
+      /* Path glow pulse */
       this.pathMeshes.forEach((pm, i) => {
         if (i !== this.hoveredPath) {
-          const baseIntensity = 0.25 + Math.sin(time * 0.8 + i * 0.9) * 0.08;
-          pm.main.material.emissiveIntensity = baseIntensity;
+          pm.mat.emissiveIntensity = 0.3 + Math.sin(time * 0.8 + i) * 0.1;
         }
       });
 
-      /* Update label screen positions */
-      this.updateLabelPositions();
+      /* Update label positions (3D → screen) */
+      if (this.state === 'exploring') {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        this.pathEndpoints.forEach((ep, i) => {
+          const v = new THREE.Vector3(ep.x, 2, ep.z);
+          v.project(this.camera);
+          const el = this.labelElements[i];
+          if (el) {
+            el.hotspot.style.left = ((v.x * 0.5 + 0.5) * w) + 'px';
+            el.hotspot.style.top = ((-v.y * 0.5 + 0.5) * h) + 'px';
+          }
+        });
+      }
 
       this.renderer.render(this.scene, this.camera);
     }
