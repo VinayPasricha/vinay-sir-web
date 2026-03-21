@@ -59,17 +59,6 @@
       this.state = 'loading'; // loading → splash → descending → walking
       this.clock = new THREE.Clock();
 
-      /* Player state */
-      this.yaw = 0;
-      this.pitch = 0;
-      this.playerPos = new THREE.Vector3(0, PLAYER_HEIGHT, 38);
-      this.playerVel = new THREE.Vector3();
-      this.currentEdge = null;
-      this.playerT = 0;
-      this.isLocked = false;
-
-      /* Input */
-      this.keys = {};
       this.pathEndpoints = new Array(7).fill(null);
       this.pathEdges = [];
       this.pathSegments = [];
@@ -593,43 +582,95 @@
       });
     }
 
-    /* ── HUD — Crosshair + path info + controls prompt ── */
+    /* ── HUD — Path info + click prompt ── */
     createHUD() {
       this.hud = document.createElement('div');
       this.hud.className = 'fp-hud';
       this.hud.style.display = 'none';
       this.hud.innerHTML = `
-        <div class="fp-crosshair">+</div>
         <div class="fp-path-info" id="fp-path-info"></div>
         <div class="fp-controls-hint" id="fp-hint">
-          Click to look around &bull; WASD to walk
+          Click a path to explore
         </div>
       `;
       this.container.appendChild(this.hud);
+
+      /* Create clickable path buttons around the screen */
+      this.pathButtons = [];
     }
 
-    /* ── CONTROLS — Pointer lock + WASD ── */
+    /* ── CONTROLS — Click to navigate ── */
     setupControls() {
-      /* Keyboard */
-      window.addEventListener('keydown', (e) => { this.keys[e.code] = true; });
-      window.addEventListener('keyup', (e) => { this.keys[e.code] = false; });
+      this.raycaster = new THREE.Raycaster();
+      this.mouseVec = new THREE.Vector2();
+      this.isAnimating = false;
 
-      /* Pointer lock */
-      this.renderer.domElement.addEventListener('click', () => {
-        if (this.state === 'walking' && !this.isLocked) {
-          this.renderer.domElement.requestPointerLock();
+      /* Click to select path */
+      this.renderer.domElement.addEventListener('click', (e) => {
+        if (this.isAnimating) return;
+
+        if (this.state === 'atJunction') {
+          /* Raycast to find which path was clicked */
+          this.mouseVec.set(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1
+          );
+          this.raycaster.setFromCamera(this.mouseVec, this.camera);
+
+          /* Check path trail meshes */
+          const trailMeshes = this.pathSegments.filter(s => s.pathIndex !== undefined).map(s => s.trail);
+          const hits = this.raycaster.intersectObjects(trailMeshes);
+
+          if (hits.length > 0) {
+            const hitTrail = hits[0].object;
+            const seg = this.pathSegments.find(s => s.trail === hitTrail);
+            if (seg && seg.pathIndex !== undefined) {
+              this.walkToPath(seg.pathIndex);
+            }
+          }
+        } else if (this.state === 'atEntrance') {
+          /* Click anywhere to walk to center */
+          this.walkToCenter();
         }
       });
 
-      document.addEventListener('pointerlockchange', () => {
-        this.isLocked = document.pointerLockElement === this.renderer.domElement;
-      });
+      /* Mouse hover to highlight paths */
+      this.renderer.domElement.addEventListener('mousemove', (e) => {
+        if (this.state !== 'atJunction' || this.isAnimating) return;
 
-      document.addEventListener('mousemove', (e) => {
-        if (!this.isLocked || this.state !== 'walking') return;
-        this.yaw -= e.movementX * MOUSE_SENSITIVITY;
-        this.pitch -= e.movementY * MOUSE_SENSITIVITY;
-        this.pitch = Math.max(-Math.PI / 2.5, Math.min(Math.PI / 2.5, this.pitch));
+        this.mouseVec.set(
+          (e.clientX / window.innerWidth) * 2 - 1,
+          -(e.clientY / window.innerHeight) * 2 + 1
+        );
+        this.raycaster.setFromCamera(this.mouseVec, this.camera);
+
+        const trailMeshes = this.pathSegments.filter(s => s.pathIndex !== undefined).map(s => s.trail);
+        const hits = this.raycaster.intersectObjects(trailMeshes);
+
+        /* Reset all glows */
+        this.pathSegments.forEach(s => {
+          if (s.pathIndex !== undefined) {
+            s._hoverTarget = 0;
+          }
+        });
+
+        const infoEl = document.getElementById('fp-path-info');
+
+        if (hits.length > 0) {
+          const seg = this.pathSegments.find(s => s.trail === hits[0].object);
+          if (seg && seg.pathIndex !== undefined) {
+            seg._hoverTarget = 0.25;
+            this.renderer.domElement.style.cursor = 'pointer';
+            const p = PATH_DATA[seg.pathIndex];
+            if (infoEl) {
+              infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub} — click to explore</small>`;
+              infoEl.style.opacity = '1';
+            }
+          }
+        } else {
+          this.renderer.domElement.style.cursor = 'default';
+          if (infoEl) infoEl.style.opacity = '0';
+        }
       });
 
       /* Resize */
@@ -640,219 +681,156 @@
       });
     }
 
-    /* ── ENTER — Cinematic descent: spiral down → swoop → land ── */
+    /* ── ENTER — Cinematic descent then land at entrance ── */
     enter() {
       if (this.state !== 'splash') return;
       this.state = 'descending';
+      this.isAnimating = true;
 
-      /* Camera descent path — smooth curve from sky to ground */
       const descentCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 55, 25),        // start: aerial
-        new THREE.Vector3(8, 38, 30),         // spiral right
-        new THREE.Vector3(4, 22, 35),         // come around
-        new THREE.Vector3(-2, 10, 37),        // swoop left
-        new THREE.Vector3(0, 4, 38),          // approaching ground
-        new THREE.Vector3(0, PLAYER_HEIGHT, 38), // land at entrance
+        new THREE.Vector3(0, 55, 25),
+        new THREE.Vector3(6, 35, 30),
+        new THREE.Vector3(3, 18, 35),
+        new THREE.Vector3(-1, 8, 37),
+        new THREE.Vector3(0, PLAYER_HEIGHT, 38),
       ]);
 
-      /* What camera looks at during descent */
       const lookCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0, 0),           // looking at center from sky
-        new THREE.Vector3(0, 0, 5),            // still center-ish
-        new THREE.Vector3(0, 0, 15),           // shifting forward
-        new THREE.Vector3(0, 1, 20),           // looking ahead
-        new THREE.Vector3(0, 1.5, 10),         // down the path
-        new THREE.Vector3(0, PLAYER_HEIGHT, 0),// looking toward center
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, 10),
+        new THREE.Vector3(0, 1, 15),
+        new THREE.Vector3(0, 1.5, 5),
+        new THREE.Vector3(0, PLAYER_HEIGHT, 0),
       ]);
 
-      const duration = 5;
-      const descentState = { t: 0 };
-
-      gsap.to(descentState, {
-        t: 1,
-        duration: duration,
-        ease: 'power2.inOut',
+      const s = { t: 0 };
+      gsap.to(s, {
+        t: 1, duration: 4, ease: 'power2.inOut',
         onUpdate: () => {
-          const pos = descentCurve.getPointAt(descentState.t);
-          const look = lookCurve.getPointAt(descentState.t);
-          this.camera.position.copy(pos);
-          this.camera.lookAt(look);
-
-          /* Gradually increase FOV */
-          this.camera.fov = 42 + descentState.t * 28;
+          this.camera.position.copy(descentCurve.getPointAt(s.t));
+          this.camera.lookAt(lookCurve.getPointAt(s.t));
+          this.camera.fov = 42 + s.t * 28;
           this.camera.updateProjectionMatrix();
-
-          /* Gradually increase fog */
-          this.fog.density = 0.005 + descentState.t * 0.015;
+          this.fog.density = 0.005 + s.t * 0.015;
         },
         onComplete: () => {
-          /* Extract final yaw from camera orientation */
-          const dir = new THREE.Vector3();
-          this.camera.getWorldDirection(dir);
-          this.yaw = Math.atan2(-dir.x, -dir.z);
-          this.pitch = Math.asin(dir.y);
-
-          this.state = 'walking';
-          this.playerPos.set(0, PLAYER_HEIGHT, 38);
-          this.currentEdge = this.pathEdges[0];
-          this.playerT = 0;
-
+          this.state = 'atEntrance';
+          this.isAnimating = false;
           this.hud.style.display = 'block';
 
           const header = document.getElementById('site-header');
           if (header) header.classList.add('visible');
 
-          setTimeout(() => {
-            const hint = document.getElementById('fp-hint');
-            if (hint) gsap.to(hint, { opacity: 0, duration: 1, onComplete: () => hint.style.display = 'none' });
-          }, 5000);
-        }
-      });
-    }
-
-    /* ── FIND NEAREST PATH EDGE — For free movement ── */
-    findNearestEdge(x, z) {
-      let bestEdge = null, bestT = 0, bestDist = Infinity;
-
-      this.pathEdges.forEach(edge => {
-        for (let t = 0; t <= 1; t += 0.02) {
-          const pt = edge.curve.getPointAt(t);
-          const d = (x - pt.x) ** 2 + (z - pt.z) ** 2;
-          if (d < bestDist) {
-            bestDist = d;
-            bestEdge = edge;
-            bestT = t;
-          }
-        }
-      });
-
-      return { edge: bestEdge, t: bestT, dist: Math.sqrt(bestDist) };
-    }
-
-    /* ── WALKING UPDATE — Movement along/near paths ── */
-    updateWalking(delta) {
-      if (this.state !== 'walking') return;
-
-      /* Get forward/right vectors from yaw */
-      const forward = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
-      const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
-
-      /* Movement input */
-      const moveDir = new THREE.Vector3();
-      if (this.keys['KeyW'] || this.keys['ArrowUp']) moveDir.add(forward);
-      if (this.keys['KeyS'] || this.keys['ArrowDown']) moveDir.sub(forward);
-      if (this.keys['KeyA'] || this.keys['ArrowLeft']) moveDir.sub(right);
-      if (this.keys['KeyD'] || this.keys['ArrowRight']) moveDir.add(right);
-
-      if (moveDir.lengthSq() > 0) {
-        moveDir.normalize().multiplyScalar(WALK_SPEED * delta);
-
-        /* Move player */
-        const newX = this.playerPos.x + moveDir.x;
-        const newZ = this.playerPos.z + moveDir.z;
-
-        /* Find nearest path — constrain to within ~3 units of paths */
-        const nearest = this.findNearestEdge(newX, newZ);
-
-        if (nearest.dist < 3.0) {
-          this.playerPos.x = newX;
-          this.playerPos.z = newZ;
-          this.currentEdge = nearest.edge;
-          this.playerT = nearest.t;
-        } else {
-          /* Slide along path boundary */
-          const pathPt = nearest.edge.curve.getPointAt(nearest.t);
-          const toPlayer = new THREE.Vector3(newX - pathPt.x, 0, newZ - pathPt.z).normalize().multiplyScalar(2.8);
-          this.playerPos.x = pathPt.x + toPlayer.x;
-          this.playerPos.z = pathPt.z + toPlayer.z;
-        }
-
-        this.playerPos.y = PLAYER_HEIGHT;
-      }
-
-      /* Apply camera */
-      this.camera.position.copy(this.playerPos);
-
-      /* Apply look rotation */
-      const euler = new THREE.Euler(this.pitch, this.yaw, 0, 'YXZ');
-      this.camera.quaternion.setFromEuler(euler);
-
-      /* Move shadow camera to follow player */
-      if (this.sun) {
-        this.sun.position.set(this.playerPos.x - 15, 50, this.playerPos.z + 15);
-        this.sun.target.position.copy(this.playerPos);
-        this.sun.target.updateMatrixWorld();
-      }
-
-      /* Light up the path we're walking on — smooth fade */
-      this.pathSegments.forEach(seg => {
-        const isActive = seg.curve === (this.currentEdge ? this.currentEdge.curve : null);
-        const target = isActive ? 0.15 : 0;
-        seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.05;
-      });
-
-      /* Check if near a path endpoint */
-      this.checkPathProximity();
-    }
-
-    checkPathProximity() {
-      const px = this.playerPos.x, pz = this.playerPos.z;
-      const infoEl = document.getElementById('fp-path-info');
-
-      /* Check proximity to center junction */
-      const distCenter = Math.sqrt(px * px + pz * pz);
-
-      if (distCenter < 6) {
-        /* At junction — show path you're looking toward AND walking toward */
-        const lookDir = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
-        let bestDot = -1, bestIdx = -1;
-
-        this.pathEndpoints.forEach((ep, i) => {
-          if (!ep) return;
-          const toEp = new THREE.Vector3(ep.x - px, 0, ep.z - pz).normalize();
-          const dot = lookDir.dot(toEp);
-          if (dot > bestDot) { bestDot = dot; bestIdx = i; }
-        });
-
-        if (bestDot > 0.4 && bestIdx >= 0 && infoEl) {
-          const p = PATH_DATA[bestIdx];
-          infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub} — walk to explore</small>`;
-          infoEl.style.opacity = '1';
-
-          /* Glow the path we're facing */
-          this.pathSegments.forEach(seg => {
-            if (seg.pathIndex === bestIdx) {
-              seg.mat.emissiveIntensity = 0.2;
-            }
-          });
-        } else if (infoEl) {
-          infoEl.style.opacity = '0';
-        }
-        return;
-      }
-
-      /* Check proximity to path endpoints */
-      for (let i = 0; i < this.pathEndpoints.length; i++) {
-        const ep = this.pathEndpoints[i];
-        if (!ep) continue;
-        const dx = px - ep.x, dz = pz - ep.z;
-        if (dx * dx + dz * dz < 9) { // within 3 units
-          const p = PATH_DATA[i];
+          /* Show click hint */
+          const infoEl = document.getElementById('fp-path-info');
           if (infoEl) {
-            infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>Press E to enter</small>`;
+            infoEl.innerHTML = 'Click anywhere to walk forward';
             infoEl.style.opacity = '1';
           }
 
-          /* Enter path on E key */
-          if (this.keys['KeyE']) {
-            this.keys['KeyE'] = false;
-            this.enterPath(i);
-          }
-          return;
+          setTimeout(() => {
+            const hint = document.getElementById('fp-hint');
+            if (hint) gsap.to(hint, { opacity: 0, duration: 1 });
+          }, 4000);
         }
+      });
+    }
+
+    /* ── WALK TO CENTER — Auto-walk along trunk ── */
+    walkToCenter() {
+      if (this.isAnimating) return;
+      this.isAnimating = true;
+
+      const trunk = this.pathEdges[0];
+      if (!trunk) return;
+
+      /* Glow the trunk */
+      this.pathSegments.forEach(s => {
+        if (s.curve === trunk.curve) s.mat.emissiveIntensity = 0.15;
+      });
+
+      /* Animate camera along trunk curve */
+      const s = { t: 0 };
+      gsap.to(s, {
+        t: 1, duration: 4, ease: 'power1.inOut',
+        onUpdate: () => {
+          const pos = trunk.curve.getPointAt(s.t);
+          const lookT = Math.min(s.t + 0.05, 1);
+          const look = trunk.curve.getPointAt(lookT);
+          this.camera.position.set(pos.x, PLAYER_HEIGHT, pos.z);
+          this.camera.lookAt(look.x, PLAYER_HEIGHT, look.z);
+        },
+        onComplete: () => {
+          this.state = 'atJunction';
+          this.isAnimating = false;
+
+          /* Look outward from center */
+          this.camera.position.set(0, PLAYER_HEIGHT, 2);
+          this.camera.lookAt(0, PLAYER_HEIGHT, -10);
+
+          /* Show path selection hint */
+          const infoEl = document.getElementById('fp-path-info');
+          if (infoEl) {
+            infoEl.innerHTML = 'Click a path to explore';
+            infoEl.style.opacity = '1';
+            setTimeout(() => { infoEl.style.opacity = '0'; }, 3000);
+          }
+
+          /* Reset trunk glow */
+          this.pathSegments.forEach(s => {
+            if (s.curve === trunk.curve) s.mat.emissiveIntensity = 0;
+          });
+        }
+      });
+    }
+
+    /* ── WALK TO PATH — Auto-walk down selected branch ── */
+    walkToPath(pathIndex) {
+      if (this.isAnimating) return;
+      this.isAnimating = true;
+
+      /* Find the edge for this path */
+      const seg = this.pathSegments.find(s => s.pathIndex === pathIndex);
+      if (!seg) return;
+
+      const path = PATH_DATA[pathIndex];
+      if (window.playChime) window.playChime();
+
+      /* Glow the selected path */
+      seg.mat.emissiveIntensity = 0.2;
+
+      /* Show path name */
+      const infoEl = document.getElementById('fp-path-info');
+      if (infoEl) {
+        infoEl.innerHTML = `<span class="fp-info-num">${path.num}</span> ${path.name}<br><small>${path.sub}</small>`;
+        infoEl.style.opacity = '1';
       }
 
-      if (infoEl) infoEl.style.opacity = '0';
+      /* Walk along the path curve */
+      const s = { t: 0 };
+      gsap.to(s, {
+        t: 0.95, duration: 3, ease: 'power1.inOut',
+        onUpdate: () => {
+          const pos = seg.curve.getPointAt(s.t);
+          const lookT = Math.min(s.t + 0.05, 1);
+          const look = seg.curve.getPointAt(lookT);
+          this.camera.position.set(pos.x, PLAYER_HEIGHT, pos.z);
+          this.camera.lookAt(look.x, PLAYER_HEIGHT, look.z);
+        },
+        onComplete: () => {
+          /* Fade to dark and navigate */
+          const flash = document.createElement('div');
+          flash.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:100;background:rgba(5,10,4,0);pointer-events:none;';
+          document.body.appendChild(flash);
+          gsap.to(flash, {
+            background: 'rgba(5,10,4,1)', duration: 1, ease: 'power2.in',
+            onComplete: () => {
+              sessionStorage.setItem('leaf-transition', 'true');
+              window.location.href = path.url;
+            }
+          });
+        }
+      });
     }
 
     enterPath(index) {
@@ -879,8 +857,15 @@
       const delta = Math.min(this.clock.getDelta(), 0.05);
       const time = this.clock.getElapsedTime();
 
-      /* Walking mode */
-      this.updateWalking(delta);
+      /* Smooth hover glow on paths */
+      if (this.state === 'atJunction') {
+        this.pathSegments.forEach(seg => {
+          if (seg.pathIndex !== undefined) {
+            const target = seg._hoverTarget || 0;
+            seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.1;
+          }
+        });
+      }
 
       /* Aerial mode — cinematic slow orbit */
       if (this.state === 'splash') {
