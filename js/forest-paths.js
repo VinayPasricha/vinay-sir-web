@@ -280,19 +280,15 @@
         map: this._dirtTex, color: 0x9a7a50, roughness: 0.88, metalness: 0
       });
 
+      /* Set emissive so we can glow it later */
+      mat.emissive = new THREE.Color(0xffe880);
+      mat.emissiveIntensity = 0;
+
       const trail = new THREE.Mesh(geo, mat);
       trail.receiveShadow = true;
       this.scene.add(trail);
 
-      /* Glow overlay — same shape but emissive, hidden by default */
-      const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xffe880, transparent: true, opacity: 0, depthWrite: false,
-      });
-      const glowMesh = new THREE.Mesh(geo.clone(), glowMat);
-      glowMesh.position.y = 0.02;
-      this.scene.add(glowMesh);
-
-      this.pathSegments.push({ trail, mat, glowMat, glowMesh, curve, pathIndex });
+      this.pathSegments.push({ trail, mat, curve, pathIndex });
 
       /* Single torch at path midpoint for direction */
       if (pathIndex !== undefined) {
@@ -781,10 +777,9 @@
 
       /* Light up the path we're walking on */
       this.pathSegments.forEach(seg => {
-        if (!seg.glowMat) return;
         const isActive = seg.curve === (this.currentEdge ? this.currentEdge.curve : null);
-        const targetOpacity = isActive ? 0.15 : 0;
-        seg.glowMat.opacity += (targetOpacity - seg.glowMat.opacity) * 0.1;
+        const target = isActive ? 0.3 : 0;
+        seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.1;
       });
 
       /* Check if near a path endpoint */
@@ -817,8 +812,8 @@
 
           /* Glow the path we're facing */
           this.pathSegments.forEach(seg => {
-            if (seg.pathIndex === bestIdx && seg.glowMat) {
-              seg.glowMat.opacity = 0.2;
+            if (seg.pathIndex === bestIdx) {
+              seg.mat.emissiveIntensity = 0.4;
             }
           });
         } else if (infoEl) {
