@@ -1536,6 +1536,157 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 /* ============================================
+   FOREST PATHS — Aerial interactive landing
+   ============================================ */
+#forest-paths-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 0;
+  overflow: hidden;
+  background: #050a06;
+}
+
+.fp-image-wrap {
+  position: absolute;
+  top: -4%; left: -4%;
+  width: 108%; height: 108%;
+  transform: scale(1.08);
+  transition: transform 0.1s ease-out;
+  will-change: transform;
+}
+
+.fp-image {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Central glow */
+.fp-center-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 200px; height: 200px;
+  transform: translate(-50%, -65%);
+  background: radial-gradient(circle, rgba(255,232,128,0.4) 0%, rgba(255,200,80,0.15) 30%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Particle canvas */
+.fp-particles {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* Labels container */
+.fp-labels {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Individual path hotspot */
+.fp-hotspot {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: all;
+  cursor: pointer;
+  opacity: 0;
+  transition: transform 0.3s ease;
+}
+
+.fp-hotspot:hover {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Label card — glassmorphism */
+.fp-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 22px;
+  background: rgba(10, 26, 13, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(168, 196, 154, 0.15);
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: all 0.4s ease;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.fp-hotspot.active .fp-label,
+.fp-hotspot:hover .fp-label {
+  background: rgba(10, 26, 13, 0.7);
+  border-color: rgba(240, 216, 112, 0.35);
+  box-shadow: 0 4px 30px rgba(240, 216, 112, 0.15), 0 0 60px rgba(240, 216, 112, 0.08);
+}
+
+.fp-label-num {
+  font-family: var(--font-body);
+  font-size: 0.55rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+.fp-label-name {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--parchment);
+  letter-spacing: 0.5px;
+}
+
+.fp-label-sub {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--sage);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.fp-hotspot.active .fp-label-sub,
+.fp-hotspot:hover .fp-label-sub {
+  opacity: 1;
+  max-height: 20px;
+  margin-top: 2px;
+}
+
+/* Glow ring behind label on hover */
+.fp-hotspot::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 120px; height: 120px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,216,112,0.12) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.fp-hotspot.active::before,
+.fp-hotspot:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
    LOADING SCREEN
    ============================================ */
 .loading-screen {

@@ -258,46 +258,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ============================================
-     3D FOREST EXPERIENCE (index page only)
+     FOREST PATHS EXPERIENCE (index page only)
      ============================================ */
-  const canvasContainer = document.getElementById('canvas-container');
-  let forest3D = null;
+  const pathsContainer = document.getElementById('forest-paths-container');
+  let forestPaths = null;
 
-  if (canvasContainer && typeof ForestExperience !== 'undefined') {
-    /* Initialize Three.js scene */
-    forest3D = new ForestExperience('canvas-container');
-
-    /* ---- CUSTOM LEAF CURSOR (homepage only) ---- */
-    const customCursor = document.getElementById('custom-cursor');
-    if (customCursor) {
-      let cursorX = 0, cursorY = 0;
-      let cursorTargetX = 0, cursorTargetY = 0;
-
-      document.addEventListener('mousemove', (e) => {
-        cursorTargetX = e.clientX;
-        cursorTargetY = e.clientY;
-      });
-
-      document.addEventListener('mousedown', () => customCursor.classList.add('clicking'));
-      document.addEventListener('mouseup', () => customCursor.classList.remove('clicking'));
-
-      function updateCursor() {
-        cursorX += (cursorTargetX - cursorX) * 0.15;
-        cursorY += (cursorTargetY - cursorY) * 0.15;
-        customCursor.style.left = cursorX + 'px';
-        customCursor.style.top = cursorY + 'px';
-        requestAnimationFrame(updateCursor);
-      }
-      updateCursor();
-    }
+  if (pathsContainer && typeof ForestPaths !== 'undefined') {
+    /* Initialize Forest Paths scene */
+    forestPaths = new ForestPaths('forest-paths-container');
 
     /* ---- TYPEWRITER SPLASH TEXT ---- */
     const typewriterEl = document.getElementById('typewriter-text');
     if (typewriterEl) {
       const lines = [
         'Welcome, dear traveler.',
-        'Step into the forest and discover',
-        'your own path.'
+        'Seven paths stretch before you.',
+        'Choose the one that calls.'
       ];
 
       function typewriterEffect() {
@@ -309,16 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function typeNext() {
           if (lineIndex >= lines.length) {
-            /* Done typing — remove cursor after a beat */
             setTimeout(() => cursor.remove(), 1500);
             return;
           }
 
           const line = lines[lineIndex];
           if (charIndex < line.length) {
-            /* Remove cursor temporarily, add char, re-add cursor */
             cursor.remove();
-            /* Get or create the current line span */
             let lineSpan = typewriterEl.querySelector(`[data-line="${lineIndex}"]`);
             if (!lineSpan) {
               if (lineIndex > 0) typewriterEl.appendChild(document.createElement('br'));
@@ -331,7 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
             charIndex++;
             setTimeout(typeNext, 35 + Math.random() * 30);
           } else {
-            /* Next line */
             lineIndex++;
             charIndex = 0;
             setTimeout(typeNext, 300);
@@ -343,9 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
       /* Start typewriter after splash fades in */
       const waitForSplash = setInterval(() => {
-        if (forest3D && forest3D.state === 'splash') {
+        if (forestPaths && forestPaths.state === 'splash') {
           clearInterval(waitForSplash);
-          setTimeout(typewriterEffect, 1200);
+          setTimeout(typewriterEffect, 800);
         }
       }, 100);
     }
@@ -360,12 +332,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return audioCtx;
     }
 
-    /* Soft chime — two gentle sine tones */
     window.playChime = function() {
       try {
         const ctx = ensureAudioCtx();
         const now = ctx.currentTime;
-
         [520, 780].forEach((freq, i) => {
           const osc = ctx.createOscillator();
           const gain = ctx.createGain();
@@ -382,7 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch(e) {}
     };
 
-    /* Soft rustle — filtered noise burst */
     window.playRustle = function() {
       try {
         const ctx = ensureAudioCtx();
@@ -391,24 +360,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const bufferSize = ctx.sampleRate * duration;
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = buffer.getChannelData(0);
-
         for (let i = 0; i < bufferSize; i++) {
           data[i] = (Math.random() * 2 - 1) * 0.3;
         }
-
         const source = ctx.createBufferSource();
         source.buffer = buffer;
-
         const filter = ctx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.value = 2000;
         filter.Q.value = 0.5;
-
         const gain = ctx.createGain();
         gain.gain.setValueAtTime(0, now);
         gain.gain.linearRampToValueAtTime(0.04, now + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
         source.connect(filter);
         filter.connect(gain);
         gain.connect(ctx.destination);
@@ -417,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch(e) {}
     };
 
-    /* Whoosh — for transitions */
     window.playWhoosh = function() {
       try {
         const ctx = ensureAudioCtx();
@@ -426,25 +389,20 @@ document.addEventListener('DOMContentLoaded', () => {
         const bufferSize = ctx.sampleRate * duration;
         const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
         const data = buffer.getChannelData(0);
-
         for (let i = 0; i < bufferSize; i++) {
           data[i] = (Math.random() * 2 - 1);
         }
-
         const source = ctx.createBufferSource();
         source.buffer = buffer;
-
         const filter = ctx.createBiquadFilter();
         filter.type = 'bandpass';
         filter.frequency.setValueAtTime(800, now);
         filter.frequency.linearRampToValueAtTime(200, now + duration);
         filter.Q.value = 1.0;
-
         const gain = ctx.createGain();
         gain.gain.setValueAtTime(0, now);
         gain.gain.linearRampToValueAtTime(0.08, now + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-
         source.connect(filter);
         filter.connect(gain);
         gain.connect(ctx.destination);
@@ -453,21 +411,23 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch(e) {}
     };
 
-    /* Show audio toggle after entering the forest */
     function onForestEnter() {
       setTimeout(() => {
         if (window.showAudioToggle) window.showAudioToggle();
       }, 1500);
     }
 
-    /* Check if returning from a path page — skip splash, go straight to tree */
+    /* Check if returning from a path page — skip splash */
     const skipSplash = sessionStorage.getItem('skip-splash') === 'true';
     if (skipSplash) {
       sessionStorage.removeItem('skip-splash');
       const waitForReady = setInterval(() => {
-        if (forest3D && forest3D.state === 'splash') {
+        if (forestPaths && forestPaths.state === 'splash') {
           clearInterval(waitForReady);
-          forest3D.enter();
+          /* Hide splash immediately */
+          const splashOverlay = document.getElementById('splash-overlay');
+          if (splashOverlay) splashOverlay.style.display = 'none';
+          forestPaths.enter();
           onForestEnter();
         }
       }, 100);
@@ -478,8 +438,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const enterBtn = document.getElementById('enter-btn');
     if (enterBtn) {
       enterBtn.addEventListener('click', () => {
-        if (forest3D) {
-          forest3D.enter();
+        if (forestPaths) {
+          /* Fade out splash overlay */
+          const splashOverlay = document.getElementById('splash-overlay');
+          if (splashOverlay) {
+            gsap.to(splashOverlay, {
+              opacity: 0, duration: 0.8,
+              onComplete: () => splashOverlay.style.display = 'none'
+            });
+          }
+          forestPaths.enter();
           onForestEnter();
           if (window.playWhoosh) window.playWhoosh();
         }
@@ -494,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const mainContent = document.querySelector('.main-content');
   const header = document.querySelector('.site-header');
 
-  if (!canvasContainer && typeof ForestCanopy !== 'undefined') {
+  if (!pathsContainer && typeof ForestCanopy !== 'undefined') {
     const forestAnim = new ForestCanopy('forest-canopy', splash ? 'full' : 'light');
     forestAnim.start();
 
@@ -588,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ambientAudio.loop = true;
 
     const wasPlaying = localStorage.getItem('forest-audio') === 'playing';
-    const isHomepage = !!document.getElementById('canvas-container');
+    const isHomepage = !!document.getElementById('forest-paths-container');
 
     /* Show audio toggle — on homepage: after entering the forest; on inner pages: after 2s */
     window.showAudioToggle = function() {
