@@ -261,7 +261,7 @@
         const w = width * taper * (1 + Math.sin(t * 15 + (pathIndex || 0) * 3) * 0.08);
         const tangent = curve.getTangent(Math.min(t, 0.999));
         const pr = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-        const y = 0.04 + Math.sin(t * 8) * 0.01;
+        const y = 0.12;
         verts.push(pt.x + pr.x * w, y, pt.z + pr.z * w, pt.x - pr.x * w, y, pt.z - pr.z * w);
         uvs.push(0, t * 6, 1, t * 6);
       }
@@ -285,7 +285,8 @@
       mat.emissiveIntensity = 0;
 
       const trail = new THREE.Mesh(geo, mat);
-      trail.receiveShadow = true;
+      trail.receiveShadow = false; /* No tree shadows on paths */
+      trail.renderOrder = 1;
       this.scene.add(trail);
 
       this.pathSegments.push({ trail, mat, curve, pathIndex });
@@ -406,17 +407,25 @@
     }
 
     createCenterGlow() {
-      /* Flat ground glow disc — no 3D spheres */
-      const disc = new THREE.Mesh(
-        new THREE.CircleGeometry(4, 32),
-        new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.12, depthWrite: false })
-      );
-      disc.rotation.x = -Math.PI / 2;
-      disc.position.y = 0.08;
-      this.scene.add(disc);
+      /* Large dirt clearing disc at center so all paths blend into it */
+      if (!this._dirtTex) this.createTrailGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0)]), 0.1); // ensure texture exists
+      const clearingMat = new THREE.MeshStandardMaterial({
+        map: this._dirtTex,
+        color: 0x9a7a50,
+        roughness: 0.88,
+        metalness: 0,
+        emissive: new THREE.Color(0xffe880),
+        emissiveIntensity: 0,
+      });
+      const clearing = new THREE.Mesh(new THREE.CircleGeometry(7, 32), clearingMat);
+      clearing.rotation.x = -Math.PI / 2;
+      clearing.position.y = 0.11;
+      clearing.renderOrder = 1;
+      this.scene.add(clearing);
+      this.centerClearing = clearingMat;
 
       /* Single warm light at center */
-      this.centerLight = new THREE.PointLight(0xffe080, 2, 15, 2);
+      this.centerLight = new THREE.PointLight(0xffe080, 1.5, 12, 2);
       this.centerLight.position.set(0, 2, 0);
       this.scene.add(this.centerLight);
     }
@@ -775,11 +784,11 @@
         this.sun.target.updateMatrixWorld();
       }
 
-      /* Light up the path we're walking on */
+      /* Light up the path we're walking on — smooth fade */
       this.pathSegments.forEach(seg => {
         const isActive = seg.curve === (this.currentEdge ? this.currentEdge.curve : null);
-        const target = isActive ? 0.3 : 0;
-        seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.1;
+        const target = isActive ? 0.15 : 0;
+        seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.05;
       });
 
       /* Check if near a path endpoint */
@@ -813,7 +822,7 @@
           /* Glow the path we're facing */
           this.pathSegments.forEach(seg => {
             if (seg.pathIndex === bestIdx) {
-              seg.mat.emissiveIntensity = 0.4;
+              seg.mat.emissiveIntensity = 0.2;
             }
           });
         } else if (infoEl) {
