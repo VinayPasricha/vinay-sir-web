@@ -68,6 +68,7 @@
     }
 
     init() {
+      try {
       this.setupRenderer();
       this.setupCamera();
       this.setupScene();
@@ -80,16 +81,35 @@
       this.createPathMarkers();
       this.setupControls();
       this.animate();
+      } catch(e) { console.error('ForestPaths init error:', e); }
 
-      setTimeout(() => {
+      /* Scene is ready — hide loader, show splash */
+      const showSplash = () => {
+        if (this.state !== 'loading') return;
         this.state = 'splash';
-        const ls = document.getElementById('loading-screen');
-        if (ls) gsap.to(ls, { opacity: 0, duration: 0.8, onComplete: () => ls.style.display = 'none' });
 
-        /* Show splash overlay */
+        /* Force-remove loading screen */
+        const ls = document.getElementById('loading-screen');
+        if (ls) ls.remove();
+
+        /* Force-show splash overlay */
         const splash = document.getElementById('splash-overlay');
-        if (splash) gsap.to(splash, { opacity: 1, duration: 1.2, delay: 0.5 });
-      }, 800);
+        if (splash) {
+          splash.style.opacity = '0';
+          splash.style.pointerEvents = 'auto';
+          /* Use requestAnimationFrame to ensure style applies before transition */
+          requestAnimationFrame(() => {
+            splash.style.transition = 'opacity 1s ease';
+            requestAnimationFrame(() => {
+              splash.style.opacity = '1';
+            });
+          });
+        }
+      };
+
+      setTimeout(showSplash, 1000);
+      /* Fallback */
+      setTimeout(() => { if (this.state === 'loading') showSplash(); }, 3000);
     }
 
     setupRenderer() {
