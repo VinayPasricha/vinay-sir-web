@@ -133,7 +133,7 @@
       this.sun = new THREE.DirectionalLight(0xfff4d0, 2.0);
       this.sun.position.set(-15, 50, 15);
       this.sun.castShadow = true;
-      this.sun.shadow.mapSize.set(2048, 2048);
+      this.sun.shadow.mapSize.set(1024, 1024);
       this.sun.shadow.camera.left = -20;
       this.sun.shadow.camera.right = 20;
       this.sun.shadow.camera.top = 20;
@@ -284,37 +284,28 @@
       this.scene.add(trail);
       this.pathSegments.push({ trail, mat, curve, pathIndex });
 
-      /* Add torch lights along this path for visibility */
-      const torchMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
-      const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa30, transparent: true, opacity: 0.8 });
-      const torchPts = curve.getPoints(80);
-      const torchSpacing = Math.floor(torchPts.length / 4);
-
-      for (let ti = 1; ti <= 3; ti++) {
-        const idx2 = Math.min(ti * torchSpacing, torchPts.length - 2);
-        const pt = torchPts[idx2];
-        const tangent = curve.getTangent(idx2 / (torchPts.length - 1));
+      /* Single torch at path midpoint for direction */
+      if (pathIndex !== undefined) {
+        const torchPts = curve.getPoints(80);
+        const mid = torchPts[Math.floor(torchPts.length * 0.5)];
+        const tangent = curve.getTangent(0.5);
         const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+        const tx = mid.x + perp.x * (width + 0.4);
+        const tz = mid.z + perp.z * (width + 0.4);
 
-        /* Place torch on right side of path */
-        const tx = pt.x + perp.x * (width + 0.5);
-        const tz = pt.z + perp.z * (width + 0.5);
-
-        /* Torch pole */
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 1.5, 4), torchMat);
+        const pole = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.03, 0.05, 1.5, 4),
+          new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 })
+        );
         pole.position.set(tx, 0.75, tz);
-        pole.castShadow = true;
         this.scene.add(pole);
 
-        /* Flame glow */
-        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), flameMat);
+        const flame = new THREE.Mesh(
+          new THREE.SphereGeometry(0.08, 6, 6),
+          new THREE.MeshBasicMaterial({ color: 0xffaa30, transparent: true, opacity: 0.8 })
+        );
         flame.position.set(tx, 1.6, tz);
         this.scene.add(flame);
-
-        /* Point light */
-        const tLight = new THREE.PointLight(0xffaa30, 0.6, 6, 2);
-        tLight.position.set(tx, 1.8, tz);
-        this.scene.add(tLight);
       }
     }
 
@@ -337,7 +328,7 @@
 
       const positions = [];
       let tries = 0;
-      while (positions.length < 1000 && tries < 6000) {
+      while (positions.length < 600 && tries < 4000) {
         tries++;
         const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
         if (x * x + z * z < 36) continue;  // big center clearing (radius 6)
@@ -409,33 +400,27 @@
     }
 
     createCenterGlow() {
-      const core = new THREE.Mesh(
-        new THREE.SphereGeometry(0.8, 16, 16),
-        new THREE.MeshBasicMaterial({ color: 0xfff8e0, transparent: true, opacity: 0.9 })
+      /* Flat ground glow disc — no 3D spheres */
+      const disc = new THREE.Mesh(
+        new THREE.CircleGeometry(4, 32),
+        new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.12, depthWrite: false })
       );
-      core.position.y = 0.5;
-      this.scene.add(core);
-      this.centerCore = core;
+      disc.rotation.x = -Math.PI / 2;
+      disc.position.y = 0.08;
+      this.scene.add(disc);
 
-      const halo = new THREE.Mesh(
-        new THREE.SphereGeometry(3.5, 16, 16),
-        new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.1, depthWrite: false })
-      );
-      halo.position.y = 0.3;
-      this.scene.add(halo);
-      this.centerHalo = halo;
-
-      this.centerLight = new THREE.PointLight(0xffe080, 5, 25, 1.5);
-      this.centerLight.position.set(0, 3, 0);
+      /* Single warm light at center */
+      this.centerLight = new THREE.PointLight(0xffe080, 2, 15, 2);
+      this.centerLight.position.set(0, 2, 0);
       this.scene.add(this.centerLight);
     }
 
     createFireflies() {
-      const count = 100;
+      const count = 50;
       const positions = new Float32Array(count * 3);
       this.fireflyData = [];
       for (let i = 0; i < count; i++) {
-        const x = (Math.random() - 0.5) * 50, y = 1 + Math.random() * 4, z = (Math.random() - 0.5) * 50;
+        const x = (Math.random() - 0.5) * 40, y = 1 + Math.random() * 3, z = (Math.random() - 0.5) * 40;
         positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
         this.fireflyData.push({ baseX: x, baseY: y, baseZ: z, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.5, radius: 0.5 + Math.random() * 2 });
       }
@@ -600,20 +585,15 @@
 
         this.scene.add(post);
 
-        /* Glowing orb above post */
+        /* Small orb above post */
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.2, 10, 10),
-          new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.7 })
+          new THREE.SphereGeometry(0.15, 8, 8),
+          new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.6 })
         );
-        orb.position.set(ep.x, 3.2, ep.z);
+        orb.position.set(ep.x, 3, ep.z);
         this.scene.add(orb);
 
-        /* Light beacon */
-        const beacon = new THREE.PointLight(0xffe880, 0.8, 8, 2);
-        beacon.position.set(ep.x, 3, ep.z);
-        this.scene.add(beacon);
-
-        this.markers.push({ orb, beacon, pathIndex: i });
+        this.markers.push({ orb, pathIndex: i });
       });
 
       /* Glowing orbs at junction branch entrances */
@@ -918,16 +898,9 @@
         this.camera.lookAt(0, 0, 2);
       }
 
-      /* Center glow */
-      if (this.centerCore) {
-        this.centerCore.material.opacity = 0.7 + Math.sin(time * 1.5) * 0.2;
-        this.centerCore.scale.setScalar(1 + Math.sin(time * 2) * 0.05);
-      }
-      if (this.centerHalo) {
-        this.centerHalo.material.opacity = 0.07 + Math.sin(time * 1.2) * 0.03;
-      }
+      /* Center light pulse */
       if (this.centerLight) {
-        this.centerLight.intensity = 4 + Math.sin(time * 1.5) * 1.5;
+        this.centerLight.intensity = 1.5 + Math.sin(time * 1.5) * 0.5;
       }
 
       /* Fireflies */
