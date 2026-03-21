@@ -16,24 +16,33 @@
     { name: 'The Social Being', sub: 'Society & Systems',  url: 'pages/path7.html', num: 'VII' },
   ];
 
-  /* Branching tree structure — main trunk splits at center */
+  /* Branching tree structure — main trunk splits at center
+     Layout designed so from the entrance you see a clear
+     path ahead that opens into a clearing with visible forks */
   const BRANCH_TREE = {
-    start: [0, 0, 28],
-    end: [0, 0, 0],
-    width: 1.6,
+    start: [0, 0, 35],     // entrance further back
+    end: [0, 0, 0],        // center clearing
+    width: 2.0,            // wide main trail
     edgeId: 'trunk',
     children: [
-      { end: [-16, 0, -14], width: 0.9, children: [
-        { end: [-26, 0, -8], width: 0.6, pathIndex: 2 },
-        { end: [-22, 0, -24], width: 0.6, pathIndex: 3 },
+      /* LEFT FORK — sweeps left, then splits */
+      { end: [-18, 0, -10], width: 1.1, children: [
+        { end: [-30, 0, -4], width: 0.7, pathIndex: 2 },   // The Thinker — far left
+        { end: [-26, 0, -22], width: 0.7, pathIndex: 3 },   // The Technologist — upper-left
       ]},
-      { end: [2, 0, -20], width: 0.9, children: [
-        { end: [-8, 0, -30], width: 0.6, pathIndex: 4 },
-        { end: [14, 0, -28], width: 0.6, pathIndex: 5 },
+      /* CENTER FORK — goes straight ahead, splits */
+      { end: [0, 0, -22], width: 1.1, children: [
+        { end: [-10, 0, -35], width: 0.7, pathIndex: 4 },  // The Future — upper-center-left
+        { end: [10, 0, -35], width: 0.7, pathIndex: 5 },   // The Writer — upper-center-right
       ]},
-      { end: [20, 0, -10], width: 0.8, pathIndex: 6 },
-      { end: [-18, 0, 16], width: 0.7, pathIndex: 1 },
-      { end: [16, 0, 18], width: 0.7, pathIndex: 0 },
+      /* RIGHT FORK — sweeps right */
+      { end: [20, 0, -8], width: 0.9, pathIndex: 6 },      // The Social Being — right
+
+      /* LOWER-LEFT — branches off trunk before center */
+      { end: [-22, 0, 18], width: 0.8, pathIndex: 1 },     // The Builder — back-left
+
+      /* LOWER-RIGHT — branches off trunk before center */
+      { end: [20, 0, 20], width: 0.8, pathIndex: 0 },      // The Human — back-right
     ]
   };
 
@@ -52,7 +61,7 @@
       /* Player state */
       this.yaw = 0;
       this.pitch = 0;
-      this.playerPos = new THREE.Vector3(0, PLAYER_HEIGHT, 28);
+      this.playerPos = new THREE.Vector3(0, PLAYER_HEIGHT, 35);
       this.playerVel = new THREE.Vector3();
       this.currentEdge = null;
       this.playerT = 0;
@@ -526,43 +535,64 @@
       }
     }
 
-    /* ── FLOATING PATH MARKERS — visible from ground level ── */
+    /* ── PATH MARKERS — Signposts + glowing orbs ── */
     createPathMarkers() {
       this.markers = [];
+      const postMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
+      const signMat = new THREE.MeshStandardMaterial({ color: 0x5a4020, roughness: 0.85 });
+
       PATH_DATA.forEach((path, i) => {
         const ep = this.pathEndpoints[i];
         if (!ep) return;
 
-        /* Glowing orb above path endpoint */
+        /* Wooden signpost at endpoint */
+        const post = new THREE.Group();
+
+        /* Vertical pole */
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.5, 5), postMat);
+        pole.position.y = 1.25;
+        pole.castShadow = true;
+        post.add(pole);
+
+        /* Sign plank */
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.05), signMat);
+        plank.position.y = 2.2;
+        plank.castShadow = true;
+        post.add(plank);
+
+        /* Point sign toward center */
+        post.position.set(ep.x, 0, ep.z);
+        post.lookAt(0, 0, 0);
+
+        this.scene.add(post);
+
+        /* Glowing orb above post */
         const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.3, 12, 12),
+          new THREE.SphereGeometry(0.2, 10, 10),
           new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.7 })
         );
-        orb.position.set(ep.x, 3, ep.z);
+        orb.position.set(ep.x, 3.2, ep.z);
         this.scene.add(orb);
 
-        /* Vertical beam */
-        const beam = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.05, 0.05, 5, 6),
-          new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.15 })
-        );
-        beam.position.set(ep.x, 2.5, ep.z);
-        this.scene.add(beam);
+        /* Light beacon */
+        const beacon = new THREE.PointLight(0xffe880, 0.8, 8, 2);
+        beacon.position.set(ep.x, 3, ep.z);
+        this.scene.add(beacon);
 
-        this.markers.push({ orb, beam, pathIndex: i });
+        this.markers.push({ orb, beacon, pathIndex: i });
       });
 
-      /* Also create markers at junction branch entrances */
+      /* Glowing orbs at junction branch entrances */
       this.junctionMarkers = [];
-      const trunkEdge = this.pathEdges[0]; // trunk
+      const trunkEdge = this.pathEdges[0];
       if (trunkEdge && trunkEdge.children) {
-        trunkEdge.children.forEach((childEdge, i) => {
-          const pt = childEdge.curve.getPointAt(0.15);
+        trunkEdge.children.forEach(childEdge => {
+          const pt = childEdge.curve.getPointAt(0.1);
           const orb = new THREE.Mesh(
-            new THREE.SphereGeometry(0.25, 10, 10),
-            new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.5 })
+            new THREE.SphereGeometry(0.15, 8, 8),
+            new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.4 })
           );
-          orb.position.set(pt.x, 2.5, pt.z);
+          orb.position.set(pt.x, 1.5, pt.z);
           this.scene.add(orb);
           this.junctionMarkers.push({ orb, edge: childEdge });
         });
@@ -616,57 +646,73 @@
       });
     }
 
-    /* ── ENTER — Cinematic descent from aerial to ground level ── */
+    /* ── ENTER — Cinematic descent: spiral down → swoop → land ── */
     enter() {
       if (this.state !== 'splash') return;
       this.state = 'descending';
 
-      /* Initial yaw: looking forward along trunk (toward center) */
-      this.yaw = Math.PI;
-      this.pitch = 0;
+      /* Camera descent path — smooth curve from sky to ground */
+      const descentCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 55, 25),       // start: aerial
+        new THREE.Vector3(8, 40, 28),        // spiral right
+        new THREE.Vector3(5, 25, 32),        // come around
+        new THREE.Vector3(-3, 12, 34),       // swoop left
+        new THREE.Vector3(0, 4, 35),         // approaching ground
+        new THREE.Vector3(0, PLAYER_HEIGHT, 35), // land at entrance
+      ]);
 
-      const tl = gsap.timeline();
+      /* What camera looks at during descent */
+      const lookCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0, 0),          // looking at center from sky
+        new THREE.Vector3(0, 0, 5),           // still center-ish
+        new THREE.Vector3(0, 0, 10),          // shifting forward
+        new THREE.Vector3(0, 1, 15),          // looking ahead
+        new THREE.Vector3(0, 1.5, 20),        // down the path
+        new THREE.Vector3(0, PLAYER_HEIGHT, 0), // looking toward center
+      ]);
 
-      /* Phase 1: Aerial descent */
-      tl.to(this.camera.position, {
-        x: 0, y: 20, z: 27,
-        duration: 2, ease: 'power2.inOut',
-      });
+      const duration = 5;
+      const descentState = { t: 0 };
 
-      /* Phase 2: Drop to eye level at trunk entrance */
-      tl.to(this.camera.position, {
-        x: 0, y: PLAYER_HEIGHT, z: 28,
-        duration: 1.8, ease: 'power2.inOut',
-      });
+      gsap.to(descentState, {
+        t: 1,
+        duration: duration,
+        ease: 'power2.inOut',
+        onUpdate: () => {
+          const pos = descentCurve.getPointAt(descentState.t);
+          const look = lookCurve.getPointAt(descentState.t);
+          this.camera.position.copy(pos);
+          this.camera.lookAt(look);
 
-      /* FOV transition to first person */
-      tl.to(this.camera, {
-        fov: 70, duration: 1.5, ease: 'power1.out',
-        onUpdate: () => this.camera.updateProjectionMatrix(),
-      }, '-=1.5');
+          /* Gradually increase FOV */
+          this.camera.fov = 42 + descentState.t * 28;
+          this.camera.updateProjectionMatrix();
 
-      /* Increase fog for ground-level atmosphere */
-      tl.to(this.fog, {
-        density: 0.02, duration: 2,
-      }, '-=2');
+          /* Gradually increase fog */
+          this.fog.density = 0.005 + descentState.t * 0.015;
+        },
+        onComplete: () => {
+          /* Extract final yaw from camera orientation */
+          const dir = new THREE.Vector3();
+          this.camera.getWorldDirection(dir);
+          this.yaw = Math.atan2(-dir.x, -dir.z);
+          this.pitch = Math.asin(dir.y);
 
-      /* Reveal HUD and switch to walking */
-      tl.call(() => {
-        this.state = 'walking';
-        this.playerPos.set(0, PLAYER_HEIGHT, 28);
-        this.currentEdge = this.pathEdges[0]; // trunk
-        this.playerT = 0;
+          this.state = 'walking';
+          this.playerPos.set(0, PLAYER_HEIGHT, 35);
+          this.currentEdge = this.pathEdges[0];
+          this.playerT = 0;
 
-        this.hud.style.display = 'block';
+          this.hud.style.display = 'block';
 
-        const header = document.getElementById('site-header');
-        if (header) header.classList.add('visible');
+          const header = document.getElementById('site-header');
+          if (header) header.classList.add('visible');
 
-        /* Auto-hide hint after 5s */
-        setTimeout(() => {
-          const hint = document.getElementById('fp-hint');
-          if (hint) gsap.to(hint, { opacity: 0, duration: 1, onComplete: () => hint.style.display = 'none' });
-        }, 5000);
+          setTimeout(() => {
+            const hint = document.getElementById('fp-hint');
+            if (hint) gsap.to(hint, { opacity: 0, duration: 1, onComplete: () => hint.style.display = 'none' });
+          }, 5000);
+        }
       });
     }
 
@@ -828,11 +874,14 @@
       /* Walking mode */
       this.updateWalking(delta);
 
-      /* Aerial mode (splash/descending) — slow rotation */
+      /* Aerial mode — cinematic slow orbit */
       if (this.state === 'splash') {
-        this.camera.position.x = Math.sin(time * 0.1) * 3;
-        this.camera.position.z = 25 + Math.cos(time * 0.1) * 2;
-        this.camera.lookAt(0, 0, 0);
+        const orbitRadius = 8;
+        const orbitSpeed = 0.08;
+        this.camera.position.x = Math.sin(time * orbitSpeed) * orbitRadius;
+        this.camera.position.z = Math.cos(time * orbitSpeed) * orbitRadius + 5;
+        this.camera.position.y = 55 + Math.sin(time * 0.15) * 3;
+        this.camera.lookAt(0, 0, 2);
       }
 
       /* Center glow */
