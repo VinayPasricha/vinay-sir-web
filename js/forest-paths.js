@@ -16,33 +16,34 @@
     { name: 'The Social Being', sub: 'Society & Systems',  url: 'pages/path7.html', num: 'VII' },
   ];
 
-  /* Branching tree structure — main trunk splits at center
-     Layout designed so from the entrance you see a clear
-     path ahead that opens into a clearing with visible forks */
+  /* All 7 paths radiate FORWARD from center so they're all visible
+     from the entrance. Spread evenly across ~240° arc ahead. */
   const BRANCH_TREE = {
-    start: [0, 0, 35],     // entrance further back
+    start: [0, 0, 38],     // entrance
     end: [0, 0, 0],        // center clearing
-    width: 2.0,            // wide main trail
+    width: 2.2,            // wide main trail
     edgeId: 'trunk',
     children: [
-      /* LEFT FORK — sweeps left, then splits */
-      { end: [-18, 0, -10], width: 1.1, children: [
-        { end: [-30, 0, -4], width: 0.7, pathIndex: 2 },   // The Thinker — far left
-        { end: [-26, 0, -22], width: 0.7, pathIndex: 3 },   // The Technologist — upper-left
-      ]},
-      /* CENTER FORK — goes straight ahead, splits */
-      { end: [0, 0, -22], width: 1.1, children: [
-        { end: [-10, 0, -35], width: 0.7, pathIndex: 4 },  // The Future — upper-center-left
-        { end: [10, 0, -35], width: 0.7, pathIndex: 5 },   // The Writer — upper-center-right
-      ]},
-      /* RIGHT FORK — sweeps right */
-      { end: [20, 0, -8], width: 0.9, pathIndex: 6 },      // The Social Being — right
+      /* FAR LEFT */
+      { end: [-28, 0, 5], width: 1.0, pathIndex: 1 },      // The Builder
 
-      /* LOWER-LEFT — branches off trunk before center */
-      { end: [-22, 0, 18], width: 0.8, pathIndex: 1 },     // The Builder — back-left
+      /* LEFT */
+      { end: [-25, 0, -12], width: 1.0, pathIndex: 2 },    // The Thinker
 
-      /* LOWER-RIGHT — branches off trunk before center */
-      { end: [20, 0, 20], width: 0.8, pathIndex: 0 },      // The Human — back-right
+      /* CENTER-LEFT */
+      { end: [-12, 0, -28], width: 1.0, pathIndex: 3 },    // The Technologist
+
+      /* CENTER — straight ahead */
+      { end: [0, 0, -30], width: 1.1, pathIndex: 4 },      // The Future
+
+      /* CENTER-RIGHT */
+      { end: [12, 0, -28], width: 1.0, pathIndex: 5 },     // The Writer
+
+      /* RIGHT */
+      { end: [25, 0, -12], width: 1.0, pathIndex: 6 },     // The Social Being
+
+      /* FAR RIGHT */
+      { end: [28, 0, 5], width: 1.0, pathIndex: 0 },       // The Human
     ]
   };
 
@@ -61,7 +62,7 @@
       /* Player state */
       this.yaw = 0;
       this.pitch = 0;
-      this.playerPos = new THREE.Vector3(0, PLAYER_HEIGHT, 35);
+      this.playerPos = new THREE.Vector3(0, PLAYER_HEIGHT, 38);
       this.playerVel = new THREE.Vector3();
       this.currentEdge = null;
       this.playerT = 0;
@@ -282,6 +283,39 @@
       trail.receiveShadow = true;
       this.scene.add(trail);
       this.pathSegments.push({ trail, mat, curve, pathIndex });
+
+      /* Add torch lights along this path for visibility */
+      const torchMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
+      const flameMat = new THREE.MeshBasicMaterial({ color: 0xffaa30, transparent: true, opacity: 0.8 });
+      const torchPts = curve.getPoints(80);
+      const torchSpacing = Math.floor(torchPts.length / 4);
+
+      for (let ti = 1; ti <= 3; ti++) {
+        const idx2 = Math.min(ti * torchSpacing, torchPts.length - 2);
+        const pt = torchPts[idx2];
+        const tangent = curve.getTangent(idx2 / (torchPts.length - 1));
+        const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+
+        /* Place torch on right side of path */
+        const tx = pt.x + perp.x * (width + 0.5);
+        const tz = pt.z + perp.z * (width + 0.5);
+
+        /* Torch pole */
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.04, 1.5, 4), torchMat);
+        pole.position.set(tx, 0.75, tz);
+        pole.castShadow = true;
+        this.scene.add(pole);
+
+        /* Flame glow */
+        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.1, 6, 6), flameMat);
+        flame.position.set(tx, 1.6, tz);
+        this.scene.add(flame);
+
+        /* Point light */
+        const tLight = new THREE.PointLight(0xffaa30, 0.6, 6, 2);
+        tLight.position.set(tx, 1.8, tz);
+        this.scene.add(tLight);
+      }
     }
 
     plantInstancedForest() {
@@ -306,8 +340,8 @@
       while (positions.length < 1000 && tries < 6000) {
         tries++;
         const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
-        if (x * x + z * z < 4) continue;
-        if (distPaths(x, z) < 2.5) continue;
+        if (x * x + z * z < 36) continue;  // big center clearing (radius 6)
+        if (distPaths(x, z) < 3.0) continue;  // wider path corridors
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 15); j--) {
           if ((x - positions[j].x) ** 2 + (z - positions[j].z) ** 2 < 2.5) { ok = false; break; }
@@ -653,22 +687,22 @@
 
       /* Camera descent path — smooth curve from sky to ground */
       const descentCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 55, 25),       // start: aerial
-        new THREE.Vector3(8, 40, 28),        // spiral right
-        new THREE.Vector3(5, 25, 32),        // come around
-        new THREE.Vector3(-3, 12, 34),       // swoop left
-        new THREE.Vector3(0, 4, 35),         // approaching ground
-        new THREE.Vector3(0, PLAYER_HEIGHT, 35), // land at entrance
+        new THREE.Vector3(0, 55, 25),        // start: aerial
+        new THREE.Vector3(8, 38, 30),         // spiral right
+        new THREE.Vector3(4, 22, 35),         // come around
+        new THREE.Vector3(-2, 10, 37),        // swoop left
+        new THREE.Vector3(0, 4, 38),          // approaching ground
+        new THREE.Vector3(0, PLAYER_HEIGHT, 38), // land at entrance
       ]);
 
       /* What camera looks at during descent */
       const lookCurve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(0, 0, 0),          // looking at center from sky
-        new THREE.Vector3(0, 0, 5),           // still center-ish
-        new THREE.Vector3(0, 0, 10),          // shifting forward
-        new THREE.Vector3(0, 1, 15),          // looking ahead
-        new THREE.Vector3(0, 1.5, 20),        // down the path
-        new THREE.Vector3(0, PLAYER_HEIGHT, 0), // looking toward center
+        new THREE.Vector3(0, 0, 0),           // looking at center from sky
+        new THREE.Vector3(0, 0, 5),            // still center-ish
+        new THREE.Vector3(0, 0, 15),           // shifting forward
+        new THREE.Vector3(0, 1, 20),           // looking ahead
+        new THREE.Vector3(0, 1.5, 10),         // down the path
+        new THREE.Vector3(0, PLAYER_HEIGHT, 0),// looking toward center
       ]);
 
       const duration = 5;
@@ -699,7 +733,7 @@
           this.pitch = Math.asin(dir.y);
 
           this.state = 'walking';
-          this.playerPos.set(0, PLAYER_HEIGHT, 35);
+          this.playerPos.set(0, PLAYER_HEIGHT, 38);
           this.currentEdge = this.pathEdges[0];
           this.playerT = 0;
 
