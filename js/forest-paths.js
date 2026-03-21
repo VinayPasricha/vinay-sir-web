@@ -197,8 +197,9 @@
       const dir = new THREE.Vector3().subVectors(end, start).normalize();
       const perp = new THREE.Vector3(-dir.z, 0, dir.x);
 
-      mid1.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 2.5));
-      mid2.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 2.0));
+      /* Gentle wobble — keep paths connected at junctions */
+      mid1.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 1.2));
+      mid2.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 1.0));
 
       const curve = new THREE.CatmullRomCurve3([start, mid1, mid2, end]);
       const width = node.width || 0.6;
@@ -282,7 +283,16 @@
       const trail = new THREE.Mesh(geo, mat);
       trail.receiveShadow = true;
       this.scene.add(trail);
-      this.pathSegments.push({ trail, mat, curve, pathIndex });
+
+      /* Glow overlay — same shape but emissive, hidden by default */
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0xffe880, transparent: true, opacity: 0, depthWrite: false,
+      });
+      const glowMesh = new THREE.Mesh(geo.clone(), glowMat);
+      glowMesh.position.y = 0.02;
+      this.scene.add(glowMesh);
+
+      this.pathSegments.push({ trail, mat, glowMat, glowMesh, curve, pathIndex });
 
       /* Single torch at path midpoint for direction */
       if (pathIndex !== undefined) {
@@ -554,7 +564,7 @@
       }
     }
 
-    /* ── PATH MARKERS — Signposts + glowing orbs ── */
+    /* ── PATH MARKERS — Simple signposts, no orbs ── */
     createPathMarkers() {
       this.markers = [];
       const postMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
@@ -565,52 +575,17 @@
         if (!ep) return;
 
         /* Wooden signpost at endpoint */
-        const post = new THREE.Group();
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.2, 5), postMat);
+        pole.position.set(ep.x, 1.1, ep.z);
+        this.scene.add(pole);
 
-        /* Vertical pole */
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.5, 5), postMat);
-        pole.position.y = 1.25;
-        pole.castShadow = true;
-        post.add(pole);
-
-        /* Sign plank */
         const plank = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.05), signMat);
-        plank.position.y = 2.2;
-        plank.castShadow = true;
-        post.add(plank);
+        plank.position.set(ep.x, 2.0, ep.z);
+        plank.lookAt(0, 2.0, 0);
+        this.scene.add(plank);
 
-        /* Point sign toward center */
-        post.position.set(ep.x, 0, ep.z);
-        post.lookAt(0, 0, 0);
-
-        this.scene.add(post);
-
-        /* Small orb above post */
-        const orb = new THREE.Mesh(
-          new THREE.SphereGeometry(0.15, 8, 8),
-          new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.6 })
-        );
-        orb.position.set(ep.x, 3, ep.z);
-        this.scene.add(orb);
-
-        this.markers.push({ orb, pathIndex: i });
+        this.markers.push({ pathIndex: i });
       });
-
-      /* Glowing orbs at junction branch entrances */
-      this.junctionMarkers = [];
-      const trunkEdge = this.pathEdges[0];
-      if (trunkEdge && trunkEdge.children) {
-        trunkEdge.children.forEach(childEdge => {
-          const pt = childEdge.curve.getPointAt(0.1);
-          const orb = new THREE.Mesh(
-            new THREE.SphereGeometry(0.15, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0xffe880, transparent: true, opacity: 0.4 })
-          );
-          orb.position.set(pt.x, 1.5, pt.z);
-          this.scene.add(orb);
-          this.junctionMarkers.push({ orb, edge: childEdge });
-        });
-      }
     }
 
     /* ── HUD — Crosshair + path info + controls prompt ── */
@@ -804,6 +779,14 @@
         this.sun.target.updateMatrixWorld();
       }
 
+      /* Light up the path we're walking on */
+      this.pathSegments.forEach(seg => {
+        if (!seg.glowMat) return;
+        const isActive = seg.curve === (this.currentEdge ? this.currentEdge.curve : null);
+        const targetOpacity = isActive ? 0.15 : 0;
+        seg.glowMat.opacity += (targetOpacity - seg.glowMat.opacity) * 0.1;
+      });
+
       /* Check if near a path endpoint */
       this.checkPathProximity();
     }
@@ -815,22 +798,29 @@
       /* Check proximity to center junction */
       const distCenter = Math.sqrt(px * px + pz * pz);
 
-      if (distCenter < 4) {
-        /* At junction — show which path player is facing */
+      if (distCenter < 6) {
+        /* At junction — show path you're looking toward AND walking toward */
         const lookDir = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
         let bestDot = -1, bestIdx = -1;
 
         this.pathEndpoints.forEach((ep, i) => {
           if (!ep) return;
-          const toEp = new THREE.Vector3(ep.x, 0, ep.z).normalize();
+          const toEp = new THREE.Vector3(ep.x - px, 0, ep.z - pz).normalize();
           const dot = lookDir.dot(toEp);
           if (dot > bestDot) { bestDot = dot; bestIdx = i; }
         });
 
-        if (bestDot > 0.5 && bestIdx >= 0 && infoEl) {
+        if (bestDot > 0.4 && bestIdx >= 0 && infoEl) {
           const p = PATH_DATA[bestIdx];
-          infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub}</small>`;
+          infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub} — walk to explore</small>`;
           infoEl.style.opacity = '1';
+
+          /* Glow the path we're facing */
+          this.pathSegments.forEach(seg => {
+            if (seg.pathIndex === bestIdx && seg.glowMat) {
+              seg.glowMat.opacity = 0.2;
+            }
+          });
         } else if (infoEl) {
           infoEl.style.opacity = '0';
         }
@@ -915,11 +905,7 @@
         this.fireflies.geometry.attributes.position.needsUpdate = true;
       }
 
-      /* Path markers bob */
-      this.markers.forEach(m => {
-        m.orb.position.y = 3 + Math.sin(time * 1.5 + m.pathIndex) * 0.3;
-        m.orb.material.opacity = 0.5 + Math.sin(time * 2 + m.pathIndex) * 0.2;
-      });
+      /* (markers are static signposts now) */
 
       this.renderer.render(this.scene, this.camera);
     }
