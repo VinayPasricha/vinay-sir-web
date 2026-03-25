@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The SIV Method — A Brutal Framework for Understanding Reality Before Execution</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-bg-strong: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-highlight: rgba(255, 255, 255, 0.22);
+  --text-primary: #f0f0f5;
+  --text-secondary: rgba(240, 240, 245, 0.72);
+  --text-muted: rgba(240, 240, 245, 0.4);
+  --accent: #a8b4ff;
+  --accent-warm: #ffd6a8;
+  --accent-rose: #ff6b9d;
+  --accent-mint: #4affc9;
+  --bg-deep: #07070f;
+  --sidebar-width: 320px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* ============ AMBIENT BACKGROUND ============ */
+.ambient-bg {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden; pointer-events: none;
+}
+.ambient-orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(140px); opacity: 0.25;
+  animation: orbFloat 20s ease-in-out infinite;
+}
+.orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #4a5fff, transparent 70%); top: -15%; left: -10%; }
+.orb-2 { width: 550px; height: 550px; background: radial-gradient(circle, #ff6b9d, transparent 70%); top: 35%; right: -12%; animation-delay: -7s; animation-duration: 28s; }
+.orb-3 { width: 800px; height: 800px; background: radial-gradient(circle, #4affc9, transparent 70%); bottom: -25%; left: 25%; animation-delay: -14s; animation-duration: 34s; opacity: 0.12; }
+.orb-4 { width: 400px; height: 400px; background: radial-gradient(circle, #ffd6a8, transparent 70%); top: 60%; left: -5%; animation-delay: -20s; animation-duration: 22s; opacity: 0.15; }
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -50px) scale(1.06); }
+  66% { transform: translate(-30px, 30px) scale(0.94); }
+}
+
+/* ============ NOISE OVERLAY ============ */
+.noise {
+  position: fixed; inset: 0; z-index: 1;
+  pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+/* ============ PROGRESS BAR ============ */
+.progress-bar {
+  position: fixed; top: 0; left: 0; width: 0%; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-warm), var(--accent-rose));
+  z-index: 500; transition: width 0.1s linear;
+  box-shadow: 0 0 20px rgba(168, 180, 255, 0.4);
+}
+
+/* ============ SIDEBAR TOGGLE ============ */
+.sidebar-toggle {
+  position: fixed; top: 1.25rem; left: 1.25rem; z-index: 400;
+  width: 48px; height: 48px;
+  background: rgba(10, 10, 20, 0.6); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border); border-radius: 14px;
+  display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px;
+  cursor: pointer; opacity: 0; pointer-events: none;
+  transition: all 0.4s var(--ease);
+}
+.sidebar-toggle.visible { opacity: 1; pointer-events: all; }
+.sidebar-toggle:hover { background: rgba(168, 180, 255, 0.12); border-color: rgba(168, 180, 255, 0.3); }
+.sidebar-toggle .bar {
+  display: block; width: 18px; height: 2px;
+  background: var(--text-primary); border-radius: 2px;
+  transition: all 0.35s var(--ease);
+}
+.sidebar-toggle.active .bar:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.sidebar-toggle.active .bar:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.sidebar-toggle.active .bar:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* ============ SIDEBAR ============ */
+.sidebar-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  z-index: 300; opacity: 0; pointer-events: none;
+  transition: opacity 0.4s var(--ease);
+}
+.sidebar-overlay.visible { opacity: 1; pointer-events: all; }
+
+.sidebar {
+  position: fixed; top: 0; left: 0; width: var(--sidebar-width); height: 100vh;
+  background: rgba(10, 10, 18, 0.92); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-right: 1px solid var(--glass-border);
+  padding: 2rem 0; overflow-y: auto; z-index: 350;
+  transform: translateX(-100%); transition: transform 0.5s var(--ease);
+}
+.sidebar.open { transform: translateX(0); }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+.sidebar-header { padding: 0 1.5rem 1.5rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 0.5rem; }
+.sidebar-title {
+  font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700;
+  background: linear-gradient(135deg, #fff, var(--accent));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.sidebar-subtitle { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.3rem; }
+
+.toc-section-label {
+  padding: 1.2rem 1.5rem 0.4rem;
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--accent); opacity: 0.6;
+}
+.toc-list { list-style: none; }
+.toc-item {
+  display: flex; align-items: baseline; gap: 0.5rem;
+  padding: 0.6rem 1.5rem; color: var(--text-secondary);
+  text-decoration: none; font-size: 0.82rem; font-weight: 400;
+  transition: all 0.3s var(--ease);
+  border-left: 2px solid transparent; cursor: pointer;
+}
+.toc-item:hover { color: var(--text-primary); background: rgba(168, 180, 255, 0.04); border-left-color: rgba(168, 180, 255, 0.25); }
+.toc-item.active { color: var(--accent); background: rgba(168, 180, 255, 0.07); border-left-color: var(--accent); font-weight: 500; }
+.toc-num { flex-shrink: 0; width: 1.6rem; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+/* ============ HERO ============ */
+.hero {
+  position: relative; z-index: 2; min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 2rem;
+}
+.hero-particles {
+  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+}
+.hero-particle {
+  position: absolute; width: 2px; height: 2px; border-radius: 50%;
+  background: var(--accent); opacity: 0;
+  animation: particleRise linear infinite;
+}
+@keyframes particleRise {
+  0% { opacity: 0; transform: translateY(0) scale(0); }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.2; }
+  100% { opacity: 0; transform: translateY(-100vh) scale(1); }
+}
+
+.hero-glass {
+  background: rgba(255, 255, 255, 0.04); backdrop-filter: blur(50px); -webkit-backdrop-filter: blur(50px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 36px; padding: 4.5rem 3.5rem;
+  max-width: 760px; width: 100%;
+  opacity: 0; transform: translateY(50px) scale(0.97);
+  animation: heroReveal 1.4s var(--ease) 0.4s forwards;
+  position: relative; overflow: hidden;
+}
+.hero-glass::before {
+  content: ''; position: absolute; top: -1px; left: 20%; right: 20%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(168, 180, 255, 0.4), transparent);
+}
+@keyframes heroReveal { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+.hero-label {
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 2rem; opacity: 0.8;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.8rem, 7vw, 5rem); font-weight: 800; line-height: 1.05;
+  margin-bottom: 1.2rem;
+  background: linear-gradient(135deg, #fff 0%, #d4daff 40%, var(--accent-warm) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.hero-subtitle { font-size: clamp(1rem, 2.2vw, 1.3rem); font-weight: 300; color: var(--text-secondary); letter-spacing: 0.02em; }
+.hero-author { font-size: 0.9rem; color: var(--text-muted); margin-top: 2rem; font-weight: 400; letter-spacing: 0.05em; }
+.hero-epigraph {
+  margin-top: 2.5rem; padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 1.1rem; color: var(--text-secondary); line-height: 1.8;
+}
+.hero-cta {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  margin-top: 3rem; padding: 1.1rem 2.8rem;
+  background: linear-gradient(135deg, rgba(168,180,255,0.15), rgba(168,180,255,0.03));
+  border: 1px solid rgba(168,180,255,0.25); border-radius: 100px;
+  color: var(--accent); font-size: 0.88rem; font-weight: 500; letter-spacing: 0.06em;
+  text-decoration: none; cursor: pointer;
+  transition: all 0.5s var(--ease);
+}
+.hero-cta:hover {
+  background: linear-gradient(135deg, rgba(168,180,255,0.25), rgba(168,180,255,0.08));
+  border-color: rgba(168,180,255,0.45);
+  transform: translateY(-3px); box-shadow: 0 12px 40px rgba(168,180,255,0.15);
+}
+.hero-cta svg { width: 16px; height: 16px; transition: transform 0.3s var(--ease); }
+.hero-cta:hover svg { transform: translateY(3px); }
+
+.scroll-hint {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  opacity: 0; animation: fadeIn 1s ease 2.5s forwards;
+}
+.scroll-hint span {
+  display: block; width: 2px; height: 44px; margin: 0 auto;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  animation: scrollPulse 2.5s ease-in-out infinite;
+}
+@keyframes scrollPulse { 0%,100% { opacity: 0.2; transform: scaleY(0.5); } 50% { opacity: 0.7; transform: scaleY(1); } }
+@keyframes fadeIn { to { opacity: 1; } }
+
+/* ============ VISUAL INDEX ============ */
+.visual-index {
+  position: relative; z-index: 2;
+  padding: 6rem 2rem 4rem;
+  max-width: 1200px; margin: 0 auto;
+}
+
+.index-header {
+  text-align: center; margin-bottom: 4rem;
+  opacity: 0; transform: translateY(30px);
+  transition: all 0.8s var(--ease);
+}
+.index-header.visible { opacity: 1; transform: translateY(0); }
+
+.index-label {
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 1rem; opacity: 0.7;
+}
+.index-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
+  color: var(--text-primary);
+}
+.index-sub {
+  font-size: 1rem; color: var(--text-muted); margin-top: 0.75rem; font-weight: 300;
+}
+
+.chapter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.index-card {
+  position: relative; overflow: hidden;
+  background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: 20px;
+  padding: 2rem 1.75rem; cursor: pointer;
+  transition: all 0.5s var(--ease);
+  opacity: 0; transform: translateY(30px);
+}
+.index-card.visible { opacity: 1; transform: translateY(0); }
+.index-card:hover {
+  background: var(--glass-bg-strong); border-color: var(--glass-highlight);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(168,180,255,0.05);
+}
+.index-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-warm));
+  opacity: 0; transition: opacity 0.4s var(--ease);
+}
+.index-card:hover::before { opacity: 1; }
+
+.card-number {
+  font-size: 2.5rem; font-weight: 800; font-family: 'Playfair Display', serif;
+  background: linear-gradient(135deg, rgba(168,180,255,0.2), rgba(168,180,255,0.05));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1; margin-bottom: 0.75rem;
+}
+.card-title {
+  font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 600;
+  color: var(--text-primary); margin-bottom: 0.6rem; line-height: 1.3;
+}
+.card-epigraph {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;
+}
+.card-arrow {
+  position: absolute; bottom: 1.5rem; right: 1.5rem;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(168,180,255,0.08); border: 1px solid rgba(168,180,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: all 0.4s var(--ease);
+}
+.index-card:hover .card-arrow { opacity: 1; }
+.card-arrow svg { width: 12px; height: 12px; color: var(--accent); }
+
+.appendix-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin-top: 2rem;
+}
+.appendix-card {
+  background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+  padding: 1.5rem; cursor: pointer;
+  transition: all 0.4s var(--ease);
+  opacity: 0; transform: translateY(20px);
+}
+.appendix-card.visible { opacity: 1; transform: translateY(0); }
+.appendix-card:hover { background: var(--glass-bg-strong); border-color: var(--glass-border); transform: translateY(-2px); }
+.appendix-num { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); opacity: 0.6; margin-bottom: 0.4rem; }
+.appendix-name { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: var(--text-secondary); }
+
+/* ============ MAIN CONTENT ============ */
+.reading-container { position: relative; z-index: 2; }
+.main-content { width: 100%; max-width: 780px; margin: 0 auto; padding: 0 2rem 8rem; }
+
+/* ============ CHAPTER SECTIONS ============ */
+.chapter-section {
+  padding-top: 7rem;
+  opacity: 0; transform: translateY(35px);
+  transition: opacity 0.9s var(--ease), transform 0.9s var(--ease);
+}
+.chapter-section.visible { opacity: 1; transform: translateY(0); }
+
+.chapter-label {
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.8rem; opacity: 0.7;
+}
+.chapter-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700;
+  line-height: 1.15; margin-bottom: 1.5rem; color: var(--text-primary);
+}
+.chapter-epigraph {
+  font-family: 'Playfair Display', serif; font-style: italic;
+  font-size: 1.08rem; color: var(--accent);
+  padding: 1.5rem 0 1.5rem 1.5rem;
+  border-left: 2px solid rgba(168,180,255,0.25);
+  margin-bottom: 2.5rem; opacity: 0.8;
+}
+.chapter-text { font-size: 1.06rem; line-height: 1.95; color: var(--text-secondary); }
+.chapter-text p { margin-bottom: 1.5rem; }
+.chapter-text p:first-of-type::first-letter {
+  font-family: 'Playfair Display', serif; font-size: 3.4rem; float: left;
+  line-height: 1; margin-right: 0.12em; margin-top: 0.05em;
+  color: var(--accent); font-weight: 700;
+}
+.chapter-divider {
+  width: 80px; height: 1px; margin: 5rem 0 0;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+/* ============ VISUALIZATIONS ============ */
+
+/* Multi-Lens Orbit */
+.viz-orbit { display: flex; justify-content: center; align-items: center; padding: 3.5rem 0; position: relative; }
+.orbit-container { position: relative; width: 260px; height: 260px; }
+.orbit-ring { position: absolute; border-radius: 50%; border: 1px solid; animation: orbitSpin linear infinite; }
+.orbit-ring:nth-child(1) { inset: 0; border-color: rgba(168,180,255,0.15); animation-duration: 25s; }
+.orbit-ring:nth-child(2) { inset: 30px; border-color: rgba(255,214,168,0.12); animation-duration: 18s; animation-direction: reverse; }
+.orbit-ring:nth-child(3) { inset: 60px; border-color: rgba(74,255,201,0.10); animation-duration: 30s; }
+.orbit-ring:nth-child(4) { inset: 85px; border-color: rgba(255,107,157,0.08); animation-duration: 22s; animation-direction: reverse; }
+.orbit-dot { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); width: 8px; height: 8px; border-radius: 50%; }
+.orbit-ring:nth-child(1) .orbit-dot { background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+.orbit-ring:nth-child(2) .orbit-dot { background: var(--accent-warm); box-shadow: 0 0 12px var(--accent-warm); }
+.orbit-ring:nth-child(3) .orbit-dot { background: var(--accent-mint); box-shadow: 0 0 12px var(--accent-mint); }
+.orbit-ring:nth-child(4) .orbit-dot { background: var(--accent-rose); box-shadow: 0 0 10px var(--accent-rose); }
+.orbit-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; text-align: center; }
+.orbit-center-label { font-size: 1.6rem; font-weight: 800; color: var(--accent); opacity: 0.9; }
+.orbit-center-sub { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-top: 0.2rem; }
+@keyframes orbitSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.orbit-labels { position: absolute; inset: -40px; pointer-events: none; }
+.orbit-label { position: absolute; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); white-space: nowrap; }
+.orbit-label:nth-child(1) { top: -30px; left: 50%; transform: translateX(-50%); color: rgba(168,180,255,0.5); }
+.orbit-label:nth-child(2) { right: -50px; top: 50%; transform: translateY(-50%); color: rgba(255,214,168,0.5); }
+.orbit-label:nth-child(3) { bottom: -30px; left: 50%; transform: translateX(-50%); color: rgba(74,255,201,0.5); }
+.orbit-label:nth-child(4) { left: -50px; top: 50%; transform: translateY(-50%); color: rgba(255,107,157,0.5); }
+
+/* Convergence Funnel */
+.viz-funnel { display: flex; flex-direction: column; align-items: center; padding: 3rem 0; gap: 0; }
+.funnel-layer { display: flex; align-items: center; justify-content: center; height: 48px; border: 1px solid; border-radius: 12px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); transition: all 0.6s var(--ease); margin-bottom: -1px; }
+.funnel-layer:nth-child(1) { width: 90%; background: rgba(168,180,255,0.04); border-color: rgba(168,180,255,0.12); }
+.funnel-layer:nth-child(2) { width: 74%; background: rgba(168,180,255,0.06); border-color: rgba(168,180,255,0.15); }
+.funnel-layer:nth-child(3) { width: 58%; background: rgba(168,180,255,0.08); border-color: rgba(168,180,255,0.18); }
+.funnel-layer:nth-child(4) { width: 42%; background: rgba(168,180,255,0.10); border-color: rgba(168,180,255,0.22); }
+.funnel-layer:nth-child(5) { width: 30%; background: linear-gradient(135deg, rgba(168,180,255,0.15), rgba(255,214,168,0.1)); border-color: rgba(168,180,255,0.3); color: var(--accent); font-weight: 700; box-shadow: 0 4px 30px rgba(168,180,255,0.1); }
+
+/* SIV-VIP Split */
+.viz-split { display: flex; gap: 1.5rem; padding: 3rem 0; }
+.split-card { flex: 1; background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2rem; text-align: center; position: relative; overflow: hidden; }
+.split-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.split-card.siv-card::before { background: linear-gradient(90deg, var(--accent), transparent); }
+.split-card.vip-card::before { background: linear-gradient(90deg, var(--accent-warm), transparent); }
+.split-label { font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; }
+.split-card.siv-card .split-label { color: var(--accent); }
+.split-card.vip-card .split-label { color: var(--accent-warm); }
+.split-role { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 1rem; }
+.split-items { list-style: none; text-align: left; }
+.split-items li { font-size: 0.85rem; color: var(--text-secondary); padding: 0.4rem 0 0.4rem 1rem; position: relative; }
+.split-items li::before { content: ''; position: absolute; left: 0; top: 0.75rem; width: 4px; height: 4px; border-radius: 50%; }
+.split-card.siv-card .split-items li::before { background: var(--accent); }
+.split-card.vip-card .split-items li::before { background: var(--accent-warm); }
+.split-connector { display: flex; align-items: center; justify-content: center; align-self: center; flex-shrink: 0; }
+.split-connector svg { width: 32px; height: 32px; color: var(--text-muted); opacity: 0.4; }
+
+/* Lens Properties */
+.viz-properties { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding: 3rem 0; }
+.prop-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; }
+.prop-num { font-size: 2rem; font-weight: 800; font-family: 'Playfair Display', serif; line-height: 1; margin-bottom: 0.5rem; background: linear-gradient(135deg, rgba(168,180,255,0.3), rgba(168,180,255,0.08)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.prop-name { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.3rem; }
+.prop-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+
+/* Pressure Gauge */
+.viz-pressure { display: flex; flex-direction: column; align-items: center; padding: 3rem 0; }
+.pressure-meter { width: 100%; max-width: 500px; height: 8px; background: rgba(255,255,255,0.04); border-radius: 8px; overflow: hidden; }
+.pressure-fill { height: 100%; border-radius: 8px; background: linear-gradient(90deg, var(--accent-mint), var(--accent), var(--accent-warm), var(--accent-rose)); width: 0%; transition: width 2s var(--ease); }
+.pressure-fill.animated { width: 85%; }
+.pressure-labels { display: flex; justify-content: space-between; width: 100%; max-width: 500px; margin-top: 0.75rem; }
+.pressure-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+
+/* Depth Scale */
+.viz-depth { display: flex; align-items: flex-end; justify-content: center; gap: 6px; padding: 3rem 0; height: 200px; }
+.depth-bar { width: 24px; border-radius: 6px 6px 0 0; background: linear-gradient(to top, var(--accent), rgba(168,180,255,0.2)); transition: height 1s var(--ease-spring); height: 0; }
+.depth-bar.animated:nth-child(1) { height: 30px; }
+.depth-bar.animated:nth-child(2) { height: 45px; transition-delay: 0.05s; }
+.depth-bar.animated:nth-child(3) { height: 60px; transition-delay: 0.1s; }
+.depth-bar.animated:nth-child(4) { height: 55px; transition-delay: 0.15s; }
+.depth-bar.animated:nth-child(5) { height: 75px; transition-delay: 0.2s; }
+.depth-bar.animated:nth-child(6) { height: 90px; transition-delay: 0.25s; }
+.depth-bar.animated:nth-child(7) { height: 80px; transition-delay: 0.3s; }
+.depth-bar.animated:nth-child(8) { height: 110px; transition-delay: 0.35s; background: linear-gradient(to top, var(--accent-warm), rgba(255,214,168,0.2)); }
+.depth-bar.animated:nth-child(9) { height: 95px; transition-delay: 0.4s; }
+.depth-bar.animated:nth-child(10) { height: 120px; transition-delay: 0.45s; background: linear-gradient(to top, var(--accent-rose), rgba(255,107,157,0.2)); }
+.depth-bar.animated:nth-child(11) { height: 100px; transition-delay: 0.5s; }
+.depth-bar.animated:nth-child(12) { height: 130px; transition-delay: 0.55s; background: linear-gradient(to top, var(--accent-mint), rgba(74,255,201,0.2)); }
+.depth-caption { text-align: center; margin-top: 1rem; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); }
+
+/* Reality Weight Bars */
+.viz-weight { padding: 3rem 0; }
+.weight-row { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 0; }
+.weight-label { flex-shrink: 0; width: 120px; font-size: 0.78rem; color: var(--text-secondary); text-align: right; }
+.weight-track { flex: 1; height: 6px; background: rgba(255,255,255,0.04); border-radius: 6px; overflow: hidden; }
+.weight-fill { height: 100%; border-radius: 6px; transition: width 1.2s var(--ease); width: 0; }
+.weight-row:nth-child(1) .weight-fill { background: linear-gradient(90deg, var(--accent), var(--accent-warm)); }
+.weight-row:nth-child(2) .weight-fill { background: linear-gradient(90deg, var(--accent-warm), var(--accent-rose)); }
+.weight-row:nth-child(3) .weight-fill { background: linear-gradient(90deg, var(--accent-mint), var(--accent)); }
+.weight-row:nth-child(4) .weight-fill { background: linear-gradient(90deg, var(--accent-rose), var(--accent)); }
+.weight-row:nth-child(5) .weight-fill { background: linear-gradient(90deg, rgba(168,180,255,0.5), rgba(168,180,255,0.2)); }
+.weight-pct { flex-shrink: 0; width: 40px; font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+.weight-row.animated:nth-child(1) .weight-fill { width: 85%; }
+.weight-row.animated:nth-child(2) .weight-fill { width: 62%; }
+.weight-row.animated:nth-child(3) .weight-fill { width: 48%; }
+.weight-row.animated:nth-child(4) .weight-fill { width: 30%; }
+.weight-row.animated:nth-child(5) .weight-fill { width: 15%; }
+
+/* ============ SPECIAL SECTIONS ============ */
+.dedication-section { text-align: center; padding: 2rem; }
+.dedication-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.5rem; color: var(--text-secondary); line-height: 1.7; }
+
+.appendix-title-main { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; margin-bottom: 1.5rem; color: var(--text-primary); }
+
+.glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2.5rem; margin: 1.5rem 0; }
+
+.warning-block { background: linear-gradient(135deg, rgba(255,107,157,0.06), rgba(168,180,255,0.04)); border: 1px solid rgba(255,107,157,0.15); border-radius: 16px; padding: 2rem; margin: 1.5rem 0; font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.08rem; color: var(--text-secondary); line-height: 1.85; }
+
+.doctrine-list { list-style: none; counter-reset: doctrine; }
+.doctrine-list li { counter-increment: doctrine; padding: 1.1rem 0 1.1rem 3.2rem; position: relative; color: var(--text-secondary); font-size: 1.05rem; line-height: 1.7; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.doctrine-list li::before { content: counter(doctrine, decimal-leading-zero); position: absolute; left: 0; top: 1.2rem; font-weight: 800; font-size: 0.8rem; color: var(--accent); opacity: 0.5; }
+
+/* ============ GLOSSARY + INDEX ============ */
+.ref-section { padding-top: 7rem; opacity: 0; transform: translateY(35px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
+.ref-section.visible { opacity: 1; transform: translateY(0); }
+
+.ref-section-header { margin-bottom: 2.5rem; }
+.ref-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.8rem; opacity: 0.7; }
+.ref-section-title { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; color: var(--text-primary); }
+
+/* Glossary */
+.glossary-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+.glossary-entry {
+  background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border); border-radius: 16px;
+  padding: 1.5rem 1.75rem; position: relative; overflow: hidden;
+  transition: all 0.4s var(--ease);
+}
+.glossary-entry:hover { background: var(--glass-bg-strong); border-color: var(--glass-highlight); }
+.glossary-entry::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+  background: linear-gradient(to bottom, var(--accent), transparent);
+  opacity: 0; transition: opacity 0.4s var(--ease);
+}
+.glossary-entry:hover::before { opacity: 1; }
+.glossary-term {
+  font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600;
+  color: var(--text-primary); margin-bottom: 0.4rem;
+}
+.glossary-def { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; }
+.glossary-refs { margin-top: 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.glossary-ref {
+  display: inline-block; padding: 0.2rem 0.6rem;
+  font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;
+  background: rgba(168,180,255,0.08); border: 1px solid rgba(168,180,255,0.15);
+  border-radius: 6px; color: var(--accent); cursor: pointer;
+  transition: all 0.3s var(--ease); text-decoration: none;
+}
+.glossary-ref:hover { background: rgba(168,180,255,0.18); border-color: rgba(168,180,255,0.3); }
+
+/* Keyword Index */
+.index-alpha-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+.index-letter-group { padding: 1.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.index-letter {
+  font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 800;
+  background: linear-gradient(135deg, rgba(168,180,255,0.25), rgba(168,180,255,0.08));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1; margin-bottom: 0.75rem;
+}
+.index-entries { display: flex; flex-direction: column; gap: 0.35rem; }
+.index-entry { display: flex; align-items: baseline; gap: 0.5rem; }
+.index-keyword { font-size: 0.88rem; color: var(--text-secondary); flex-shrink: 0; }
+.index-dots { flex: 1; border-bottom: 1px dotted rgba(255,255,255,0.08); margin-bottom: 0.25rem; min-width: 20px; }
+.index-ch-links { display: flex; flex-wrap: wrap; gap: 0.3rem; flex-shrink: 0; }
+.index-ch-link {
+  font-size: 0.7rem; font-weight: 600; color: var(--accent); cursor: pointer;
+  padding: 0.15rem 0.45rem; border-radius: 4px;
+  background: rgba(168,180,255,0.06); transition: all 0.3s var(--ease);
+  text-decoration: none;
+}
+.index-ch-link:hover { background: rgba(168,180,255,0.18); }
+
+.ref-divider { width: 80px; height: 1px; margin: 5rem 0 0; background: linear-gradient(90deg, var(--accent), transparent); }
+
+/* ============ BACK TO TOP ============ */
+.back-to-top { position: fixed; bottom: 2rem; right: 2rem; z-index: 400; width: 48px; height: 48px; background: rgba(10,10,20,0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; pointer-events: none; transition: all 0.4s var(--ease); }
+.back-to-top.visible { opacity: 1; pointer-events: all; }
+.back-to-top:hover { background: rgba(168,180,255,0.12); transform: translateY(-3px); }
+.back-to-top svg { width: 18px; height: 18px; color: var(--accent); }
+
+/* ============ FOOTER ============ */
+.site-footer { position: relative; z-index: 2; text-align: center; padding: 5rem 2rem 3rem; border-top: 1px solid rgba(255,255,255,0.05); }
+.footer-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--text-secondary); }
+.footer-sub { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.3rem; }
+.footer-line { width: 40px; height: 1px; margin: 1.5rem auto 0; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.3; }
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 768px) {
+  .hero-glass { padding: 3rem 2rem; border-radius: 24px; }
+  .main-content { padding: 0 1.25rem 5rem; }
+  .chapter-section { padding-top: 5rem; }
+  .glass-card { padding: 1.5rem; border-radius: 16px; }
+  .sidebar { width: 285px; }
+  .chapter-text p:first-of-type::first-letter { font-size: 2.6rem; }
+  .chapter-grid { grid-template-columns: 1fr; }
+  .appendix-grid { grid-template-columns: 1fr; }
+  .viz-properties { grid-template-columns: 1fr; }
+  .viz-split { flex-direction: column; }
+  .split-connector { transform: rotate(90deg); }
+  .visual-index { padding: 4rem 1.25rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient-bg">
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+  <div class="ambient-orb orb-3"></div>
+  <div class="ambient-orb orb-4"></div>
+</div>
+<div class="noise"></div>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle contents">
+  <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.7rem;color:var(--text-muted);text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8rem;transition:color 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">&larr; Back to Home</a>
+    <div class="sidebar-title">The SIV Method</div>
+    <div class="sidebar-subtitle">Vinay Pasricha</div>
+  </div>
+  <div class="toc-section-label">Front Matter</div>
+  <ul class="toc-list">
+    <li><a class="toc-item" data-target="dedication">Dedication &amp; Author Note</a></li>
+    <li><a class="toc-item" data-target="preface">Preface</a></li>
+  </ul>
+  <div class="toc-section-label">Chapters</div>
+  <ul class="toc-list">
+    <li><a class="toc-item" data-target="ch1"><span class="toc-num">01</span>The Crime Against Reality</a></li>
+    <li><a class="toc-item" data-target="ch2"><span class="toc-num">02</span>The Failure of Ordinary Thinking</a></li>
+    <li><a class="toc-item" data-target="ch3"><span class="toc-num">03</span>Why AI Changes the Game</a></li>
+    <li><a class="toc-item" data-target="ch4"><span class="toc-num">04</span>What SIV Is</a></li>
+    <li><a class="toc-item" data-target="ch5"><span class="toc-num">05</span>The Vinay Lens</a></li>
+    <li><a class="toc-item" data-target="ch6"><span class="toc-num">06</span>The Socratic Engine</a></li>
+    <li><a class="toc-item" data-target="ch7"><span class="toc-num">07</span>Iteration and Depth</a></li>
+    <li><a class="toc-item" data-target="ch8"><span class="toc-num">08</span>Reality Weight</a></li>
+    <li><a class="toc-item" data-target="ch9"><span class="toc-num">09</span>Convergence</a></li>
+    <li><a class="toc-item" data-target="ch10"><span class="toc-num">10</span>SIV and VIP</a></li>
+    <li><a class="toc-item" data-target="ch11"><span class="toc-num">11</span>The Future of Better Seeing</a></li>
+  </ul>
+  <div class="toc-section-label">Appendices</div>
+  <ul class="toc-list">
+    <li><a class="toc-item" data-target="app1"><span class="toc-num">I</span>Canonical SIV Statement</a></li>
+    <li><a class="toc-item" data-target="app2"><span class="toc-num">II</span>The Fixed SIV Warning</a></li>
+    <li><a class="toc-item" data-target="app3"><span class="toc-num">III</span>Compact Doctrine</a></li>
+  </ul>
+  <div class="toc-section-label">Reference</div>
+  <ul class="toc-list">
+    <li><a class="toc-item" data-target="glossary">Glossary of Terms</a></li>
+    <li><a class="toc-item" data-target="keyword-index">Keyword Index</a></li>
+  </ul>
+</nav>
+
+<button class="back-to-top" id="backToTop" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="hero">
+  <div class="hero-particles" id="heroParticles"></div>
+  <div class="hero-glass">
+    <div class="hero-label">Socratic Iterative Vinay &mdash; Amplified Understanding Framework</div>
+    <h1>The SIV Method</h1>
+    <p class="hero-subtitle">A Brutal Framework for Understanding Reality Before Execution</p>
+    <p class="hero-author">by Vinay Pasricha</p>
+    <div class="hero-epigraph">&ldquo;Most execution fails in public.<br>Most misunderstanding fails in private.&rdquo;</div>
+    <a class="hero-cta" id="beginReading">
+      Begin Reading
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </a>
+  </div>
+  <div class="scroll-hint"><span></span></div>
+</section>
+
+<!-- ============ VISUAL INDEX ============ -->
+<section class="visual-index" id="indexSection">
+  <div class="index-header" id="indexHeader">
+    <div class="index-label">Table of Contents</div>
+    <div class="index-title">Eleven Chapters. Three Appendices. One Discipline.</div>
+    <div class="index-sub">Navigate the framework</div>
+  </div>
+
+  <div class="chapter-grid" id="chapterGrid">
+    <div class="index-card" data-nav="preface">
+      <div class="card-number">&bull;</div>
+      <div class="card-title">Preface</div>
+      <div class="card-epigraph">Before power is applied, reality must be examined hard enough to deserve action.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch1">
+      <div class="card-number">01</div>
+      <div class="card-title">The Crime Against Reality</div>
+      <div class="card-epigraph">The second failure always comes first.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch2">
+      <div class="card-number">02</div>
+      <div class="card-title">The Failure of Ordinary Thinking</div>
+      <div class="card-epigraph">The mind wants relief. SIV demands reality.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch3">
+      <div class="card-number">03</div>
+      <div class="card-title">Why AI Changes the Game</div>
+      <div class="card-epigraph">AI matters most when it helps thought stay open longer.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch4">
+      <div class="card-number">04</div>
+      <div class="card-title">What SIV Is</div>
+      <div class="card-epigraph">Understand before power is applied.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch5">
+      <div class="card-number">05</div>
+      <div class="card-title">The Vinay Lens</div>
+      <div class="card-epigraph">A weak lens decorates thought. A strong lens rearranges it.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch6">
+      <div class="card-number">06</div>
+      <div class="card-title">The Socratic Engine</div>
+      <div class="card-epigraph">If a claim cannot survive pressure, it has no right to guide action.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch7">
+      <div class="card-number">07</div>
+      <div class="card-title">Iteration and Depth</div>
+      <div class="card-epigraph">The purpose of iteration is not delay. It is earned clarity.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch8">
+      <div class="card-number">08</div>
+      <div class="card-title">Reality Weight</div>
+      <div class="card-epigraph">To see many things is not enough. One must also know what matters most.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch9">
+      <div class="card-number">09</div>
+      <div class="card-title">Convergence</div>
+      <div class="card-epigraph">A framework becomes useful the moment it stops circling and starts concluding.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch10">
+      <div class="card-number">10</div>
+      <div class="card-title">SIV and VIP</div>
+      <div class="card-epigraph">Execution without understanding is force without sight.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+    <div class="index-card" data-nav="ch11">
+      <div class="card-number">11</div>
+      <div class="card-title">The Future of Better Seeing</div>
+      <div class="card-epigraph">Civilizations decline when they lose the ability to see clearly.</div>
+      <div class="card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+    </div>
+  </div>
+
+  <div class="appendix-grid" id="appendixGrid">
+    <div class="appendix-card" data-nav="app1">
+      <div class="appendix-num">Appendix I</div>
+      <div class="appendix-name">The Canonical SIV Statement</div>
+    </div>
+    <div class="appendix-card" data-nav="app2">
+      <div class="appendix-num">Appendix II</div>
+      <div class="appendix-name">The Fixed SIV Warning</div>
+    </div>
+    <div class="appendix-card" data-nav="app3">
+      <div class="appendix-num">Appendix III</div>
+      <div class="appendix-name">Compact Doctrine</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BOOK CONTENT ============ -->
+<div class="reading-container">
+  <main class="main-content">
+
+    <!-- Dedication -->
+    <section class="chapter-section dedication-section" id="dedication">
+      <div class="chapter-label">Dedication</div>
+      <p class="dedication-text">For those who prefer reality to comfort.</p>
+      <div style="margin-top:3rem;">
+        <div class="chapter-label">Author Note</div>
+      </div>
+      <div class="chapter-text" style="text-align:left; max-width:600px; margin:1rem auto 0;">
+        <p>This book was written for people who are serious about work and serious about reality.</p>
+        <p>It was not written to comfort the reader, flatter the reader, or entertain the reader with complexity. It was written to address a practical problem: human beings repeatedly act on shallow understanding and then call the result execution. The cost of that error is visible everywhere — in companies, strategies, teams, institutions, decisions, and lives.</p>
+        <p>SIV emerged from the belief that understanding must be treated as a discipline in its own right, and that AI, used correctly, can help amplify human inquiry beyond the ordinary fragility of the mind. This book is the first formal statement of that belief.</p>
+        <p>It is not intended as the last word. It is intended as the opening move.</p>
+        <p style="color:var(--text-muted); font-style:italic;">— Vinay Pasricha</p>
+      </div>
+      <div class="chapter-divider" style="margin:4rem auto 0;"></div>
+    </section>
+
+    <!-- Preface -->
+    <section class="chapter-section" id="preface">
+      <div class="chapter-label">Preface</div>
+      <h2 class="chapter-title">Preface</h2>
+      <div class="chapter-text">
+        <p>Most failure does not begin in action. It begins in misunderstanding.</p>
+        <p>People act too soon because they think they understand. They decide too early because uncertainty irritates them. They label reality before they have seen enough of it, then mistake conviction for truth, speed for clarity, and familiarity for understanding. Then they call the result judgment.</p>
+        <p>This is not mainly a moral defect. It is a structural limitation.</p>
+        <p>The human mind is not built to hold many frames of reference at once with rigor. It evolved for survival, not for comprehensive perception. It simplifies, compresses, protects, and closes. It wants a workable story before reality has finished disclosing itself. In ordinary life that may be efficient. In serious work it is often catastrophic.</p>
+        <p>Reality does not care about that limitation. A company is never only a company. A conflict is never only a conflict. A plan is never only a plan. Each is a field of incentives, distortions, histories, structures, power relations, blind spots, and hidden pressures. To look from one or two angles and then announce understanding is not intelligence. It is fragility wearing the mask of clarity.</p>
+        <p>The SIV Method was built against that fragility.</p>
+        <p>SIV stands for Socratic Iterative Vinay. It is an amplified understanding framework designed to examine any subjective reality through multiple dynamically generated lenses, each representing a distinct frame of reference. It begins from a hard proposition: no important issue can be properly understood from a single angle, and no fixed set of angles is enough for every case. Inquiry must be generated fresh. Assumptions must be challenged. The user must be contradicted when necessary. The method must converge toward one best integrated understanding.</p>
+        <p>SIV is not decorative depth. It is not intellectual theater. It is not a philosophy hobby and not a delay tactic for people afraid of decision. It exists for work.</p>
+        <p>Its purpose is not to admire complexity but to penetrate it. Not to romanticize uncertainty but to reduce blindness. Not to perform intelligence but to force a stronger approximation of reality than ordinary thinking can produce on its own. Only then should execution begin.</p>
+        <p>That is why SIV is only the first half of a larger discipline. SIV is for understanding. Execution belongs to another method: VIP — Vinay's Improving Process. The separation is deliberate. Most bad execution is misunderstanding accelerated.</p>
+        <p>This book is a manifesto for a simple claim: before power is applied, reality must be examined hard enough to deserve action.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 1 -->
+    <section class="chapter-section" id="ch1">
+      <div class="chapter-label">Chapter One</div>
+      <h2 class="chapter-title">The Crime Against Reality</h2>
+      <div class="chapter-epigraph">The second failure always comes first.</div>
+      <div class="chapter-text">
+        <p>The first crime in serious work is not bad execution. It is bad seeing.</p>
+        <p>Someone frames the problem too quickly. Someone else agrees because the frame sounds intelligent. A team rallies around language before it has earned the right to do so. A founder becomes emotionally attached to an interpretation. A leader mistakes movement for understanding. Then execution begins on top of that contamination.</p>
+        <p>By the time failure becomes visible, the damage is already old.</p>
+        <p>Most people diagnose failure where it becomes public: in missed targets, broken plans, confused teams, failed products, weak strategies, or wasted money. The earlier failure remains hidden because it happened in private, inside the frame through which reality was first understood.</p>
+        <p>This is why shallow interpretation is so dangerous. It does not merely produce bad thought. It produces bad action with force behind it.</p>
+        <p>The modern world multiplies this danger. Markets are multi-causal. Organizations are political as well as economic. Products are technological, psychological, social, and narrative at the same time. Conflicts contain visible events and invisible incentives. Even personal decisions are entangled with fear, identity, memory, and misread trade-offs.</p>
+        <p>Yet most people still insist on single-frame interpretation. One person explains everything commercially. Another morally. Another emotionally. Another operationally. Each thinks they have seen the thing itself when they have only seen a slice.</p>
+        <p>The problem is not that the slice is false. The problem is that partial truth becomes destructive when treated as total truth.</p>
+        <p>This is the crime against reality. The reduction of the real into something prematurely manageable.</p>
+        <p>SIV begins by refusing that reduction.</p>
+        <p>It assumes that reality is distributed across multiple frames of reference. No single lens is enough. Even when one lens carries a large share of the truth, another may still reveal a force the first concealed. Stronger understanding therefore requires deliberate multiplication of viewpoint.</p>
+        <p>This is not relativism. It is discipline.</p>
+        <p>Most execution fails in public. Most misunderstanding fails in private. The second failure always comes first.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 2 -->
+    <section class="chapter-section" id="ch2">
+      <div class="chapter-label">Chapter Two</div>
+      <h2 class="chapter-title">The Failure of Ordinary Thinking</h2>
+      <div class="chapter-epigraph">The mind wants relief. SIV demands reality.</div>
+      <div class="chapter-text">
+        <p>The human mind wants relief more than reality.</p>
+        <p>It wants a story. It wants closure. It wants an answer that will let it stop looking. Faced with uncertainty, it often prefers a wrong conclusion to an unresolved field.</p>
+        <p>This is not stupidity. It is architecture.</p>
+        <p>The brain did not evolve to contemplate reality in all its dimensions. It evolved to survive. In survival conditions, speed mattered more than completeness. Binary distinctions were useful: safe or dangerous, friend or enemy, move or freeze. That machinery still lives inside us, even when we are dealing with markets, institutions, teams, strategies, or our own lives.</p>
+        <p>The result is predictable. We overvalue what is visible, recent, vivid, emotional, and narratively satisfying. We undervalue what is structural, distributed, slow-moving, and hidden. We attach identity to interpretation. We defend a view not because it is true but because it has become part of us.</p>
+        <p>Intelligence does not save us from this. It often sharpens the error. A clever person with a weak frame can generate elegant nonsense and defend it beautifully. Intelligence can increase narrative sophistication without increasing contact with reality.</p>
+        <p>This is why ordinary thinking fails in serious matters. It closes too soon, protects too much, and mistakes coherence for truth.</p>
+        <p>SIV is built to interrupt those habits.</p>
+        <p>It forces thought to move through multiple frames of reference instead of settling inside the first satisfying explanation. It introduces contradiction where comfort would normally win. It holds inquiry open long enough for a stronger pattern to emerge.</p>
+        <p>It does not eliminate human fragility. Nothing will. But it can reduce its effects.</p>
+        <p>That alone would justify the method.</p>
+        <p>The mind wants relief. SIV demands reality.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 3 -->
+    <section class="chapter-section" id="ch3">
+      <div class="chapter-label">Chapter Three</div>
+      <h2 class="chapter-title">Why AI Changes the Game</h2>
+      <div class="chapter-epigraph">AI matters most when it helps thought stay open longer.</div>
+      <div class="chapter-text">
+        <p>Human beings can think deeply. They cannot think broadly and stably enough for many modern problems.</p>
+        <p>A person may hold two or three frames of reference at once with effort. An exceptional thinker may hold more. But the mind still tires. It compresses. It begins to privilege narrative fluency over structural accuracy. It drops variables. It defends one frame because carrying many becomes expensive.</p>
+        <p>This is where AI changes the game.</p>
+        <p>AI can hold more angles, compare more interpretations, sustain inquiry longer, and return to earlier contradictions without the same emotional fatigue that distorts human thinking. This does not make AI wise. It makes a new kind of disciplined seeing possible.</p>
+        <p>That possibility is the foundation of SIV.</p>
+        <p>SIV does not use AI as an answer machine. It uses AI as an instrument of amplified understanding. The point is not speed alone. The point is increased cognitive surface. More angles held at once. More pressure applied without impatience. More capacity to remain in inquiry without collapsing into premature closure.</p>
+        <p>If governed badly, AI can amplify nonsense as easily as sense. If governed well, it can do something rarer: it can help force reality into view before action hardens around a shallow frame.</p>
+        <p>That is the promise. Not artificial certainty. Amplified understanding.</p>
+        <p>AI matters most when it helps thought stay open longer than the human mind can tolerate on its own.</p>
+      </div>
+      <!-- Multi-Lens Orbit Visualization -->
+      <div class="viz-orbit">
+        <div class="orbit-container">
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-ring"><div class="orbit-dot"></div></div>
+          <div class="orbit-center">
+            <div class="orbit-center-label">SIV</div>
+            <div class="orbit-center-sub">Amplified Seeing</div>
+          </div>
+          <div class="orbit-labels">
+            <span class="orbit-label">Incentive Lens</span>
+            <span class="orbit-label">Power Lens</span>
+            <span class="orbit-label">Narrative Lens</span>
+            <span class="orbit-label">Structure Lens</span>
+          </div>
+        </div>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 4 -->
+    <section class="chapter-section" id="ch4">
+      <div class="chapter-label">Chapter Four</div>
+      <h2 class="chapter-title">What SIV Is</h2>
+      <div class="chapter-epigraph">Understand before power is applied.</div>
+      <div class="chapter-text">
+        <p>SIV stands for Socratic Iterative Vinay.</p>
+        <p>It is Socratic because it questions, contradicts, stress-tests, and dismantles weak assumptions. It is Iterative because understanding is not produced in one sweep; it develops progressively, lens by lens, through disciplined inquiry. It is Vinay because the method is not generic. It arises from a specific claim: understanding must be amplified before execution can be trusted.</p>
+        <p>SIV is an Amplified Understanding Framework. It is not a brainstorming ritual, not a note-taking system, not a debate format, and not a decision tree. It is a method for forcing an issue to reveal more of itself by examining it through multiple dynamically generated frames of reference called Vinay Lenses.</p>
+        <p>A Vinay Lens is a formally named, self-explanatory angle of inquiry generated specifically for the issue at hand. It is not merely a topic. It is a way of seeing. One lens may expose hidden incentives. Another may reveal power structure. Another may surface emotional distortion. Another may show execution friction. Another may distinguish narrative from reality.</p>
+        <p>The exact lenses cannot be fixed in advance because reality changes with the issue.</p>
+        <p>This is one of SIV's first laws: lenses must be generated fresh.</p>
+        <p>SIV does not dump all lenses at once. It works one lens at a time. A later lens may need to be shaped by what an earlier one exposed. Inquiry remains dynamic, but it must remain anchored to the original issue.</p>
+        <p>Its final aim is convergence. Not endless perspective generation. Not intellectual performance. Not a museum of angles. SIV may explore competing understandings along the way, but it must end in one best integrated understanding.</p>
+        <p>That is what makes it useful for work.</p>
+        <p>And that is exactly where SIV stops.</p>
+        <p>SIV is not execution. Those belong to VIP — Vinay's Improving Process. When understanding and execution are collapsed into one another, haste replaces clarity.</p>
+        <p>SIV therefore occupies a precise place in serious work: after casual thought, before applied force.</p>
+        <p>SIV exists to do one thing well: understand before power is applied.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 5 -->
+    <section class="chapter-section" id="ch5">
+      <div class="chapter-label">Chapter Five</div>
+      <h2 class="chapter-title">The Vinay Lens</h2>
+      <div class="chapter-epigraph">A weak lens decorates thought. A strong lens rearranges it.</div>
+      <div class="chapter-text">
+        <p>The lens is the atom of SIV.</p>
+        <p>If the lens is weak, the method becomes theater. If the lens is strong, thought is rearranged.</p>
+        <p>Every Vinay Lens has four essential properties.</p>
+      </div>
+      <!-- Lens Properties Visualization -->
+      <div class="viz-properties">
+        <div class="prop-card">
+          <div class="prop-num">01</div>
+          <div class="prop-name">Formal</div>
+          <div class="prop-desc">It must have a name. What is unnamed remains loose and cannot be tracked rigorously.</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-num">02</div>
+          <div class="prop-name">Self-Explanatory</div>
+          <div class="prop-desc">The name must reveal the frame directly. Cleverness is a liability.</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-num">03</div>
+          <div class="prop-name">Case-Generated</div>
+          <div class="prop-desc">No lens has authority merely because it was useful before. Each must arise from the issue at hand.</div>
+        </div>
+        <div class="prop-card">
+          <div class="prop-num">04</div>
+          <div class="prop-name">Directional</div>
+          <div class="prop-desc">A lens must change the angle from which the issue is seen. A good lens creates new visibility.</div>
+        </div>
+      </div>
+      <div class="chapter-text">
+        <p>A lens is the meeting point between a frame of reference and a questioning pressure. One lens may ask what incentives are shaping visible behavior. Another may ask what contradictions exist between stated purpose and actual structure. Another may ask what hidden fear is distorting choice. A lens is therefore not a category. It is an instrument.</p>
+        <p>This is why SIV does not generate all lenses upfront. Inquiry must breathe. The method must learn while it moves. Later lenses should be able to respond to earlier discoveries.</p>
+        <p>Not every lens matters equally. Some are peripheral. Some are diagnostic. Some are decisive. The mature use of SIV requires learning to tell the difference.</p>
+        <p>A weak lens decorates thought. A strong lens rearranges it.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 6 -->
+    <section class="chapter-section" id="ch6">
+      <div class="chapter-label">Chapter Six</div>
+      <h2 class="chapter-title">The Socratic Engine</h2>
+      <div class="chapter-epigraph">If a claim cannot survive pressure, it has no right to guide action.</div>
+      <div class="chapter-text">
+        <p>Many methods ask questions. Very few deserve the word Socratic.</p>
+        <p>In diluted usage, Socratic means merely inquisitive. In SIV, it means adversarial in the service of truth.</p>
+        <p>That means contradiction. Pressure. Stress-testing. Falsification pressure. Dismantling weak assumptions. Refusal to treat coherence as evidence of truth. Exposure of vague language, emotional certainty, self-serving narrative, and borrowed concepts that have never been earned.</p>
+        <p>This is necessary because without pressure inquiry becomes performance.</p>
+        <p>A person can speak fluently and still be wrong. A statement can be emotionally powerful and still be false. An interpretation can be elegant and still conceal reality. Strong language often masks weak structure. The Socratic engine exists to cut through that mask.</p>
+      </div>
+      <!-- Pressure Gauge Visualization -->
+      <div class="viz-pressure" id="vizPressure">
+        <div class="pressure-meter"><div class="pressure-fill" id="pressureFill"></div></div>
+        <div class="pressure-labels">
+          <span class="pressure-label">Comfort</span>
+          <span class="pressure-label">Inquiry</span>
+          <span class="pressure-label">Contradiction</span>
+          <span class="pressure-label">Truth</span>
+        </div>
+      </div>
+      <div class="chapter-text">
+        <p>There is a deeper problem. The mind protects itself. It protects identity, continuity, pride, belonging, and emotional safety. When an idea threatens those things, the mind rarely surrenders cleanly. It rationalizes. It narrows. It re-labels. It performs intelligence while defending blindness.</p>
+        <p>Any method that does not contest this becomes its accomplice.</p>
+        <p>That is why SIV begins with a warning. The user is told plainly that the system is designed only for those willing to think honestly, examine assumptions critically, and confront bias and blind spots. If they are unwilling, they should exit. This is not cruelty. It is hygiene.</p>
+        <p>Socratic pressure in SIV is not random aggression. It is disciplined hostility toward distortion. The goal is not humiliation. The goal is stronger contact with reality.</p>
+        <p>If a user becomes evasive, unserious, dishonest, or repeatedly unwilling to submit claims to scrutiny, SIV escalates in firmness. If the refusal continues, the inquiry should terminate. Better no conclusion than counterfeit depth.</p>
+        <p>If a claim cannot survive pressure, it has no right to guide action.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 7 -->
+    <section class="chapter-section" id="ch7">
+      <div class="chapter-label">Chapter Seven</div>
+      <h2 class="chapter-title">Iteration and Depth</h2>
+      <div class="chapter-epigraph">The purpose of iteration is not delay. It is earned clarity.</div>
+      <div class="chapter-text">
+        <p>One of the most dangerous habits in serious work is the urge to know too soon.</p>
+        <p>The mind wants a summary. The team wants direction. The founder wants the answer. The operator wants the plan. Everyone feels safer once a conclusion appears. Early conclusions often function as traps. They freeze inquiry before reality has had time to disclose itself.</p>
+        <p>SIV protects against this by building iteration into the method.</p>
+        <p>Understanding does not arrive in one sweep. It emerges through passes. Each lens reveals something, corrects something, or disturbs something. A seeming cause becomes a symptom. A hidden factor appears. A favored story loses authority. Over time, the field changes shape.</p>
+      </div>
+      <!-- Depth Scale Visualization -->
+      <div class="viz-depth" id="vizDepth">
+        <div class="depth-bar"></div><div class="depth-bar"></div><div class="depth-bar"></div>
+        <div class="depth-bar"></div><div class="depth-bar"></div><div class="depth-bar"></div>
+        <div class="depth-bar"></div><div class="depth-bar"></div><div class="depth-bar"></div>
+        <div class="depth-bar"></div><div class="depth-bar"></div><div class="depth-bar"></div>
+      </div>
+      <div class="depth-caption">Lens depth accumulates — each pass reveals more structure</div>
+      <div class="chapter-text">
+        <p>This means depth cannot be symbolic. The number of lenses matters. A simple issue may need eight. A serious one may need sixteen. A complex or high-stakes one may justify sixty-four or one hundred and twenty-eight. There is no virtue in choosing a high number and no wisdom in choosing a low one. The initial depth is a judgment call.</p>
+        <p>In SIV, that call belongs to the user.</p>
+        <p>The method may suggest a starting depth, but it does not impose one as doctrine. Yet once that depth is chosen, SIV remains responsible for judging adequacy. If the inquiry is still weak, thin, or structurally incomplete when the chosen depth is exhausted, SIV must say so and recommend more lenses.</p>
+        <p>This is where honesty matters. Complete understanding is impossible. Some part of reality remains obscure even after many passes. But impossible completeness is not an excuse for premature sufficiency.</p>
+        <p>The real question is whether the current understanding is strong enough, integrated enough, and comprehensive enough to support intelligent execution.</p>
+        <p>That judgment depends on confidence and comprehensiveness. If confidence is low, more lenses may be needed. If major areas remain underdeveloped, more lenses may be needed. If contradictions remain unresolved, more lenses may be needed.</p>
+        <p>This makes SIV a method of disciplined incompleteness. It refuses the fantasy of total knowledge, but it also refuses to stop merely because the mind is tired.</p>
+        <p>The purpose of iteration is not delay. It is earned clarity.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 8 -->
+    <section class="chapter-section" id="ch8">
+      <div class="chapter-label">Chapter Eight</div>
+      <h2 class="chapter-title">Reality Weight</h2>
+      <div class="chapter-epigraph">To see many things is not enough. One must also know what matters most.</div>
+      <div class="chapter-text">
+        <p>Not every lens matters equally.</p>
+        <p>If an inquiry treats all perspectives as equal merely because they have been stated, it becomes weak and incapable of convergence. SIV therefore imposes a harder discipline: each lens must be judged by how much relevant reality it appears to contain.</p>
+        <p>This is reality weight.</p>
+        <p>Reality weight is not metaphysical truth. It is explanatory burden. When a lens is applied to an issue, how much of what is actually going on does it illuminate? Does it reveal a central driver, a secondary factor, a useful edge case, or merely commentary around structure?</p>
+      </div>
+      <!-- Reality Weight Visualization -->
+      <div class="viz-weight" id="vizWeight">
+        <div class="weight-row"><div class="weight-label">Incentive Lens</div><div class="weight-track"><div class="weight-fill"></div></div><div class="weight-pct">High</div></div>
+        <div class="weight-row"><div class="weight-label">Power Lens</div><div class="weight-track"><div class="weight-fill"></div></div><div class="weight-pct">Med</div></div>
+        <div class="weight-row"><div class="weight-label">Narrative Lens</div><div class="weight-track"><div class="weight-fill"></div></div><div class="weight-pct">Med</div></div>
+        <div class="weight-row"><div class="weight-label">Emotion Lens</div><div class="weight-track"><div class="weight-fill"></div></div><div class="weight-pct">Low</div></div>
+        <div class="weight-row"><div class="weight-label">Timing Lens</div><div class="weight-track"><div class="weight-fill"></div></div><div class="weight-pct">Low</div></div>
+      </div>
+      <div class="chapter-text">
+        <p>These questions matter because the final integrated understanding cannot be built by averaging perspectives. It must be organized around the lenses that carry the greatest share of relevant reality.</p>
+        <p>SIV insists that this weighting remain qualitative first. Numbers may help later, but they must not create fake precision. The deeper task is judgment: which lenses are revealing the structure of the issue most powerfully, and which are only marginal?</p>
+        <p>Reality weight must be argued for. It cannot be assumed. A vivid explanation may attract too much authority because it feels satisfying. A favored narrative may be overweighted because it flatters the user. This is why weighting belongs late in the inquiry, after contradiction and challenge have done their work.</p>
+        <p>There is another subtlety. A low-weight lens may still be indispensable if it reveals a bottleneck, a timing issue, a hidden lever, or a vulnerability that larger frames overlooked. SIV therefore does not discard smaller lenses casually. It locates them accurately.</p>
+        <p>The weighted reality model becomes one of SIV's most powerful outputs because it does more than describe. It ranks. It reveals where the center of gravity likely lies.</p>
+        <p>To see many things is not enough. One must also know what matters most.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 9 -->
+    <section class="chapter-section" id="ch9">
+      <div class="chapter-label">Chapter Nine</div>
+      <h2 class="chapter-title">Convergence</h2>
+      <div class="chapter-epigraph">A framework becomes useful the moment it stops circling and starts concluding.</div>
+      <div class="chapter-text">
+        <p>A weak method stops at plurality. A strong method converges.</p>
+        <p>It is easy to appear deep by producing many perspectives. It is harder to decide what they amount to. Yet without that decision, work cannot proceed. A team cannot execute on twelve incompatible understandings. A founder cannot build on seven equally defended narratives. A plan cannot improve if reality remains scattered across unintegrated fragments.</p>
+        <p>SIV therefore requires convergence.</p>
+      </div>
+      <!-- Convergence Funnel -->
+      <div class="viz-funnel">
+        <div class="funnel-layer">Multiple Lenses Generated</div>
+        <div class="funnel-layer">Contradiction &amp; Pressure Applied</div>
+        <div class="funnel-layer">Reality Weight Assigned</div>
+        <div class="funnel-layer">Synthesis Formed</div>
+        <div class="funnel-layer">One Best Integrated Understanding</div>
+      </div>
+      <div class="chapter-text">
+        <p>This does not mean forcing certainty where none exists. It means drawing from multiple lenses to construct one best integrated understanding — the strongest picture that can currently be defended given the inquiry completed.</p>
+        <p>Synthesis here is not summary. It is not a recap of the lenses. It is a reassembly of the issue in a new form shaped by what survived scrutiny. Some lenses dominate the final shape. Some become modifiers. Some remain as cautionary variables. Some recede. The final understanding is not a list. It is a structured whole.</p>
+        <p>This is where the method proves whether it is built for work. During inquiry, ambiguity is tolerated because exploration requires openness. But ambiguity cannot be the product. SIV is not an invitation to permanent suspension. It exists to produce a clarified reality strong enough to support what comes next.</p>
+        <p>Good convergence does not erase complexity. It organizes it. It distinguishes central from peripheral, driver from symptom, visible from hidden, structural from incidental. What emerges may still contain uncertainty, but it is uncertainty inside an ordered picture rather than uncertainty spread across chaos.</p>
+        <p>This is why SIV ends with both a confidence statement and an uncertainty statement. The confidence statement names what has become reasonably clear. The uncertainty statement names what remains obscure. Together, they keep convergence honest.</p>
+        <p>A framework becomes useful the moment it stops circling and starts concluding.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 10 -->
+    <section class="chapter-section" id="ch10">
+      <div class="chapter-label">Chapter Ten</div>
+      <h2 class="chapter-title">SIV and VIP</h2>
+      <div class="chapter-epigraph">Execution without understanding is force without sight.</div>
+      <div class="chapter-text">
+        <p>One of the most important design choices in this framework is the separation between SIV and VIP.</p>
+        <p>SIV is for understanding. VIP is for execution and improvement.</p>
+        <p>This sounds obvious until one looks at how most work is actually done. Inquiry turns into recommendation too early. A problem is only partially understood when the team starts assigning actions. A founder reaches for a plan before the reality beneath the plan has been integrated. The phases collapse into each other, and the result is waste disguised as speed.</p>
+        <p>The distinction between SIV and VIP is meant to stop that waste.</p>
+      </div>
+      <!-- SIV vs VIP -->
+      <div class="viz-split">
+        <div class="split-card siv-card">
+          <div class="split-label">SIV</div>
+          <div class="split-role">Understanding</div>
+          <ul class="split-items">
+            <li>What is this really?</li>
+            <li>What are we missing?</li>
+            <li>Which frames matter most?</li>
+            <li>What contradictions remain?</li>
+            <li>What can now be defended?</li>
+          </ul>
+        </div>
+        <div class="split-connector">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="split-card vip-card">
+          <div class="split-label">VIP</div>
+          <div class="split-role">Execution</div>
+          <ul class="split-items">
+            <li>What do we do now?</li>
+            <li>What should improve?</li>
+            <li>What sequence to follow?</li>
+            <li>How to translate to motion?</li>
+            <li>How to measure progress?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="chapter-text">
+        <p>SIV asks: What is this really? What are we missing? Which frames of reference matter most? What contradictions remain? What best integrated understanding can now be defended? VIP asks something else: Now that we understand it better, what do we do? What should improve? What sequence should be executed? How do we translate understanding into motion?</p>
+        <p>These are not the same questions. They require different postures of mind. The first requires disciplined openness. The second requires disciplined commitment. The first expands the field. The second narrows it into action. Confusing them produces shallow plans and brittle execution.</p>
+        <p>There is a simple formula here: SIV without VIP becomes sterile. VIP without SIV becomes blind.</p>
+        <p>The handoff matters because understanding must be able to travel. That is why SIV ends with a synthesized understanding, a lens map, a weighted reality model, a confidence statement, and an uncertainty statement. The handoff is not a vague impression. It is a prepared transfer.</p>
+        <p>Execution without understanding is force without sight.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Chapter 11 -->
+    <section class="chapter-section" id="ch11">
+      <div class="chapter-label">Chapter Eleven</div>
+      <h2 class="chapter-title">The Future of Better Seeing</h2>
+      <div class="chapter-epigraph">Civilizations decline when they lose the ability to see clearly. They rise when they rebuild it.</div>
+      <div class="chapter-text">
+        <p>The SIV Method begins as a work framework, but its implications reach further.</p>
+        <p>Any system that improves understanding changes the quality of action that follows. This is true for a founder, a team, an organization, a political community, and eventually a civilization. To see more clearly is not a marginal advantage. It is one of the deepest strategic advantages possible.</p>
+        <p>Much human conflict is sustained by single-frame thinking. Much bad management is sustained by low-resolution interpretation. Much wasted effort is sustained by shallow agreement. Much ideological rigidity is sustained by the refusal to examine reality through more than one loyal lens. In each case, the pattern is the same: a fragment is mistaken for the whole, and then power is applied to the fragment as if it were truth.</p>
+        <p>The result is error with force behind it.</p>
+        <p>SIV proposes a different possibility. It asks whether AI can become more than an answer machine, more than a convenience layer, more than a productivity tool. It asks whether AI can become an instrument of amplified understanding — a way of holding more frames of reference than the unassisted human mind can hold, without surrendering rigor, discipline, or convergence.</p>
+        <p>If that possibility matures, it changes what serious thought can become. Leaders may examine reality before declaring strategy. Organizations may frame issues better before reorganizing around them. Public discourse may become harder to manipulate when more people learn to recognize the partiality of any single lens. Even private life may become less confused when people stop treating the first coherent interpretation as final truth.</p>
+        <p>This does not guarantee wisdom. No method can do that. But it can create the conditions for better seeing.</p>
+        <p>That is already a radical ambition.</p>
+        <p>Civilizations decline when they lose the ability to see clearly. They rise when they rebuild it.</p>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Appendix I -->
+    <section class="chapter-section" id="app1">
+      <div class="chapter-label">Appendix I</div>
+      <h2 class="appendix-title-main">The Canonical SIV Statement</h2>
+      <div class="glass-card">
+        <div class="chapter-text">
+          <p>SIV — Socratic Iterative Vinay — is Vinay's Amplified Understanding Framework, designed to overcome the fragility of the human mind and help perceive reality as it is.</p>
+          <p>SIV is a Socratic, iterative, multi-lens understanding framework that uses AI to examine any subjective reality through dynamically generated frames of reference, converge toward one best integrated understanding, and prepare that understanding for execution through VIP.</p>
+        </div>
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Appendix II -->
+    <section class="chapter-section" id="app2">
+      <div class="chapter-label">Appendix II</div>
+      <h2 class="appendix-title-main">The Fixed SIV Warning</h2>
+      <div class="warning-block">
+        This system is designed only for those willing to think honestly, examine their own assumptions critically, and confront their biases and blind spots. If you are unwilling to do that, exit now.
+      </div>
+      <div class="chapter-divider"></div>
+    </section>
+
+    <!-- Appendix III -->
+    <section class="chapter-section" id="app3">
+      <div class="chapter-label">Appendix III</div>
+      <h2 class="appendix-title-main">Compact Doctrine</h2>
+      <div class="glass-card">
+        <ol class="doctrine-list">
+          <li>Frame the issue in two sentences and get approval.</li>
+          <li>Generate lenses fresh from the issue.</li>
+          <li>Give each lens a formal, self-explanatory name.</li>
+          <li>Explore lenses one by one.</li>
+          <li>Challenge every assumption rigorously.</li>
+          <li>Prefer surprising lenses often enough to disrupt complacency.</li>
+          <li>Weigh lenses qualitatively first and numerically only when useful.</li>
+          <li>Converge toward one best integrated understanding.</li>
+          <li>End with confidence, uncertainty, and readiness for VIP.</li>
+          <li>Never mistake inquiry for execution.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ============ GLOSSARY ============ -->
+    <section class="ref-section" id="glossary">
+      <div class="ref-section-header">
+        <div class="ref-section-label">Glossary</div>
+        <h2 class="ref-section-title">Glossary of Terms</h2>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Amplified Understanding</div>
+          <div class="glossary-def">The core purpose of SIV. The use of AI and structured multi-lens inquiry to extend human perception beyond its ordinary cognitive limits, producing a stronger approximation of reality than unassisted thinking can achieve.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="preface">Preface</a><a class="glossary-ref" data-target="ch3">Ch 3</a><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch11">Ch 11</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Cognitive Surface</div>
+          <div class="glossary-def">The total number of angles, frames, and interpretive dimensions held simultaneously during inquiry. SIV uses AI to increase cognitive surface beyond what the unassisted human mind can sustain.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch3">Ch 3</a><a class="glossary-ref" data-target="ch4">Ch 4</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Compact Doctrine</div>
+          <div class="glossary-def">The ten-rule distillation of the entire SIV method into its minimal operational form. Listed in Appendix III as the quickest reference for practitioners.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="app3">Appendix III</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Confidence Statement</div>
+          <div class="glossary-def">A formal declaration at the end of a SIV inquiry naming what has become reasonably clear. Paired with the Uncertainty Statement to keep convergence honest.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch9">Ch 9</a><a class="glossary-ref" data-target="ch10">Ch 10</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Convergence</div>
+          <div class="glossary-def">The process of drawing from multiple Vinay Lenses to construct one best integrated understanding. Not a summary or average of perspectives, but a structured reassembly of the issue shaped by what survived scrutiny.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch9">Ch 9</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Crime Against Reality</div>
+          <div class="glossary-def">The reduction of a complex, multi-causal reality into something prematurely manageable through single-frame interpretation. The foundational error that SIV is designed to prevent.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch1">Ch 1</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Explanatory Burden</div>
+          <div class="glossary-def">The share of relevant reality that a given lens illuminates when applied to an issue. The basis for assigning Reality Weight. A lens with high explanatory burden reveals central drivers; one with low burden reveals only peripheral factors.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch8">Ch 8</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Frame of Reference</div>
+          <div class="glossary-def">A distinct angle or perspective through which an issue can be examined. Each Vinay Lens represents a specific frame of reference generated fresh for the issue at hand.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="preface">Preface</a><a class="glossary-ref" data-target="ch1">Ch 1</a><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch5">Ch 5</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Iteration / Iterative Inquiry</div>
+          <div class="glossary-def">The progressive, lens-by-lens development of understanding. SIV does not produce understanding in one sweep; later lenses respond to what earlier ones revealed. Depth is earned, not declared.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch7">Ch 7</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Lens Depth</div>
+          <div class="glossary-def">The number of Vinay Lenses applied during an inquiry. A simple issue may need 8; a serious one 16; a high-stakes one may justify 64 or 128. The user chooses the starting depth, but SIV judges adequacy.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch7">Ch 7</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Lens Map</div>
+          <div class="glossary-def">A structured record of all lenses explored during a SIV inquiry, their findings, and their relative weights. Part of the formal handoff from SIV to VIP.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch10">Ch 10</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Premature Closure</div>
+          <div class="glossary-def">The mind's tendency to settle on the first coherent interpretation and stop looking, mistaking narrative satisfaction for contact with reality. The central cognitive habit SIV is built to interrupt.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch2">Ch 2</a><a class="glossary-ref" data-target="ch3">Ch 3</a><a class="glossary-ref" data-target="ch7">Ch 7</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Reality Weight</div>
+          <div class="glossary-def">A qualitative (and optionally numerical) judgment of how much relevant reality a given lens contains. Used to organize the final integrated understanding around lenses that carry the greatest explanatory burden.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch8">Ch 8</a><a class="glossary-ref" data-target="ch9">Ch 9</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">SIV (Socratic Iterative Vinay)</div>
+          <div class="glossary-def">Vinay's Amplified Understanding Framework. A Socratic, iterative, multi-lens method that uses AI to examine any subjective reality through dynamically generated frames of reference and converge toward one best integrated understanding.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="preface">Preface</a><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="app1">App I</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Socratic Engine</div>
+          <div class="glossary-def">The adversarial, truth-seeking pressure system within SIV. Not merely inquisitive but deliberately hostile toward distortion: it contradicts, stress-tests, and dismantles weak assumptions.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch6">Ch 6</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Uncertainty Statement</div>
+          <div class="glossary-def">A formal declaration at the end of a SIV inquiry naming what remains obscure or unresolved. Paired with the Confidence Statement to prevent false certainty.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch9">Ch 9</a><a class="glossary-ref" data-target="ch10">Ch 10</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Vinay Lens</div>
+          <div class="glossary-def">The fundamental unit of SIV. A formally named, self-explanatory, case-generated, and directional angle of inquiry. Each lens is an instrument for changing the angle from which an issue is seen, not merely a category label.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch5">Ch 5</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">VIP (Vinay's Improving Process)</div>
+          <div class="glossary-def">The execution and improvement framework that follows SIV. Where SIV asks "What is this really?", VIP asks "What do we do about it?" SIV without VIP becomes sterile; VIP without SIV becomes blind.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="preface">Preface</a><a class="glossary-ref" data-target="ch4">Ch 4</a><a class="glossary-ref" data-target="ch10">Ch 10</a></div>
+        </div>
+
+        <div class="glossary-entry">
+          <div class="glossary-term">Weighted Reality Model</div>
+          <div class="glossary-def">One of SIV's most powerful outputs. A structured picture of the issue that ranks lenses by their explanatory burden, revealing where the center of gravity likely lies. Part of the handoff to VIP.</div>
+          <div class="glossary-refs"><a class="glossary-ref" data-target="ch8">Ch 8</a><a class="glossary-ref" data-target="ch10">Ch 10</a></div>
+        </div>
+
+      </div>
+      <div class="ref-divider"></div>
+    </section>
+
+    <!-- ============ KEYWORD INDEX ============ -->
+    <section class="ref-section" id="keyword-index">
+      <div class="ref-section-header">
+        <div class="ref-section-label">Index</div>
+        <h2 class="ref-section-title">Keyword Index</h2>
+      </div>
+      <div class="index-alpha-grid">
+
+        <div class="index-letter-group">
+          <div class="index-letter">A</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Action, premature</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Preface</a><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">AI, as instrument of understanding</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch3">3</a><a class="index-ch-link" data-target="ch11">11</a></span></div>
+            <div class="index-entry"><span class="index-keyword">AI, cognitive surface</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch3">3</a><a class="index-ch-link" data-target="ch4">4</a></span></div>
+            <div class="index-entry"><span class="index-keyword">AI, governed badly vs. well</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch3">3</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Amplified understanding</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch3">3</a><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch11">11</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Assumptions, dismantling</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="app2">App II</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">B</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Bias and blind spots</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="app2">App II</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Binary distinctions</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">C</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Case-generated lenses</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Civilizations, clarity and decline</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch11">11</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Closure, premature</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch3">3</a><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Coherence vs. truth</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Compact Doctrine</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="app3">App III</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Confidence statement</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch9">9</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Contradiction, role of</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Convergence</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch8">8</a><a class="index-ch-link" data-target="ch9">9</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Crime against reality</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch1">1</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">D</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Depth, lens</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Directional lenses</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Disciplined incompleteness</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Distortion, hostility toward</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">E</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Emotional fatigue</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch3">3</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Execution, premature</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Execution vs. understanding</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Explanatory burden</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch8">8</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">F</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Failure, hidden vs. public</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch1">1</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Falsification pressure</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Formal lens property</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Fragility, cognitive</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch11">11</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Frames of reference, multiple</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch3">3</a><a class="index-ch-link" data-target="ch5">5</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">H</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Handoff, SIV to VIP</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Human mind, limitations of</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch3">3</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">I</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Identity, attachment to interpretation</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Incentives, hidden</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Inquiry vs. performance</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Intelligence, as sharpener of error</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Iteration</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch7">7</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">L</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Lens, atom of SIV</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Lens depth (8 / 16 / 64 / 128)</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Lens map</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Lens properties (four)</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Lenses, generated fresh</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch5">5</a><a class="index-ch-link" data-target="app3">App III</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">M</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Mind, self-protection of</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Misunderstanding, as root of failure</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Multi-causal reality</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch1">1</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">N</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Narrative, self-serving</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch2">2</a><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="ch8">8</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">P</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Partial truth as destructive</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch1">1</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Power structure</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Precision, fake</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch8">8</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Premature sufficiency</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch7">7</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Pressure, Socratic</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="app2">App II</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">R</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Rationalization</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Reality weight</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch8">8</a><a class="index-ch-link" data-target="ch9">9</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Relativism, SIV is not</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch1">1</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">S</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Self-explanatory lens property</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Single-frame thinking</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch1">1</a><a class="index-ch-link" data-target="ch11">11</a></span></div>
+            <div class="index-entry"><span class="index-keyword">SIV, canonical statement</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="app1">App I</a></span></div>
+            <div class="index-entry"><span class="index-keyword">SIV, definition</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="app1">App I</a></span></div>
+            <div class="index-entry"><span class="index-keyword">SIV, warning</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch6">6</a><a class="index-ch-link" data-target="app2">App II</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Socratic, meaning of in SIV</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Stress-testing</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch6">6</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Structural limitation, human</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch2">2</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Synthesis vs. summary</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch9">9</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">U</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Uncertainty statement</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch9">9</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Understanding, as discipline</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch4">4</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">V</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Vinay Lens</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">Vinay Lens, four properties</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch5">5</a></span></div>
+            <div class="index-entry"><span class="index-keyword">VIP (Vinay's Improving Process)</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="preface">Pref</a><a class="index-ch-link" data-target="ch4">4</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+          </div>
+        </div>
+
+        <div class="index-letter-group">
+          <div class="index-letter">W</div>
+          <div class="index-entries">
+            <div class="index-entry"><span class="index-keyword">Weighted reality model</span><span class="index-dots"></span><span class="index-ch-links"><a class="index-ch-link" data-target="ch8">8</a><a class="index-ch-link" data-target="ch10">10</a></span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-title">The SIV Method</div>
+  <div class="footer-sub">A Brutal Framework for Understanding Reality Before Execution &mdash; Vinay Pasricha</div>
+  <div class="footer-line"></div>
+</footer>
+
+<script>
+(function() {
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebarToggle');
+  const overlay = document.getElementById('sidebarOverlay');
+  const progressBar = document.getElementById('progressBar');
+  const backToTop = document.getElementById('backToTop');
+  const beginReading = document.getElementById('beginReading');
+  const hero = document.getElementById('hero');
+  const sections = document.querySelectorAll('.chapter-section');
+  const tocItems = document.querySelectorAll('.toc-item');
+  let sidebarOpen = false;
+
+  // Hero particles
+  const pc = document.getElementById('heroParticles');
+  for (let i = 0; i < 35; i++) {
+    const p = document.createElement('div');
+    p.className = 'hero-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (8 + Math.random() * 14) + 's';
+    p.style.animationDelay = (Math.random() * 12) + 's';
+    p.style.width = p.style.height = (1 + Math.random() * 2.5) + 'px';
+    pc.appendChild(p);
+  }
+
+  function toggleSidebar() {
+    sidebarOpen = !sidebarOpen;
+    sidebar.classList.toggle('open', sidebarOpen);
+    toggle.classList.toggle('active', sidebarOpen);
+    overlay.classList.toggle('visible', sidebarOpen);
+  }
+  toggle.addEventListener('click', toggleSidebar);
+  overlay.addEventListener('click', toggleSidebar);
+
+  function scrollToId(id) {
+    const el = document.getElementById(id);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); if (sidebarOpen) toggleSidebar(); }
+  }
+  tocItems.forEach(item => item.addEventListener('click', e => { e.preventDefault(); scrollToId(item.getAttribute('data-target')); }));
+  document.querySelectorAll('.index-card, .appendix-card').forEach(card => {
+    card.addEventListener('click', () => scrollToId(card.getAttribute('data-nav')));
+  });
+  document.querySelectorAll('.glossary-ref, .index-ch-link').forEach(link => {
+    link.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); scrollToId(link.getAttribute('data-target')); });
+  });
+  beginReading.addEventListener('click', e => { e.preventDefault(); scrollToId('dedication'); });
+
+  // Section fade-in
+  const sectionObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+  sections.forEach(s => sectionObs.observe(s));
+  document.querySelectorAll('.ref-section').forEach(s => sectionObs.observe(s));
+
+  // Index card stagger
+  let cardIndex = 0;
+  const cardObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const delay = cardIndex * 70;
+        cardIndex++;
+        setTimeout(() => e.target.classList.add('visible'), delay);
+        cardObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.05 });
+  document.querySelectorAll('.index-card, .appendix-card, #indexHeader').forEach(c => cardObs.observe(c));
+
+  // Animated viz on scroll
+  const vizObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const pf = e.target.querySelector('#pressureFill');
+        if (pf) pf.classList.add('animated');
+        if (e.target.id === 'vizDepth') e.target.querySelectorAll('.depth-bar').forEach(b => b.classList.add('animated'));
+        if (e.target.id === 'vizWeight') e.target.querySelectorAll('.weight-row').forEach(r => r.classList.add('animated'));
+        vizObs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.25 });
+  ['vizPressure', 'vizDepth', 'vizWeight'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) vizObs.observe(el);
+  });
+
+  // Scroll events
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        const sy = window.scrollY;
+        const dh = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = (dh > 0 ? (sy / dh) * 100 : 0) + '%';
+        toggle.classList.toggle('visible', sy > hero.offsetHeight - 250);
+        backToTop.classList.toggle('visible', sy > 700);
+        let current = '';
+        sections.forEach(s => { if (sy >= s.offsetTop - 180) current = s.id; });
+        tocItems.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === current));
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && sidebarOpen) toggleSidebar(); });
+})();
+</script>
+</body>
+</html>
