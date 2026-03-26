@@ -467,7 +467,7 @@
       });
       const clearing = new THREE.Mesh(new THREE.CircleGeometry(4, 24), clearingMat);
       clearing.rotation.x = -Math.PI / 2;
-      clearing.position.y = 0.11;
+      clearing.position.y = 0.06;
       clearing.renderOrder = 1;
       this.scene.add(clearing);
       this.centerClearing = clearingMat;
