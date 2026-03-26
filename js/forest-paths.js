@@ -58,6 +58,7 @@
       this.setupRenderer();
       this.setupCamera();
       this.setupScene();
+      this.setupPostProcessing();
       this.createTerrain();
       this.buildBranchingPaths(BRANCH_TREE, null);
       this.plantInstancedForest();
@@ -112,6 +113,35 @@
       const fill = new THREE.DirectionalLight(0xaaccaa, 0.5);
       fill.position.set(15, 30, -15);
       this.scene.add(fill);
+    }
+
+    setupPostProcessing() {
+      if (!THREE.EffectComposer) return;
+
+      this.composer = new THREE.EffectComposer(this.renderer);
+
+      /* 1. Render the scene */
+      this.composer.addPass(new THREE.RenderPass(this.scene, this.camera));
+
+      /* 2. Bloom — soft glow on bright areas (fireflies, torches, emissive paths) */
+      const bloomPass = new THREE.UnrealBloomPass(
+        new THREE.Vector2(window.innerWidth, window.innerHeight),
+        0.6,    /* strength — subtle, not overwhelming */
+        0.4,    /* radius — how far bloom spreads */
+        0.85    /* threshold — only bright things glow */
+      );
+      this.composer.addPass(bloomPass);
+      this.bloomPass = bloomPass;
+
+      /* 3. Vignette + color grading — cinematic look */
+      const colorPass = new THREE.ShaderPass(THREE.VignetteColorShader);
+      colorPass.uniforms.vignetteStrength.value = 0.45;
+      colorPass.uniforms.vignetteRadius.value = 0.7;
+      colorPass.uniforms.saturation.value = 1.2;
+      colorPass.uniforms.contrast.value = 1.1;
+      colorPass.uniforms.brightness.value = 1.0;
+      colorPass.uniforms.warmth.value = 0.025;
+      this.composer.addPass(colorPass);
     }
 
     createTerrain() {
@@ -296,7 +326,7 @@
 
         const flame = new THREE.Mesh(
           new THREE.SphereGeometry(0.08, 6, 6),
-          new THREE.MeshBasicMaterial({ color: 0xffcc40, transparent: true, opacity: 0.9 })
+          new THREE.MeshBasicMaterial({ color: 0xffdd60, transparent: true, opacity: 1.0 })
         );
         flame.position.set(tx, 2.1, tz);
         this.scene.add(flame);
@@ -838,6 +868,10 @@
         this.camera.aspect = window.innerWidth / window.innerHeight;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
+        if (this.composer) {
+          const pr = this.renderer.getPixelRatio();
+          this.composer.setSize(window.innerWidth * pr, window.innerHeight * pr);
+        }
       });
     }
 
@@ -1065,7 +1099,11 @@
 
       /* (markers are static signposts now) */
 
-      this.renderer.render(this.scene, this.camera);
+      if (this.composer) {
+        this.composer.render();
+      } else {
+        this.renderer.render(this.scene, this.camera);
+      }
     }
   }
 
