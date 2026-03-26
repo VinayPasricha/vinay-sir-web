@@ -85,7 +85,7 @@
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       this.renderer.shadowMap.enabled = false;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.toneMappingExposure = 1.3;
+      this.renderer.toneMappingExposure = 1.8;
       this.renderer.outputColorSpace = THREE.SRGBColorSpace;
       this.container.appendChild(this.renderer.domElement);
     }
@@ -99,20 +99,25 @@
 
     setupScene() {
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0x060e06);
-      this.fog = new THREE.FogExp2(0x0a1a0d, 0.005);
+      this.scene.background = new THREE.Color(0x0c1a0c);
+      this.fog = new THREE.FogExp2(0x0f1f0f, 0.004);
       this.scene.fog = this.fog;
 
-      this.scene.add(new THREE.HemisphereLight(0x87CEEB, 0x2a4a1a, 0.5));
-      this.scene.add(new THREE.AmbientLight(0x1a3a1a, 0.4));
+      /* Much brighter lighting — forest in daylight, not midnight */
+      this.scene.add(new THREE.HemisphereLight(0xb0d8f0, 0x4a7a3a, 1.0));
+      this.scene.add(new THREE.AmbientLight(0x3a5a2a, 0.8));
 
-      this.sun = new THREE.DirectionalLight(0xfff4d0, 2.0);
+      this.sun = new THREE.DirectionalLight(0xfff8e0, 2.5);
       this.sun.position.set(-15, 50, 15);
       this.scene.add(this.sun);
 
-      const fill = new THREE.DirectionalLight(0xaaccaa, 0.5);
+      const fill = new THREE.DirectionalLight(0xc0e0c0, 0.8);
       fill.position.set(15, 30, -15);
       this.scene.add(fill);
+
+      const backFill = new THREE.DirectionalLight(0xffe8c0, 0.4);
+      backFill.position.set(0, 20, -40);
+      this.scene.add(backFill);
     }
 
     setupPostProcessing() {
@@ -133,14 +138,14 @@
       this.composer.addPass(bloomPass);
       this.bloomPass = bloomPass;
 
-      /* 3. Vignette + color grading — cinematic look */
+      /* 3. Vignette + color grading — subtle cinematic look */
       const colorPass = new THREE.ShaderPass(THREE.VignetteColorShader);
-      colorPass.uniforms.vignetteStrength.value = 0.45;
-      colorPass.uniforms.vignetteRadius.value = 0.7;
-      colorPass.uniforms.saturation.value = 1.2;
-      colorPass.uniforms.contrast.value = 1.1;
-      colorPass.uniforms.brightness.value = 1.0;
-      colorPass.uniforms.warmth.value = 0.025;
+      colorPass.uniforms.vignetteStrength.value = 0.25;
+      colorPass.uniforms.vignetteRadius.value = 0.85;
+      colorPass.uniforms.saturation.value = 1.15;
+      colorPass.uniforms.contrast.value = 1.05;
+      colorPass.uniforms.brightness.value = 1.05;
+      colorPass.uniforms.warmth.value = 0.01;
       this.composer.addPass(colorPass);
     }
 
@@ -148,7 +153,7 @@
       const c = document.createElement('canvas');
       c.width = 512; c.height = 512;
       const ctx = c.getContext('2d');
-      ctx.fillStyle = '#141e10';
+      ctx.fillStyle = '#1e2e18';
       ctx.fillRect(0, 0, 512, 512);
       for (let pass = 0; pass < 2; pass++) {
         for (let i = 0; i < [2000, 1000][pass]; i++) {
@@ -173,7 +178,7 @@
       geo.computeVertexNormals();
 
       const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-        color: 0x1a3a14, map: tex, roughness: 0.93, metalness: 0
+        color: 0x2a5a24, map: tex, roughness: 0.9, metalness: 0
       }));
       ground.rotation.x = -Math.PI / 2;
       this.scene.add(ground);
@@ -239,9 +244,9 @@
         const dctx = dc.getContext('2d');
         /* Warm dirt base */
         const baseGrad = dctx.createLinearGradient(0, 0, 256, 256);
-        baseGrad.addColorStop(0, '#7a6040');
-        baseGrad.addColorStop(0.5, '#6a5030');
-        baseGrad.addColorStop(1, '#5a4528');
+        baseGrad.addColorStop(0, '#a08860');
+        baseGrad.addColorStop(0.5, '#8a7550');
+        baseGrad.addColorStop(1, '#7a6845');
         dctx.fillStyle = baseGrad;
         dctx.fillRect(0, 0, 256, 256);
         /* Lighter noise — fewer circles for fast init */
@@ -294,7 +299,7 @@
       geo.computeVertexNormals();
 
       const mat = new THREE.MeshStandardMaterial({
-        map: this._dirtTex, color: 0xb08a5a, roughness: 0.82, metalness: 0.02
+        map: this._dirtTex, color: 0xc8a870, roughness: 0.85, metalness: 0
       });
       mat.emissive = new THREE.Color(0xffe880);
       mat.emissiveIntensity = 0;
@@ -375,7 +380,7 @@
       const cone3 = new THREE.ConeGeometry(0.5, 1.2, 5);
       const crownGeo = new THREE.IcosahedronGeometry(0.85, 0);
 
-      const greens = [0x1a5218, 0x226420, 0x164612, 0x2a6e26, 0x1e5a1e, 0x306830].map(c => new THREE.Color(c));
+      const greens = [0x2a7228, 0x328430, 0x266622, 0x3a8e36, 0x2e7a2e, 0x408840].map(c => new THREE.Color(c));
 
       const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, count);
       /* shadows disabled for performance */
@@ -428,7 +433,7 @@
       if (!this._dirtTex) this.createTrailGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,0,1), new THREE.Vector3(0,0,0)]), 0.1); // ensure texture exists
       const clearingMat = new THREE.MeshStandardMaterial({
         map: this._dirtTex,
-        color: 0x9a7a50,
+        color: 0xc8a870,
         roughness: 0.88,
         metalness: 0,
         emissive: new THREE.Color(0xffe880),
