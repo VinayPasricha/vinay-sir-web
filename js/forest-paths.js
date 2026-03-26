@@ -99,11 +99,37 @@
 
     setupScene() {
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0x0c1a0c);
-      this.fog = new THREE.FogExp2(0x0f1f0f, 0.004);
+      this.fog = new THREE.FogExp2(0x1a3020, 0.004);
       this.scene.fog = this.fog;
 
-      /* Much brighter lighting — forest in daylight, not midnight */
+      /* ── Sky dome — gradient canvas on inverted sphere ── */
+      const skyCanvas = document.createElement('canvas');
+      skyCanvas.width = 2; skyCanvas.height = 512;
+      const sctx = skyCanvas.getContext('2d');
+      const skyGrad = sctx.createLinearGradient(0, 0, 0, 512);
+      /* Deep blue-purple zenith → blue → soft teal → warm golden horizon */
+      skyGrad.addColorStop(0, '#0a0e1a');
+      skyGrad.addColorStop(0.15, '#101830');
+      skyGrad.addColorStop(0.35, '#1a2a48');
+      skyGrad.addColorStop(0.55, '#2a4060');
+      skyGrad.addColorStop(0.72, '#3a5a60');
+      skyGrad.addColorStop(0.85, '#5a7a60');
+      skyGrad.addColorStop(0.92, '#8a9060');
+      skyGrad.addColorStop(0.97, '#c0a060');
+      skyGrad.addColorStop(1.0, '#e8b860');
+      sctx.fillStyle = skyGrad;
+      sctx.fillRect(0, 0, 2, 512);
+      const skyTex = new THREE.CanvasTexture(skyCanvas);
+      skyTex.magFilter = THREE.LinearFilter;
+      const skyGeo = new THREE.SphereGeometry(90, 16, 16);
+      const skyMat = new THREE.MeshBasicMaterial({
+        map: skyTex, side: THREE.BackSide, fog: false,
+      });
+      const sky = new THREE.Mesh(skyGeo, skyMat);
+      this.scene.add(sky);
+      this.sky = sky;
+
+      /* Brighter lighting to match the sky */
       this.scene.add(new THREE.HemisphereLight(0xb0d8f0, 0x4a7a3a, 1.0));
       this.scene.add(new THREE.AmbientLight(0x3a5a2a, 0.8));
 
@@ -1102,7 +1128,10 @@
         this.fireflies.geometry.attributes.position.needsUpdate = true;
       }
 
-      /* (markers are static signposts now) */
+      /* Sky dome follows camera */
+      if (this.sky) {
+        this.sky.position.copy(this.camera.position);
+      }
 
       if (this.composer) {
         this.composer.render();
