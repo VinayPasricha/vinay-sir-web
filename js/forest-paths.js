@@ -21,29 +21,29 @@
   const BRANCH_TREE = {
     start: [0, 0, 38],     // entrance
     end: [0, 0, 0],        // center clearing
-    width: 2.2,            // wide main trail
+    width: 2.8,            // wide main trail
     edgeId: 'trunk',
     children: [
       /* FAR LEFT */
-      { end: [-28, 0, 5], width: 1.0, pathIndex: 1 },      // The Builder
+      { end: [-28, 0, 5], width: 1.4, pathIndex: 1 },      // The Builder
 
       /* LEFT */
-      { end: [-25, 0, -12], width: 1.0, pathIndex: 2 },    // The Thinker
+      { end: [-25, 0, -12], width: 1.4, pathIndex: 2 },    // The Thinker
 
       /* CENTER-LEFT */
-      { end: [-12, 0, -28], width: 1.0, pathIndex: 3 },    // The Technologist
+      { end: [-12, 0, -28], width: 1.4, pathIndex: 3 },    // The Technologist
 
       /* CENTER — straight ahead */
-      { end: [0, 0, -30], width: 1.1, pathIndex: 4 },      // The Future
+      { end: [0, 0, -30], width: 1.5, pathIndex: 4 },      // The Future
 
       /* CENTER-RIGHT */
-      { end: [12, 0, -28], width: 1.0, pathIndex: 5 },     // The Writer
+      { end: [12, 0, -28], width: 1.4, pathIndex: 5 },     // The Writer
 
       /* RIGHT */
-      { end: [25, 0, -12], width: 1.0, pathIndex: 6 },     // The Social Being
+      { end: [25, 0, -12], width: 1.4, pathIndex: 6 },     // The Social Being
 
       /* FAR RIGHT */
-      { end: [28, 0, 5], width: 1.0, pathIndex: 0 },       // The Human
+      { end: [28, 0, 5], width: 1.4, pathIndex: 0 },       // The Human
     ]
   };
 
@@ -224,35 +224,66 @@
     createTrailGeometry(curve, width, pathIndex) {
       if (!this._dirtTex) {
         const dc = document.createElement('canvas');
-        dc.width = 256; dc.height = 256;
+        dc.width = 512; dc.height = 512;
         const dctx = dc.getContext('2d');
-        dctx.fillStyle = '#6a5030';
-        dctx.fillRect(0, 0, 256, 256);
-        for (let i = 0; i < 3000; i++) {
-          const v = Math.random();
-          dctx.fillStyle = v > 0.7
-            ? `rgba(${80 + Math.random() * 40},${55 + Math.random() * 30},${30 + Math.random() * 20},${0.4 + Math.random() * 0.3})`
-            : `rgba(${50 + Math.random() * 30},${35 + Math.random() * 25},${18 + Math.random() * 12},${0.15 + Math.random() * 0.2})`;
-          dctx.beginPath();
-          dctx.arc(Math.random() * 256, Math.random() * 256, 0.5 + Math.random() * 2.5, 0, Math.PI * 2);
-          dctx.fill();
+        /* Rich warm dirt base */
+        const baseGrad = dctx.createLinearGradient(0, 0, 512, 512);
+        baseGrad.addColorStop(0, '#7a6040');
+        baseGrad.addColorStop(0.5, '#6a5030');
+        baseGrad.addColorStop(1, '#5a4528');
+        dctx.fillStyle = baseGrad;
+        dctx.fillRect(0, 0, 512, 512);
+        /* Layered noise for realistic dirt */
+        for (let pass = 0; pass < 4; pass++) {
+          const counts = [4000, 3000, 2000, 1500];
+          const sizes = [1.5, 3, 5, 1];
+          const alphas = [0.35, 0.2, 0.12, 0.4];
+          for (let i = 0; i < counts[pass]; i++) {
+            const v = Math.random();
+            if (pass < 3) {
+              const g = 25 + pass * 12 + Math.random() * 35;
+              dctx.fillStyle = v > 0.6
+                ? `rgba(${85 + Math.random() * 45},${60 + Math.random() * 35},${35 + Math.random() * 25},${alphas[pass]})`
+                : `rgba(${55 + Math.random() * 35},${40 + Math.random() * 30},${22 + Math.random() * 15},${alphas[pass] * 0.7})`;
+            } else {
+              /* Tiny pebble highlights */
+              dctx.fillStyle = `rgba(${140 + Math.random() * 60},${120 + Math.random() * 50},${90 + Math.random() * 40},${0.15 + Math.random() * 0.15})`;
+            }
+            dctx.beginPath();
+            dctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * sizes[pass] + 0.3, 0, Math.PI * 2);
+            dctx.fill();
+          }
         }
+        /* Worn track lines down the center */
+        dctx.globalAlpha = 0.06;
+        for (let i = 0; i < 20; i++) {
+          dctx.strokeStyle = `rgba(90,70,45,${0.1 + Math.random() * 0.1})`;
+          dctx.lineWidth = 1 + Math.random() * 3;
+          dctx.beginPath();
+          dctx.moveTo(200 + Math.random() * 112, 0);
+          dctx.lineTo(200 + Math.random() * 112, 512);
+          dctx.stroke();
+        }
+        dctx.globalAlpha = 1;
         this._dirtTex = new THREE.CanvasTexture(dc);
         this._dirtTex.wrapS = this._dirtTex.wrapT = THREE.RepeatWrapping;
       }
 
-      const pts = curve.getPoints(80);
+      /* More sample points for smoother curves */
+      const pts = curve.getPoints(120);
       const verts = [], uvs = [], idx = [];
 
+      /* Main path strip — wider, smoother taper */
       for (let p = 0; p < pts.length; p++) {
         const pt = pts[p], t = p / (pts.length - 1);
-        const taper = Math.sin(t * Math.PI) * 0.3 + 0.7;
-        const w = width * taper * (1 + Math.sin(t * 15 + (pathIndex || 0) * 3) * 0.08);
+        /* Gentler taper — stays wide in the middle */
+        const taper = Math.sin(t * Math.PI) * 0.15 + 0.85;
+        const w = width * taper;
         const tangent = curve.getTangent(Math.min(t, 0.999));
         const pr = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-        const y = 0.12;
+        const y = 0.08;
         verts.push(pt.x + pr.x * w, y, pt.z + pr.z * w, pt.x - pr.x * w, y, pt.z - pr.z * w);
-        uvs.push(0, t * 6, 1, t * 6);
+        uvs.push(0, t * 4, 1, t * 4);
       }
       for (let p = 0; p < pts.length - 1; p++) {
         const a = p * 2, b = p * 2 + 1, c = (p + 1) * 2, d = (p + 1) * 2 + 1;
@@ -266,42 +297,84 @@
       geo.computeVertexNormals();
 
       const mat = new THREE.MeshStandardMaterial({
-        map: this._dirtTex, color: 0x9a7a50, roughness: 0.88, metalness: 0
+        map: this._dirtTex, color: 0xb08a5a, roughness: 0.82, metalness: 0.02
       });
-
-      /* Set emissive so we can glow it later */
       mat.emissive = new THREE.Color(0xffe880);
       mat.emissiveIntensity = 0;
 
       const trail = new THREE.Mesh(geo, mat);
-      trail.receiveShadow = false; /* No tree shadows on paths */
+      trail.receiveShadow = false;
       trail.renderOrder = 1;
       this.scene.add(trail);
 
       this.pathSegments.push({ trail, mat, curve, pathIndex });
 
-      /* Single torch at path midpoint for direction */
+      /* Stone edge borders along each side of the path */
       if (pathIndex !== undefined) {
-        const torchPts = curve.getPoints(80);
-        const mid = torchPts[Math.floor(torchPts.length * 0.5)];
-        const tangent = curve.getTangent(0.5);
-        const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-        const tx = mid.x + perp.x * (width + 0.4);
-        const tz = mid.z + perp.z * (width + 0.4);
+        if (!this._stoneMat) {
+          this._stoneMat = new THREE.MeshStandardMaterial({ color: 0x8a8278, roughness: 0.95, metalness: 0 });
+        }
+        if (!this._stoneGeo) {
+          this._stoneGeo = new THREE.SphereGeometry(0.12, 4, 3);
+        }
+        /* Place stones along edges — every 8th point for performance */
+        for (let p = 4; p < pts.length - 4; p += 8) {
+          const pt = pts[p], t = p / (pts.length - 1);
+          const taper = Math.sin(t * Math.PI) * 0.15 + 0.85;
+          const w = width * taper;
+          const tangent = curve.getTangent(Math.min(t, 0.999));
+          const pr = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+          for (const side of [-1, 1]) {
+            const sx = pt.x + pr.x * w * side * 1.05;
+            const sz = pt.z + pr.z * w * side * 1.05;
+            const stone = new THREE.Mesh(this._stoneGeo, this._stoneMat);
+            stone.position.set(sx, 0.04, sz);
+            stone.scale.set(0.6 + Math.random() * 0.8, 0.3 + Math.random() * 0.3, 0.6 + Math.random() * 0.8);
+            stone.rotation.y = Math.random() * Math.PI;
+            this.scene.add(stone);
+          }
+        }
+      }
 
-        const pole = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.03, 0.05, 1.5, 4),
-          new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 })
-        );
-        pole.position.set(tx, 0.75, tz);
-        this.scene.add(pole);
+      /* Lantern torches at 33% and 66% along each branch path */
+      if (pathIndex !== undefined) {
+        if (!this._torchPoleMat) {
+          this._torchPoleMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
+        }
+        if (!this._torchPoleGeo) {
+          this._torchPoleGeo = new THREE.CylinderGeometry(0.04, 0.07, 2.0, 5);
+        }
+        for (const frac of [0.35, 0.65]) {
+          const mid = curve.getPointAt(frac);
+          const tangent = curve.getTangent(frac);
+          const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+          const tx = mid.x + perp.x * (width + 0.6);
+          const tz = mid.z + perp.z * (width + 0.6);
 
-        const flame = new THREE.Mesh(
-          new THREE.SphereGeometry(0.08, 6, 6),
-          new THREE.MeshBasicMaterial({ color: 0xffaa30, transparent: true, opacity: 0.8 })
-        );
-        flame.position.set(tx, 1.6, tz);
-        this.scene.add(flame);
+          const pole = new THREE.Mesh(this._torchPoleGeo, this._torchPoleMat);
+          pole.position.set(tx, 1.0, tz);
+          this.scene.add(pole);
+
+          /* Lantern top */
+          const lantern = new THREE.Mesh(
+            new THREE.BoxGeometry(0.18, 0.22, 0.18),
+            new THREE.MeshStandardMaterial({ color: 0x2a1a08, roughness: 0.7, metalness: 0.3 })
+          );
+          lantern.position.set(tx, 2.1, tz);
+          this.scene.add(lantern);
+
+          const flame = new THREE.Mesh(
+            new THREE.SphereGeometry(0.06, 6, 6),
+            new THREE.MeshBasicMaterial({ color: 0xffcc40, transparent: true, opacity: 0.9 })
+          );
+          flame.position.set(tx, 2.1, tz);
+          this.scene.add(flame);
+
+          /* Warm point light at each torch */
+          const torchLight = new THREE.PointLight(0xffaa40, 0.8, 8, 2);
+          torchLight.position.set(tx, 2.2, tz);
+          this.scene.add(torchLight);
+        }
       }
     }
 
@@ -324,7 +397,7 @@
 
       const positions = [];
       let tries = 0;
-      while (positions.length < 600 && tries < 4000) {
+      while (positions.length < 400 && tries < 3000) {
         tries++;
         const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
         if (x * x + z * z < 36) continue;  // big center clearing (radius 6)
@@ -420,7 +493,7 @@
     }
 
     createFireflies() {
-      const count = 50;
+      const count = 30;
       const positions = new Float32Array(count * 3);
       this.fireflyData = [];
       for (let i = 0; i < count; i++) {
@@ -558,27 +631,112 @@
       }
     }
 
-    /* ── PATH MARKERS — Simple signposts, no orbs ── */
+    /* ── PATH MARKERS — Wooden signposts with readable text + floating name sprites ── */
     createPathMarkers() {
       this.markers = [];
       const postMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
-      const signMat = new THREE.MeshStandardMaterial({ color: 0x5a4020, roughness: 0.85 });
 
       PATH_DATA.forEach((path, i) => {
         const ep = this.pathEndpoints[i];
         if (!ep) return;
 
-        /* Wooden signpost at endpoint */
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 2.2, 5), postMat);
-        pole.position.set(ep.x, 1.1, ep.z);
+        /* Tall wooden signpost */
+        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 2.8, 6), postMat);
+        pole.position.set(ep.x, 1.4, ep.z);
         this.scene.add(pole);
 
-        const plank = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.3, 0.05), signMat);
-        plank.position.set(ep.x, 2.0, ep.z);
-        plank.lookAt(0, 2.0, 0);
+        /* Wooden plank with text rendered on canvas */
+        const signCanvas = document.createElement('canvas');
+        signCanvas.width = 512; signCanvas.height = 128;
+        const sctx = signCanvas.getContext('2d');
+        /* Wood plank background */
+        sctx.fillStyle = '#5a4020';
+        sctx.fillRect(0, 0, 512, 128);
+        /* Wood grain */
+        sctx.globalAlpha = 0.15;
+        for (let g = 0; g < 30; g++) {
+          sctx.strokeStyle = g % 2 === 0 ? '#3a2510' : '#6a5535';
+          sctx.lineWidth = 1 + Math.random() * 2;
+          sctx.beginPath();
+          sctx.moveTo(0, Math.random() * 128);
+          sctx.lineTo(512, Math.random() * 128);
+          sctx.stroke();
+        }
+        sctx.globalAlpha = 1;
+        /* Border */
+        sctx.strokeStyle = '#3a2510';
+        sctx.lineWidth = 6;
+        sctx.strokeRect(3, 3, 506, 122);
+        /* Path name text */
+        sctx.fillStyle = '#f2ece0';
+        sctx.font = 'bold 42px Georgia, serif';
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.shadowColor = 'rgba(0,0,0,0.6)';
+        sctx.shadowBlur = 4;
+        sctx.fillText(path.name, 256, 50);
+        /* Subtitle */
+        sctx.font = '24px Georgia, serif';
+        sctx.fillStyle = '#d4c8a8';
+        sctx.shadowBlur = 2;
+        sctx.fillText(path.sub, 256, 95);
+
+        const signTex = new THREE.CanvasTexture(signCanvas);
+        const signMat = new THREE.MeshStandardMaterial({
+          map: signTex, roughness: 0.8, metalness: 0.05,
+        });
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.5, 0.08), signMat);
+        plank.position.set(ep.x, 2.6, ep.z);
+        plank.lookAt(0, 2.6, 0);
         this.scene.add(plank);
 
-        this.markers.push({ pathIndex: i });
+        /* Floating name sprite visible from far away at junction */
+        const spriteCanvas = document.createElement('canvas');
+        spriteCanvas.width = 512; spriteCanvas.height = 160;
+        const spctx = spriteCanvas.getContext('2d');
+        /* Transparent dark pill background */
+        spctx.fillStyle = 'rgba(10,20,10,0.75)';
+        const rx = 20;
+        spctx.beginPath();
+        spctx.moveTo(rx, 0); spctx.lineTo(512 - rx, 0);
+        spctx.quadraticCurveTo(512, 0, 512, rx);
+        spctx.lineTo(512, 160 - rx);
+        spctx.quadraticCurveTo(512, 160, 512 - rx, 160);
+        spctx.lineTo(rx, 160);
+        spctx.quadraticCurveTo(0, 160, 0, 160 - rx);
+        spctx.lineTo(0, rx);
+        spctx.quadraticCurveTo(0, 0, rx, 0);
+        spctx.fill();
+        /* Border glow */
+        spctx.strokeStyle = 'rgba(255,232,128,0.5)';
+        spctx.lineWidth = 3;
+        spctx.stroke();
+        /* Roman numeral */
+        spctx.fillStyle = '#ffe880';
+        spctx.font = 'bold 36px Georgia, serif';
+        spctx.textAlign = 'center';
+        spctx.textBaseline = 'middle';
+        spctx.fillText(path.num, 256, 42);
+        /* Name */
+        spctx.fillStyle = '#f2ece0';
+        spctx.font = 'bold 40px Georgia, serif';
+        spctx.fillText(path.name, 256, 90);
+        /* Subtitle */
+        spctx.fillStyle = '#c0b898';
+        spctx.font = '26px Georgia, serif';
+        spctx.fillText(path.sub, 256, 132);
+
+        const spriteTex = new THREE.CanvasTexture(spriteCanvas);
+        const spriteMat = new THREE.SpriteMaterial({
+          map: spriteTex, transparent: true, depthTest: true, sizeAttenuation: true,
+        });
+        const sprite = new THREE.Sprite(spriteMat);
+        /* Position above the endpoint, facing camera always */
+        sprite.position.set(ep.x, 4.5, ep.z);
+        sprite.scale.set(5, 1.6, 1);
+        this.scene.add(sprite);
+
+        this.markers.push({ pathIndex: i, sprite, plank });
       });
     }
 
@@ -659,17 +817,27 @@
         if (hits.length > 0) {
           const seg = this.pathSegments.find(s => s.trail === hits[0].object);
           if (seg && seg.pathIndex !== undefined) {
-            seg._hoverTarget = 0.25;
+            seg._hoverTarget = 0.4;
             this.renderer.domElement.style.cursor = 'pointer';
             const p = PATH_DATA[seg.pathIndex];
             if (infoEl) {
               infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub} — click to explore</small>`;
               infoEl.style.opacity = '1';
             }
+            /* Brighten the floating sprite for hovered path */
+            if (this.markers) {
+              this.markers.forEach(m => {
+                if (m.sprite) m.sprite.material.opacity = m.pathIndex === seg.pathIndex ? 1.0 : 0.6;
+              });
+            }
           }
         } else {
           this.renderer.domElement.style.cursor = 'default';
           if (infoEl) infoEl.style.opacity = '0';
+          /* Reset all sprites to normal */
+          if (this.markers) {
+            this.markers.forEach(m => { if (m.sprite) m.sprite.material.opacity = 0.85; });
+          }
         }
       });
 
@@ -862,7 +1030,7 @@
         this.pathSegments.forEach(seg => {
           if (seg.pathIndex !== undefined) {
             const target = seg._hoverTarget || 0;
-            seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.1;
+            seg.mat.emissiveIntensity += (target - seg.mat.emissiveIntensity) * 0.15;
           }
         });
       }
