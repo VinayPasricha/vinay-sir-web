@@ -64,7 +64,6 @@
       this.plantInstancedForest();
       this.createCenterGlow();
       this.createFireflies();
-      this.createCanopy();
       this.createHUD();
       this.createPathMarkers();
       this.setupControls();
@@ -504,114 +503,6 @@
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffe880,
       }));
       this.scene.add(this.fireflies);
-    }
-
-    /* ── CANOPY — Overhead leaf layer with dappled light gaps ── */
-    createCanopy() {
-      const size = 1024;
-      const c = document.createElement('canvas');
-      c.width = size; c.height = size;
-      const ctx = c.getContext('2d');
-
-      /* Start fully transparent */
-      ctx.clearRect(0, 0, size, size);
-
-      /* Paint dense leaf clusters — overlapping circles of varying greens */
-      for (let i = 0; i < 800; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const r = 15 + Math.random() * 50;
-        const g = 25 + Math.floor(Math.random() * 50);
-        const alpha = 0.5 + Math.random() * 0.45;
-        ctx.fillStyle = `rgba(${8 + Math.random() * 20},${g + 20},${5 + Math.random() * 12},${alpha})`;
-        ctx.beginPath();
-
-        /* Organic leaf-cluster shapes — irregular blobs, not perfect circles */
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.random() * Math.PI * 2);
-        ctx.scale(1, 0.6 + Math.random() * 0.8);
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.restore();
-        ctx.fill();
-      }
-
-      /* Add smaller detail leaves for texture */
-      for (let i = 0; i < 1500; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const r = 3 + Math.random() * 12;
-        const g = 30 + Math.floor(Math.random() * 60);
-        ctx.fillStyle = `rgba(${10 + Math.random() * 25},${g + 15},${5 + Math.random() * 10},${0.4 + Math.random() * 0.5})`;
-        ctx.beginPath();
-        /* Leaf shapes — elongated ellipses */
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.random() * Math.PI * 2);
-        ctx.scale(1, 0.3 + Math.random() * 0.5);
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.restore();
-        ctx.fill();
-      }
-
-      /* Punch bright sky-light holes where sunlight comes through */
-      for (let i = 0; i < 60; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const r = 8 + Math.random() * 30;
-        /* Clear to transparent — sky shows through */
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.fillStyle = `rgba(0,0,0,${0.6 + Math.random() * 0.4})`;
-        ctx.beginPath();
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(Math.random() * Math.PI * 2);
-        ctx.scale(1, 0.5 + Math.random() * 1.0);
-        ctx.arc(0, 0, r, 0, Math.PI * 2);
-        ctx.restore();
-        ctx.fill();
-        ctx.globalCompositeOperation = 'source-over';
-      }
-
-      /* Add bright sun-streak highlights at the gap edges */
-      for (let i = 0; i < 40; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const r = 5 + Math.random() * 15;
-        ctx.fillStyle = `rgba(180,220,100,${0.08 + Math.random() * 0.12})`;
-        ctx.beginPath();
-        ctx.arc(x, y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      const canopyTex = new THREE.CanvasTexture(c);
-      canopyTex.wrapS = canopyTex.wrapT = THREE.RepeatWrapping;
-      canopyTex.repeat.set(3, 3);
-
-      /* Two canopy layers at different heights for depth */
-      const canopyMat1 = new THREE.MeshBasicMaterial({
-        map: canopyTex, transparent: true, side: THREE.DoubleSide,
-        depthWrite: false, opacity: 0.85, fog: true,
-      });
-      const canopyMat2 = new THREE.MeshBasicMaterial({
-        map: canopyTex, transparent: true, side: THREE.DoubleSide,
-        depthWrite: false, opacity: 0.6, fog: true,
-      });
-
-      /* Lower canopy — denser, closer */
-      const canopy1 = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), canopyMat1);
-      canopy1.rotation.x = Math.PI / 2;
-      canopy1.position.y = 12;
-      this.scene.add(canopy1);
-
-      /* Higher canopy — sparser, offset for parallax when looking up */
-      const canopy2 = new THREE.Mesh(new THREE.PlaneGeometry(110, 110), canopyMat2);
-      canopy2.rotation.x = Math.PI / 2;
-      canopy2.position.set(5, 18, -5);
-      canopy2.material.map.offset.set(0.3, 0.2); /* Offset so it doesn't align with layer 1 */
-      this.scene.add(canopy2);
-
-      this.canopyLayers = [canopy1, canopy2];
     }
 
     /* ── ENTRY OVERLAY — Built entirely in JS ── */
@@ -1242,13 +1133,6 @@
         this.sky.position.copy(this.camera.position);
       }
 
-      /* Gentle canopy sway — wind effect */
-      if (this.canopyLayers) {
-        this.canopyLayers[0].material.map.offset.x = Math.sin(time * 0.05) * 0.02;
-        this.canopyLayers[0].material.map.offset.y = Math.cos(time * 0.04) * 0.015;
-        this.canopyLayers[1].material.map.offset.x = 0.3 + Math.sin(time * 0.03 + 1) * 0.025;
-        this.canopyLayers[1].material.map.offset.y = 0.2 + Math.cos(time * 0.035 + 1) * 0.02;
-      }
 
       if (this.composer) {
         this.composer.render();
