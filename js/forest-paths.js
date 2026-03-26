@@ -16,34 +16,21 @@
     { name: 'The Social Being', sub: 'Society & Systems',  url: 'pages/path7.html', num: 'VII' },
   ];
 
-  /* All 7 paths radiate FORWARD from center so they're all visible
-     from the entrance. Spread evenly across ~240° arc ahead. */
+  /* 7 paths radiate from center — spread across full 360° so they feel
+     like real forest trails, not spokes on a wheel */
   const BRANCH_TREE = {
-    start: [0, 0, 38],     // entrance
+    start: [0, 0, 35],     // entrance
     end: [0, 0, 0],        // center clearing
-    width: 2.8,            // wide main trail
+    width: 1.5,            // narrower natural trail
     edgeId: 'trunk',
     children: [
-      /* FAR LEFT */
-      { end: [-28, 0, 5], width: 1.4, pathIndex: 1 },      // The Builder
-
-      /* LEFT */
-      { end: [-25, 0, -12], width: 1.4, pathIndex: 2 },    // The Thinker
-
-      /* CENTER-LEFT */
-      { end: [-12, 0, -28], width: 1.4, pathIndex: 3 },    // The Technologist
-
-      /* CENTER — straight ahead */
-      { end: [0, 0, -30], width: 1.5, pathIndex: 4 },      // The Future
-
-      /* CENTER-RIGHT */
-      { end: [12, 0, -28], width: 1.4, pathIndex: 5 },     // The Writer
-
-      /* RIGHT */
-      { end: [25, 0, -12], width: 1.4, pathIndex: 6 },     // The Social Being
-
-      /* FAR RIGHT */
-      { end: [28, 0, 5], width: 1.4, pathIndex: 0 },       // The Human
+      { end: [-22, 0, 18], width: 0.8, pathIndex: 1 },     // The Builder (back-left)
+      { end: [-26, 0, -4], width: 0.8, pathIndex: 2 },     // The Thinker (left)
+      { end: [-16, 0, -24], width: 0.8, pathIndex: 3 },    // The Technologist (front-left)
+      { end: [0, 0, -28], width: 0.85, pathIndex: 4 },     // The Future (straight ahead)
+      { end: [16, 0, -24], width: 0.8, pathIndex: 5 },     // The Writer (front-right)
+      { end: [26, 0, -4], width: 0.8, pathIndex: 6 },      // The Social Being (right)
+      { end: [22, 0, 18], width: 0.8, pathIndex: 0 },      // The Human (back-right)
     ]
   };
 
@@ -92,11 +79,10 @@
     }
 
     setupRenderer() {
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.shadowMap.enabled = true;
-      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+      this.renderer.shadowMap.enabled = false;
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.3;
       this.renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -121,57 +107,45 @@
 
       this.sun = new THREE.DirectionalLight(0xfff4d0, 2.0);
       this.sun.position.set(-15, 50, 15);
-      this.sun.castShadow = true;
-      this.sun.shadow.mapSize.set(1024, 1024);
-      this.sun.shadow.camera.left = -20;
-      this.sun.shadow.camera.right = 20;
-      this.sun.shadow.camera.top = 20;
-      this.sun.shadow.camera.bottom = -20;
-      this.sun.shadow.camera.near = 5;
-      this.sun.shadow.camera.far = 80;
-      this.sun.shadow.bias = -0.0005;
       this.scene.add(this.sun);
 
-      const fill = new THREE.DirectionalLight(0xaaccaa, 0.4);
+      const fill = new THREE.DirectionalLight(0xaaccaa, 0.5);
       fill.position.set(15, 30, -15);
       this.scene.add(fill);
-
-      this.scene.add(new THREE.DirectionalLight(0xffe8c0, 0.3).translateZ(-40).translateY(15));
     }
 
     createTerrain() {
       const c = document.createElement('canvas');
-      c.width = 1024; c.height = 1024;
+      c.width = 512; c.height = 512;
       const ctx = c.getContext('2d');
       ctx.fillStyle = '#141e10';
-      ctx.fillRect(0, 0, 1024, 1024);
-      for (let pass = 0; pass < 3; pass++) {
-        for (let i = 0; i < [4000, 3000, 2000][pass]; i++) {
+      ctx.fillRect(0, 0, 512, 512);
+      for (let pass = 0; pass < 2; pass++) {
+        for (let i = 0; i < [2000, 1000][pass]; i++) {
           const g = 20 + pass * 15 + Math.random() * 30;
-          ctx.fillStyle = `rgba(${g * 0.4},${g},${5 + Math.random() * 10},${[0.3, 0.15, 0.08][pass]})`;
+          ctx.fillStyle = `rgba(${g * 0.4},${g},${5 + Math.random() * 10},${[0.25, 0.12][pass]})`;
           ctx.beginPath();
-          ctx.arc(Math.random() * 1024, Math.random() * 1024, Math.random() * [2, 4, 8][pass], 0, Math.PI * 2);
+          ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * [2, 5][pass], 0, Math.PI * 2);
           ctx.fill();
         }
       }
 
       const tex = new THREE.CanvasTexture(c);
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-      tex.repeat.set(8, 8);
+      tex.repeat.set(6, 6);
 
-      const geo = new THREE.PlaneGeometry(120, 120, 64, 64);
+      const geo = new THREE.PlaneGeometry(120, 120, 32, 32);
       const pos = geo.attributes.position.array;
       for (let i = 2; i < pos.length; i += 3) {
         const px = pos[i - 2] * 0.12, py = pos[i - 1] * 0.12;
-        pos[i] += Math.sin(px) * Math.cos(py) * 0.15 + (Math.random() - 0.5) * 0.05;
+        pos[i] += Math.sin(px) * Math.cos(py) * 0.1 + (Math.random() - 0.5) * 0.03;
       }
       geo.computeVertexNormals();
 
       const ground = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
-        map: tex, color: 0x1a3a14, roughness: 0.93, metalness: 0
+        color: 0x1a3a14, map: tex, roughness: 0.93, metalness: 0
       }));
       ground.rotation.x = -Math.PI / 2;
-      ground.receiveShadow = true;
       this.scene.add(ground);
     }
 
@@ -181,16 +155,23 @@
         : new THREE.Vector3(node.start[0], 0, node.start[2]);
       const end = new THREE.Vector3(node.end[0], 0, node.end[2]);
 
-      const mid1 = new THREE.Vector3().lerpVectors(start, end, 0.3);
-      const mid2 = new THREE.Vector3().lerpVectors(start, end, 0.65);
       const dir = new THREE.Vector3().subVectors(end, start).normalize();
       const perp = new THREE.Vector3(-dir.z, 0, dir.x);
+      const len = start.distanceTo(end);
 
-      /* Gentle wobble — keep paths connected at junctions */
-      mid1.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 1.2));
-      mid2.add(perp.clone().multiplyScalar((Math.random() - 0.5) * 1.0));
+      /* More control points + bigger wobble = organic winding trails */
+      const controlPoints = [start];
+      const numMids = node.edgeId === 'trunk' ? 4 : 5;
+      for (let i = 1; i <= numMids; i++) {
+        const t = i / (numMids + 1);
+        const pt = new THREE.Vector3().lerpVectors(start, end, t);
+        const wobbleAmt = node.edgeId === 'trunk' ? len * 0.06 : len * 0.12;
+        pt.add(perp.clone().multiplyScalar((Math.random() - 0.5) * wobbleAmt));
+        controlPoints.push(pt);
+      }
+      controlPoints.push(end);
 
-      const curve = new THREE.CatmullRomCurve3([start, mid1, mid2, end]);
+      const curve = new THREE.CatmullRomCurve3(controlPoints);
       const width = node.width || 0.6;
 
       /* Store edge for walking */
@@ -341,11 +322,11 @@
 
       const positions = [];
       let tries = 0;
-      while (positions.length < 400 && tries < 3000) {
+      while (positions.length < 250 && tries < 2000) {
         tries++;
-        const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
-        if (x * x + z * z < 36) continue;  // big center clearing (radius 6)
-        if (distPaths(x, z) < 3.0) continue;  // wider path corridors
+        const x = (Math.random() - 0.5) * 80, z = (Math.random() - 0.5) * 80;
+        if (x * x + z * z < 20) continue;  // center clearing
+        if (distPaths(x, z) < 2.5) continue;  // path corridors
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 15); j--) {
           if ((x - positions[j].x) ** 2 + (z - positions[j].z) ** 2 < 2.5) { ok = false; break; }
@@ -358,27 +339,27 @@
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2a1808, roughness: 0.92 });
       const canopyMat = new THREE.MeshStandardMaterial({ roughness: 0.82 });
 
-      const trunkGeo = new THREE.CylinderGeometry(0.08, 0.16, 2.0, 5);
-      const cone1 = new THREE.ConeGeometry(1.0, 2.2, 7);
-      const cone2 = new THREE.ConeGeometry(0.75, 1.6, 6);
-      const cone3 = new THREE.ConeGeometry(0.5, 1.2, 6);
-      const crownGeo = new THREE.IcosahedronGeometry(0.85, 1);
+      const trunkGeo = new THREE.CylinderGeometry(0.08, 0.16, 2.0, 4);
+      const cone1 = new THREE.ConeGeometry(1.0, 2.2, 5);
+      const cone2 = new THREE.ConeGeometry(0.75, 1.6, 5);
+      const cone3 = new THREE.ConeGeometry(0.5, 1.2, 5);
+      const crownGeo = new THREE.IcosahedronGeometry(0.85, 0);
 
       const greens = [0x1a5218, 0x226420, 0x164612, 0x2a6e26, 0x1e5a1e, 0x306830].map(c => new THREE.Color(c));
 
       const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, count);
-      trunkMesh.castShadow = true;
+      /* shadows disabled for performance */
       const c1Mesh = new THREE.InstancedMesh(cone1, canopyMat.clone(), count);
-      c1Mesh.castShadow = true;
+
       c1Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const c2Mesh = new THREE.InstancedMesh(cone2, canopyMat.clone(), count);
-      c2Mesh.castShadow = true;
+
       c2Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const c3Mesh = new THREE.InstancedMesh(cone3, canopyMat.clone(), count);
-      c3Mesh.castShadow = true;
+
       c3Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const crMesh = new THREE.InstancedMesh(crownGeo, canopyMat.clone(), count);
-      crMesh.castShadow = true;
+
       crMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
 
       const d = new THREE.Object3D();
@@ -423,7 +404,7 @@
         emissive: new THREE.Color(0xffe880),
         emissiveIntensity: 0,
       });
-      const clearing = new THREE.Mesh(new THREE.CircleGeometry(7, 32), clearingMat);
+      const clearing = new THREE.Mesh(new THREE.CircleGeometry(4, 24), clearingMat);
       clearing.rotation.x = -Math.PI / 2;
       clearing.position.y = 0.11;
       clearing.renderOrder = 1;
@@ -875,10 +856,10 @@
 
       const descentCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 55, 25),
-        new THREE.Vector3(6, 35, 30),
-        new THREE.Vector3(3, 18, 35),
-        new THREE.Vector3(-1, 8, 37),
-        new THREE.Vector3(0, PLAYER_HEIGHT, 38),
+        new THREE.Vector3(6, 35, 28),
+        new THREE.Vector3(3, 18, 32),
+        new THREE.Vector3(-1, 8, 34),
+        new THREE.Vector3(0, PLAYER_HEIGHT, 35),
       ]);
 
       const lookCurve = new THREE.CatmullRomCurve3([
