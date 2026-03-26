@@ -224,53 +224,39 @@
     createTrailGeometry(curve, width, pathIndex) {
       if (!this._dirtTex) {
         const dc = document.createElement('canvas');
-        dc.width = 512; dc.height = 512;
+        dc.width = 256; dc.height = 256;
         const dctx = dc.getContext('2d');
-        /* Rich warm dirt base */
-        const baseGrad = dctx.createLinearGradient(0, 0, 512, 512);
+        /* Warm dirt base */
+        const baseGrad = dctx.createLinearGradient(0, 0, 256, 256);
         baseGrad.addColorStop(0, '#7a6040');
         baseGrad.addColorStop(0.5, '#6a5030');
         baseGrad.addColorStop(1, '#5a4528');
         dctx.fillStyle = baseGrad;
-        dctx.fillRect(0, 0, 512, 512);
-        /* Layered noise for realistic dirt */
-        for (let pass = 0; pass < 4; pass++) {
-          const counts = [4000, 3000, 2000, 1500];
-          const sizes = [1.5, 3, 5, 1];
-          const alphas = [0.35, 0.2, 0.12, 0.4];
+        dctx.fillRect(0, 0, 256, 256);
+        /* Lighter noise — fewer circles for fast init */
+        for (let pass = 0; pass < 3; pass++) {
+          const counts = [1500, 1000, 600];
+          const sizes = [1.5, 3, 1];
+          const alphas = [0.3, 0.18, 0.25];
           for (let i = 0; i < counts[pass]; i++) {
             const v = Math.random();
-            if (pass < 3) {
-              const g = 25 + pass * 12 + Math.random() * 35;
+            if (pass < 2) {
               dctx.fillStyle = v > 0.6
                 ? `rgba(${85 + Math.random() * 45},${60 + Math.random() * 35},${35 + Math.random() * 25},${alphas[pass]})`
                 : `rgba(${55 + Math.random() * 35},${40 + Math.random() * 30},${22 + Math.random() * 15},${alphas[pass] * 0.7})`;
             } else {
-              /* Tiny pebble highlights */
-              dctx.fillStyle = `rgba(${140 + Math.random() * 60},${120 + Math.random() * 50},${90 + Math.random() * 40},${0.15 + Math.random() * 0.15})`;
+              dctx.fillStyle = `rgba(${140 + Math.random() * 60},${120 + Math.random() * 50},${90 + Math.random() * 40},0.15)`;
             }
             dctx.beginPath();
-            dctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * sizes[pass] + 0.3, 0, Math.PI * 2);
+            dctx.arc(Math.random() * 256, Math.random() * 256, Math.random() * sizes[pass] + 0.3, 0, Math.PI * 2);
             dctx.fill();
           }
         }
-        /* Worn track lines down the center */
-        dctx.globalAlpha = 0.06;
-        for (let i = 0; i < 20; i++) {
-          dctx.strokeStyle = `rgba(90,70,45,${0.1 + Math.random() * 0.1})`;
-          dctx.lineWidth = 1 + Math.random() * 3;
-          dctx.beginPath();
-          dctx.moveTo(200 + Math.random() * 112, 0);
-          dctx.lineTo(200 + Math.random() * 112, 512);
-          dctx.stroke();
-        }
-        dctx.globalAlpha = 1;
         this._dirtTex = new THREE.CanvasTexture(dc);
         this._dirtTex.wrapS = this._dirtTex.wrapT = THREE.RepeatWrapping;
       }
 
-      /* More sample points for smoother curves */
-      const pts = curve.getPoints(120);
+      const pts = curve.getPoints(80);
       const verts = [], uvs = [], idx = [];
 
       /* Main path strip — wider, smoother taper */
@@ -309,34 +295,7 @@
 
       this.pathSegments.push({ trail, mat, curve, pathIndex });
 
-      /* Stone edge borders along each side of the path */
-      if (pathIndex !== undefined) {
-        if (!this._stoneMat) {
-          this._stoneMat = new THREE.MeshStandardMaterial({ color: 0x8a8278, roughness: 0.95, metalness: 0 });
-        }
-        if (!this._stoneGeo) {
-          this._stoneGeo = new THREE.SphereGeometry(0.12, 4, 3);
-        }
-        /* Place stones along edges — every 8th point for performance */
-        for (let p = 4; p < pts.length - 4; p += 8) {
-          const pt = pts[p], t = p / (pts.length - 1);
-          const taper = Math.sin(t * Math.PI) * 0.15 + 0.85;
-          const w = width * taper;
-          const tangent = curve.getTangent(Math.min(t, 0.999));
-          const pr = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-          for (const side of [-1, 1]) {
-            const sx = pt.x + pr.x * w * side * 1.05;
-            const sz = pt.z + pr.z * w * side * 1.05;
-            const stone = new THREE.Mesh(this._stoneGeo, this._stoneMat);
-            stone.position.set(sx, 0.04, sz);
-            stone.scale.set(0.6 + Math.random() * 0.8, 0.3 + Math.random() * 0.3, 0.6 + Math.random() * 0.8);
-            stone.rotation.y = Math.random() * Math.PI;
-            this.scene.add(stone);
-          }
-        }
-      }
-
-      /* Lantern torches at 33% and 66% along each branch path */
+      /* Single torch at midpoint — no extra point lights for performance */
       if (pathIndex !== undefined) {
         if (!this._torchPoleMat) {
           this._torchPoleMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
@@ -344,37 +303,22 @@
         if (!this._torchPoleGeo) {
           this._torchPoleGeo = new THREE.CylinderGeometry(0.04, 0.07, 2.0, 5);
         }
-        for (const frac of [0.35, 0.65]) {
-          const mid = curve.getPointAt(frac);
-          const tangent = curve.getTangent(frac);
-          const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
-          const tx = mid.x + perp.x * (width + 0.6);
-          const tz = mid.z + perp.z * (width + 0.6);
+        const mid = curve.getPointAt(0.5);
+        const tangent = curve.getTangent(0.5);
+        const perp = new THREE.Vector3(-tangent.z, 0, tangent.x).normalize();
+        const tx = mid.x + perp.x * (width + 0.5);
+        const tz = mid.z + perp.z * (width + 0.5);
 
-          const pole = new THREE.Mesh(this._torchPoleGeo, this._torchPoleMat);
-          pole.position.set(tx, 1.0, tz);
-          this.scene.add(pole);
+        const pole = new THREE.Mesh(this._torchPoleGeo, this._torchPoleMat);
+        pole.position.set(tx, 1.0, tz);
+        this.scene.add(pole);
 
-          /* Lantern top */
-          const lantern = new THREE.Mesh(
-            new THREE.BoxGeometry(0.18, 0.22, 0.18),
-            new THREE.MeshStandardMaterial({ color: 0x2a1a08, roughness: 0.7, metalness: 0.3 })
-          );
-          lantern.position.set(tx, 2.1, tz);
-          this.scene.add(lantern);
-
-          const flame = new THREE.Mesh(
-            new THREE.SphereGeometry(0.06, 6, 6),
-            new THREE.MeshBasicMaterial({ color: 0xffcc40, transparent: true, opacity: 0.9 })
-          );
-          flame.position.set(tx, 2.1, tz);
-          this.scene.add(flame);
-
-          /* Warm point light at each torch */
-          const torchLight = new THREE.PointLight(0xffaa40, 0.8, 8, 2);
-          torchLight.position.set(tx, 2.2, tz);
-          this.scene.add(torchLight);
-        }
+        const flame = new THREE.Mesh(
+          new THREE.SphereGeometry(0.08, 6, 6),
+          new THREE.MeshBasicMaterial({ color: 0xffcc40, transparent: true, opacity: 0.9 })
+        );
+        flame.position.set(tx, 2.1, tz);
+        this.scene.add(flame);
       }
     }
 
@@ -757,45 +701,51 @@
       this.pathButtons = [];
     }
 
-    /* ── CONTROLS — Click to navigate ── */
+    /* ── CONTROLS — Click to navigate, drag to look around ── */
     setupControls() {
       this.raycaster = new THREE.Raycaster();
       this.mouseVec = new THREE.Vector2();
       this.isAnimating = false;
 
-      /* Click to select path */
-      this.renderer.domElement.addEventListener('click', (e) => {
-        if (this.isAnimating) return;
+      /* Camera yaw for looking around at junction */
+      this.cameraYaw = Math.PI;  /* Start facing -Z (forward into paths) */
+      this.cameraPitch = 0;
+      this._isDragging = false;
+      this._dragStartX = 0;
+      this._dragStartY = 0;
+      this._dragMoved = false;
 
-        if (this.state === 'atJunction') {
-          /* Raycast to find which path was clicked */
-          this.mouseVec.set(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            -(e.clientY / window.innerHeight) * 2 + 1
-          );
-          this.raycaster.setFromCamera(this.mouseVec, this.camera);
-
-          /* Check path trail meshes */
-          const trailMeshes = this.pathSegments.filter(s => s.pathIndex !== undefined).map(s => s.trail);
-          const hits = this.raycaster.intersectObjects(trailMeshes);
-
-          if (hits.length > 0) {
-            const hitTrail = hits[0].object;
-            const seg = this.pathSegments.find(s => s.trail === hitTrail);
-            if (seg && seg.pathIndex !== undefined) {
-              this.walkToPath(seg.pathIndex);
-            }
-          }
-        } else if (this.state === 'atEntrance') {
-          /* Click anywhere to walk to center */
-          this.walkToCenter();
-        }
+      /* Mouse down — start drag */
+      this.renderer.domElement.addEventListener('mousedown', (e) => {
+        if (this.state !== 'atJunction' || this.isAnimating) return;
+        this._isDragging = true;
+        this._dragStartX = e.clientX;
+        this._dragStartY = e.clientY;
+        this._dragMoved = false;
       });
 
-      /* Mouse hover to highlight paths */
+      /* Mouse move — drag to rotate camera OR hover paths */
       this.renderer.domElement.addEventListener('mousemove', (e) => {
-        if (this.state !== 'atJunction' || this.isAnimating) return;
+        if (this.isAnimating) return;
 
+        if (this._isDragging && this.state === 'atJunction') {
+          const dx = e.clientX - this._dragStartX;
+          const dy = e.clientY - this._dragStartY;
+          if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this._dragMoved = true;
+          this.cameraYaw -= dx * 0.004;
+          this.cameraPitch -= dy * 0.002;
+          this.cameraPitch = Math.max(-0.4, Math.min(0.4, this.cameraPitch));
+          this._dragStartX = e.clientX;
+          this._dragStartY = e.clientY;
+
+          /* Update camera look direction */
+          this._updateJunctionCamera();
+          return;
+        }
+
+        if (this.state !== 'atJunction') return;
+
+        /* Hover raycast for path highlighting */
         this.mouseVec.set(
           (e.clientX / window.innerWidth) * 2 - 1,
           -(e.clientY / window.innerHeight) * 2 + 1
@@ -824,7 +774,6 @@
               infoEl.innerHTML = `<span class="fp-info-num">${p.num}</span> ${p.name}<br><small>${p.sub} — click to explore</small>`;
               infoEl.style.opacity = '1';
             }
-            /* Brighten the floating sprite for hovered path */
             if (this.markers) {
               this.markers.forEach(m => {
                 if (m.sprite) m.sprite.material.opacity = m.pathIndex === seg.pathIndex ? 1.0 : 0.6;
@@ -834,11 +783,73 @@
         } else {
           this.renderer.domElement.style.cursor = 'default';
           if (infoEl) infoEl.style.opacity = '0';
-          /* Reset all sprites to normal */
           if (this.markers) {
             this.markers.forEach(m => { if (m.sprite) m.sprite.material.opacity = 0.85; });
           }
         }
+      });
+
+      /* Mouse up — end drag, or if it was a short click, select path */
+      this.renderer.domElement.addEventListener('mouseup', (e) => {
+        const wasDragging = this._isDragging && this._dragMoved;
+        this._isDragging = false;
+
+        if (this.isAnimating) return;
+
+        /* If the user dragged, don't treat as a click */
+        if (wasDragging) return;
+
+        if (this.state === 'atJunction') {
+          this.mouseVec.set(
+            (e.clientX / window.innerWidth) * 2 - 1,
+            -(e.clientY / window.innerHeight) * 2 + 1
+          );
+          this.raycaster.setFromCamera(this.mouseVec, this.camera);
+
+          const trailMeshes = this.pathSegments.filter(s => s.pathIndex !== undefined).map(s => s.trail);
+          const hits = this.raycaster.intersectObjects(trailMeshes);
+
+          if (hits.length > 0) {
+            const hitTrail = hits[0].object;
+            const seg = this.pathSegments.find(s => s.trail === hitTrail);
+            if (seg && seg.pathIndex !== undefined) {
+              this.walkToPath(seg.pathIndex);
+            }
+          }
+        } else if (this.state === 'atEntrance') {
+          this.walkToCenter();
+        }
+      });
+
+      /* Touch support for mobile drag-to-look */
+      this.renderer.domElement.addEventListener('touchstart', (e) => {
+        if (this.state !== 'atJunction' || this.isAnimating) return;
+        const t = e.touches[0];
+        this._isDragging = true;
+        this._dragStartX = t.clientX;
+        this._dragStartY = t.clientY;
+        this._dragMoved = false;
+      }, { passive: true });
+
+      this.renderer.domElement.addEventListener('touchmove', (e) => {
+        if (!this._isDragging || this.state !== 'atJunction') return;
+        const t = e.touches[0];
+        const dx = t.clientX - this._dragStartX;
+        const dy = t.clientY - this._dragStartY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this._dragMoved = true;
+        this.cameraYaw -= dx * 0.004;
+        this.cameraPitch -= dy * 0.002;
+        this.cameraPitch = Math.max(-0.4, Math.min(0.4, this.cameraPitch));
+        this._dragStartX = t.clientX;
+        this._dragStartY = t.clientY;
+        this._updateJunctionCamera();
+      }, { passive: true });
+
+      this.renderer.domElement.addEventListener('touchend', (e) => {
+        const wasDragging = this._isDragging && this._dragMoved;
+        this._isDragging = false;
+        if (wasDragging || this.isAnimating) return;
+        if (this.state === 'atEntrance') this.walkToCenter();
       });
 
       /* Resize */
@@ -847,6 +858,13 @@
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(window.innerWidth, window.innerHeight);
       });
+    }
+
+    _updateJunctionCamera() {
+      const lookX = Math.sin(this.cameraYaw);
+      const lookZ = Math.cos(this.cameraYaw);
+      const lookY = PLAYER_HEIGHT + this.cameraPitch * 3;
+      this.camera.lookAt(lookX * 10, lookY, lookZ * 10);
     }
 
     /* ── ENTER — Cinematic descent then land at entrance ── */
@@ -932,16 +950,18 @@
           this.state = 'atJunction';
           this.isAnimating = false;
 
-          /* Look outward from center */
+          /* Position at center, facing forward */
           this.camera.position.set(0, PLAYER_HEIGHT, 2);
-          this.camera.lookAt(0, PLAYER_HEIGHT, -10);
+          this.cameraYaw = Math.PI;
+          this.cameraPitch = 0;
+          this._updateJunctionCamera();
 
           /* Show path selection hint */
           const infoEl = document.getElementById('fp-path-info');
           if (infoEl) {
-            infoEl.innerHTML = 'Click a path to explore';
+            infoEl.innerHTML = 'Drag to look around — click a path to explore';
             infoEl.style.opacity = '1';
-            setTimeout(() => { infoEl.style.opacity = '0'; }, 3000);
+            setTimeout(() => { infoEl.style.opacity = '0'; }, 4000);
           }
 
           /* Reset trunk glow */
