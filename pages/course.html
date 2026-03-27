@@ -273,7 +273,7 @@
     </section>
 
     <!-- WHAT YOU LEAVE WITH -->
-    <section class="path-section scroll-section path-section-final">
+    <section class="path-section scroll-section">
       <div class="path-section-inner reveal">
         <div class="section-label gold">Outcomes</div>
         <h2 class="section-heading">What You <em>Leave With</em></h2>
@@ -287,11 +287,66 @@
             <li><strong>90-Day AI Implementation Roadmap</strong> &mdash; For a real business</li>
           </ul>
         </div>
-        <div class="path-return">
-          <a href="connect.html" class="forest-btn">Get in Touch</a>
-        </div>
       </div>
     </section>
+
+    <!-- REGISTRATION FORM -->
+    <section class="path-section scroll-section dark path-section-final">
+      <div class="path-section-inner reveal">
+        <div class="section-label gold">Register</div>
+        <h2 class="section-heading">Reserve <em>Your Seat</em></h2>
+        <div class="section-text">
+          <p>Seats are limited. Fill in your details below to register your interest and we will be in touch with next steps.</p>
+        </div>
+        <form id="course-register-form" class="course-form">
+          <div class="course-form-row">
+            <div class="course-form-field">
+              <label for="reg-name">Full Name</label>
+              <input type="text" id="reg-name" name="name" required placeholder="Your full name">
+            </div>
+            <div class="course-form-field">
+              <label for="reg-email">Email Address</label>
+              <input type="email" id="reg-email" name="email" required placeholder="you@company.com">
+            </div>
+          </div>
+          <div class="course-form-row">
+            <div class="course-form-field">
+              <label for="reg-company">Company / Organization</label>
+              <input type="text" id="reg-company" name="company" placeholder="Your company name">
+            </div>
+            <div class="course-form-field">
+              <label for="reg-role">Role / Title</label>
+              <input type="text" id="reg-role" name="role" placeholder="e.g. CEO, VP of Product">
+            </div>
+          </div>
+          <div class="course-form-field" style="margin-bottom: 1.5rem;">
+            <label for="reg-message">What do you hope to gain from this course?</label>
+            <textarea id="reg-message" name="message" rows="4" placeholder="Tell us briefly about your goals..."></textarea>
+          </div>
+          <button type="submit" class="forest-btn course-submit-btn">Register Now</button>
+        </form>
+      </div>
+    </section>
+
+    <script>
+      document.getElementById('course-register-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        /* TODO: Replace this URL with your actual registration redirect link */
+        var REGISTER_URL = '#';
+        /* Collect form data for the redirect (can append as query params if needed) */
+        var name = document.getElementById('reg-name').value;
+        var email = document.getElementById('reg-email').value;
+        var company = document.getElementById('reg-company').value;
+        var role = document.getElementById('reg-role').value;
+        var message = document.getElementById('reg-message').value;
+        if (REGISTER_URL === '#') {
+          alert('Registration received! We will be in touch soon.');
+        } else {
+          var params = new URLSearchParams({ name: name, email: email, company: company, role: role, message: message });
+          window.location.href = REGISTER_URL + '?' + params.toString();
+        }
+      });
+    </script>
 
   </main>
 
