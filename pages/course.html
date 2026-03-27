@@ -309,16 +309,6 @@
               <input type="email" id="reg-email" name="email" required placeholder="you@company.com">
             </div>
           </div>
-          <div class="course-form-row">
-            <div class="course-form-field">
-              <label for="reg-company">Company / Organization</label>
-              <input type="text" id="reg-company" name="company" placeholder="Your company name">
-            </div>
-            <div class="course-form-field">
-              <label for="reg-role">Role / Title</label>
-              <input type="text" id="reg-role" name="role" placeholder="e.g. CEO, VP of Product">
-            </div>
-          </div>
           <div class="course-form-field" style="margin-bottom: 1.5rem;">
             <label for="reg-message">What do you hope to gain from this course?</label>
             <textarea id="reg-message" name="message" rows="4" placeholder="Tell us briefly about your goals..."></textarea>
@@ -336,13 +326,11 @@
         /* Collect form data for the redirect (can append as query params if needed) */
         var name = document.getElementById('reg-name').value;
         var email = document.getElementById('reg-email').value;
-        var company = document.getElementById('reg-company').value;
-        var role = document.getElementById('reg-role').value;
         var message = document.getElementById('reg-message').value;
         if (REGISTER_URL === '#') {
           alert('Registration received! We will be in touch soon.');
         } else {
-          var params = new URLSearchParams({ name: name, email: email, company: company, role: role, message: message });
+          var params = new URLSearchParams({ name: name, email: email, message: message });
           window.location.href = REGISTER_URL + '?' + params.toString();
         }
       });
