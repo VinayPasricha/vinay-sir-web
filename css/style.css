@@ -876,7 +876,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 .path-list li {
   font-family: var(--font-accent);
-  font-size: 1rem;
+  font-size: 1.15rem;
   color: var(--leaf-light);
   padding: 0.3rem 0;
   position: relative;
@@ -902,7 +902,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 /* Inner page intro text */
 .page-intro {
   font-family: var(--font-accent);
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   color: var(--text-secondary);
   line-height: 1.7;
   max-width: 520px;
@@ -979,7 +979,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .section-label {
   font-family: var(--font-body);
-  font-size: 0.55rem; font-weight: 600;
+  font-size: 0.65rem; font-weight: 600;
   letter-spacing: 5px; text-transform: uppercase;
   color: var(--gold-dim); margin-bottom: 1rem;
 }
@@ -987,7 +987,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .section-heading {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem,4vw,3.5rem);
+  font-size: clamp(2rem,4.5vw,4rem);
   font-weight: 300; line-height: 1.15;
   letter-spacing: -0.01em; margin-bottom: 1.5rem;
   color: #f0ece4;
@@ -996,8 +996,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 
 .section-text {
   font-family: var(--font-accent);
-  font-size: 1rem; line-height: 1.75;
-  max-width: 550px; color: var(--text-secondary);
+  font-size: 1.15rem; line-height: 1.8;
+  max-width: 650px; color: var(--text-secondary);
 }
 
 /* ============================================
