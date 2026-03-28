@@ -1404,7 +1404,8 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
    BOOK (Writer) — FLIPBOOK READER
    ============================================ */
 .books-showcase {
-  padding: var(--space-lg); background: var(--forest-deep);
+  position: relative; z-index: 2;
+  padding: var(--space-lg); background: rgba(10, 26, 13, 0.92);
   min-height: 100vh; display: flex;
   align-items: center; justify-content: center;
 }
