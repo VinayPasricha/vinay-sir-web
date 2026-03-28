@@ -61,54 +61,46 @@
     <section class="books-showcase">
       <div class="book-display reveal">
         <div class="book-cover-wrap">
-          <div class="book-3d">
-            <!-- Front Cover -->
-            <div class="book-3d-front">
-              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="book-svg-bg">
-                <circle cx="100" cy="60" r="8" stroke="var(--sage)" stroke-width="0.5"/>
-                <circle cx="60" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
-                <circle cx="140" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
-                <circle cx="80" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
-                <circle cx="120" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
-                <line x1="100" y1="60" x2="60" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
-                <line x1="100" y1="60" x2="140" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
-                <line x1="60" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-                <line x1="140" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-                <line x1="60" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-                <line x1="140" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-              </svg>
-              <div class="book-title-display">AI For<br>Business<br>Leaders</div>
-              <div class="book-author-display">VINAY PASRICHA</div>
-            </div>
-            <!-- Spine -->
-            <div class="book-3d-spine">
-              <span>AI FOR BUSINESS LEADERS</span>
-            </div>
-            <!-- Page edges (right side) -->
-            <div class="book-3d-pages"></div>
-            <!-- Flip pages -->
-            <div class="book-3d-page page-1">
-              <div class="page-inner">
-                <div class="page-quote">&ldquo;AI won&rsquo;t fix chaos. AI amplifies whatever structure you already have.&rdquo;</div>
+          <div class="book-scene">
+            <div class="book-container">
+              <!-- Cover (front face) -->
+              <div class="book-face book-front">
+                <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="book-svg-bg">
+                  <circle cx="100" cy="60" r="8" stroke="#7a9a6e" stroke-width="0.5"/>
+                  <circle cx="60" cy="100" r="6" stroke="#7a9a6e" stroke-width="0.5"/>
+                  <circle cx="140" cy="100" r="6" stroke="#7a9a6e" stroke-width="0.5"/>
+                  <circle cx="80" cy="140" r="7" stroke="#7a9a6e" stroke-width="0.5"/>
+                  <circle cx="120" cy="140" r="7" stroke="#7a9a6e" stroke-width="0.5"/>
+                  <line x1="100" y1="60" x2="60" y2="100" stroke="#7a9a6e" stroke-width="0.3"/>
+                  <line x1="100" y1="60" x2="140" y2="100" stroke="#7a9a6e" stroke-width="0.3"/>
+                  <line x1="60" y1="100" x2="80" y2="140" stroke="#7a9a6e" stroke-width="0.3"/>
+                  <line x1="140" y1="100" x2="120" y2="140" stroke="#7a9a6e" stroke-width="0.3"/>
+                  <line x1="60" y1="100" x2="120" y2="140" stroke="#7a9a6e" stroke-width="0.3"/>
+                  <line x1="140" y1="100" x2="80" y2="140" stroke="#7a9a6e" stroke-width="0.3"/>
+                </svg>
+                <div class="book-title-display">AI For<br>Business<br>Leaders</div>
+                <div class="book-author-display">VINAY PASRICHA</div>
+              </div>
+              <!-- Inside page (back of cover) -->
+              <div class="book-face book-inside">
+                <div class="book-inside-content">
+                  <div class="inside-quote">&ldquo;AI won&rsquo;t fix chaos.<br>AI amplifies whatever structure<br>you already have.&rdquo;</div>
+                  <div class="inside-divider"></div>
+                  <div class="inside-chapters">
+                    <div class="inside-ch">Chapter 1 &mdash; Building Your Company Brain</div>
+                    <div class="inside-ch">Chapter 5 &mdash; From Data to Decisions</div>
+                    <div class="inside-ch">Chapter 9 &mdash; The AI-Ready Organization</div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="book-3d-page page-2">
-              <div class="page-inner">
-                <div class="page-chapter">Chapter 1</div>
-                <div class="page-chapter-title">Building Your Company Brain</div>
-              </div>
+            <!-- Static back/pages behind -->
+            <div class="book-back-static">
+              <div class="book-pages-edge"></div>
             </div>
-            <div class="book-3d-page page-3">
-              <div class="page-inner">
-                <div class="page-chapter">Chapter 5</div>
-                <div class="page-chapter-title">From Data to Decisions</div>
-              </div>
-            </div>
-            <!-- Back Cover -->
-            <div class="book-3d-back"></div>
           </div>
           <div class="book-shadow"></div>
-          <div class="book-hover-hint">Hover to peek inside</div>
+          <div class="book-hover-hint">Hover to open</div>
         </div>
         <div class="book-info">
           <div class="book-category">PUBLISHED WORKS</div>
