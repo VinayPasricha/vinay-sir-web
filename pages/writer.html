@@ -61,24 +61,54 @@
     <section class="books-showcase">
       <div class="book-display reveal">
         <div class="book-cover-wrap">
-          <div class="book-cover">
-            <!-- Neural network SVG decoration -->
-            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; width:70%; opacity:0.12; z-index:0;">
-              <circle cx="100" cy="60" r="8" stroke="var(--sage)" stroke-width="0.5"/>
-              <circle cx="60" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
-              <circle cx="140" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
-              <circle cx="80" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
-              <circle cx="120" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
-              <line x1="100" y1="60" x2="60" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
-              <line x1="100" y1="60" x2="140" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
-              <line x1="60" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-              <line x1="140" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-              <line x1="60" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-              <line x1="140" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
-            </svg>
-            <div class="book-title-display">AI For<br>Business<br>Leaders</div>
-            <div class="book-author-display">VINAY PASRICHA</div>
+          <div class="book-3d">
+            <!-- Front Cover -->
+            <div class="book-3d-front">
+              <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="book-svg-bg">
+                <circle cx="100" cy="60" r="8" stroke="var(--sage)" stroke-width="0.5"/>
+                <circle cx="60" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
+                <circle cx="140" cy="100" r="6" stroke="var(--sage)" stroke-width="0.5"/>
+                <circle cx="80" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
+                <circle cx="120" cy="140" r="7" stroke="var(--sage)" stroke-width="0.5"/>
+                <line x1="100" y1="60" x2="60" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
+                <line x1="100" y1="60" x2="140" y2="100" stroke="var(--sage)" stroke-width="0.3"/>
+                <line x1="60" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
+                <line x1="140" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
+                <line x1="60" y1="100" x2="120" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
+                <line x1="140" y1="100" x2="80" y2="140" stroke="var(--sage)" stroke-width="0.3"/>
+              </svg>
+              <div class="book-title-display">AI For<br>Business<br>Leaders</div>
+              <div class="book-author-display">VINAY PASRICHA</div>
+            </div>
+            <!-- Spine -->
+            <div class="book-3d-spine">
+              <span>AI FOR BUSINESS LEADERS</span>
+            </div>
+            <!-- Page edges (right side) -->
+            <div class="book-3d-pages"></div>
+            <!-- Flip pages -->
+            <div class="book-3d-page page-1">
+              <div class="page-inner">
+                <div class="page-quote">&ldquo;AI won&rsquo;t fix chaos. AI amplifies whatever structure you already have.&rdquo;</div>
+              </div>
+            </div>
+            <div class="book-3d-page page-2">
+              <div class="page-inner">
+                <div class="page-chapter">Chapter 1</div>
+                <div class="page-chapter-title">Building Your Company Brain</div>
+              </div>
+            </div>
+            <div class="book-3d-page page-3">
+              <div class="page-inner">
+                <div class="page-chapter">Chapter 5</div>
+                <div class="page-chapter-title">From Data to Decisions</div>
+              </div>
+            </div>
+            <!-- Back Cover -->
+            <div class="book-3d-back"></div>
           </div>
+          <div class="book-shadow"></div>
+          <div class="book-hover-hint">Hover to peek inside</div>
         </div>
         <div class="book-info">
           <div class="book-category">PUBLISHED WORKS</div>
@@ -86,7 +116,15 @@
           <p>
             A practical guide to building your company brain. Discover frameworks for transforming your organization with AI — without the hype. Grounded in real-world experience from building GoodSpace AI and decades of entrepreneurship.
           </p>
-          <a href="#" class="forest-btn">Buy on Amazon &rarr;</a>
+          <div class="book-meta">
+            <span class="book-meta-item">&#128214; 200+ Pages</span>
+            <span class="book-meta-item">&#9733; Practical Frameworks</span>
+            <span class="book-meta-item">&#127891; Real-World Case Studies</span>
+          </div>
+          <a href="https://www.amazon.in/dp/B0F1MZ3ZGK" target="_blank" rel="noopener" class="amazon-btn">
+            <svg class="amazon-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M.045 18.02c.07-.116.36-.206.614-.206 2.47-.027 4.94-.027 7.41 0 .255 0 .546.09.614.206.074.124.018.352-.112.458-1.96 1.594-4.296 2.36-6.71 2.36-.65 0-1.3-.05-1.943-.164-.132-.023-.268-.08-.34-.192-.065-.1-.018-.252.067-.36l.4-.102zM14.587 17.474c-.42.666-1.3 1.37-1.943 1.468-.113.018-.223-.05-.266-.162-.04-.105.003-.23.098-.306 1.04-.832 1.723-2.044 2.092-3.368.05-.18.19-.31.362-.31.105 0 .206.05.27.14.36.5.114 1.164-.12 1.674l-.493.864zm6.632-8.905c-.32 3.9-3.28 7.114-7.05 8.24-.113.034-.237-.018-.3-.12-.058-.094-.04-.216.038-.294 2.99-2.95 4.3-6.876 3.672-10.94-.028-.183.084-.36.26-.41.1-.027.208.003.287.076 1.84 1.57 3.195 3.504 3.093 3.448z"/></svg>
+            Buy on Amazon &rarr;
+          </a>
         </div>
       </div>
     </section>
