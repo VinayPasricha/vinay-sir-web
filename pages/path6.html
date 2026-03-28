@@ -121,9 +121,10 @@
     <section class="books-showcase">
       <div class="book-display reveal">
         <div class="book-cover-wrap">
-          <div class="book-scene">
-            <div class="book-container">
-              <div class="book-face book-front">
+          <div class="book-reader" id="bookReader">
+            <!-- Page 0: Front Cover -->
+            <div class="book-page active" data-page="0">
+              <div class="book-page-face book-front-cover">
                 <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="book-svg-bg">
                   <circle cx="100" cy="60" r="8" stroke="#7a9a6e" stroke-width="0.5"/>
                   <circle cx="60" cy="100" r="6" stroke="#7a9a6e" stroke-width="0.5"/>
@@ -139,25 +140,68 @@
                 </svg>
                 <div class="book-title-display">AI For<br>Business<br>Leaders</div>
                 <div class="book-author-display">VINAY PASRICHA</div>
-              </div>
-              <div class="book-face book-inside">
-                <div class="book-inside-content">
-                  <div class="inside-quote">&ldquo;AI won&rsquo;t fix chaos.<br>AI amplifies whatever structure<br>you already have.&rdquo;</div>
-                  <div class="inside-divider"></div>
-                  <div class="inside-chapters">
-                    <div class="inside-ch">Chapter 1 &mdash; Building Your Company Brain</div>
-                    <div class="inside-ch">Chapter 5 &mdash; From Data to Decisions</div>
-                    <div class="inside-ch">Chapter 9 &mdash; The AI-Ready Organization</div>
-                  </div>
-                </div>
+                <div class="book-tap-hint">Click to read sample chapters &rarr;</div>
               </div>
             </div>
-            <div class="book-back-static">
-              <div class="book-pages-edge"></div>
+            <!-- Page 1: Chapter 1 -->
+            <div class="book-page" data-page="1">
+              <div class="book-page-face book-chapter-page">
+                <div class="chapter-label">SAMPLE CHAPTER</div>
+                <div class="chapter-number">Chapter 1</div>
+                <h3 class="chapter-title">Building Your Company Brain</h3>
+                <div class="chapter-divider"></div>
+                <div class="chapter-text">
+                  <p>Every organization has a brain &mdash; a system of knowledge, processes, and decisions that determines how it operates. Most companies don&rsquo;t realize this brain exists, let alone manage it deliberately.</p>
+                  <p>AI doesn&rsquo;t replace this brain. It amplifies it. If your organization&rsquo;s knowledge is scattered across email threads, tribal memory, and undocumented processes, AI will amplify that chaos.</p>
+                  <p>But if you build a structured company brain &mdash; clear processes, documented decisions, organized data &mdash; AI becomes the most powerful tool you&rsquo;ve ever had.</p>
+                  <p>The first step isn&rsquo;t buying software. It&rsquo;s mapping what your organization actually knows, how decisions get made, and where knowledge lives today.</p>
+                </div>
+                <div class="chapter-page-num">12</div>
+              </div>
+            </div>
+            <!-- Page 2: Chapter 5 -->
+            <div class="book-page" data-page="2">
+              <div class="book-page-face book-chapter-page">
+                <div class="chapter-label">SAMPLE CHAPTER</div>
+                <div class="chapter-number">Chapter 5</div>
+                <h3 class="chapter-title">From Data to Decisions</h3>
+                <div class="chapter-divider"></div>
+                <div class="chapter-text">
+                  <p>Data alone is worthless. Every company today is drowning in data &mdash; dashboards nobody reads, reports nobody acts on, databases nobody queries.</p>
+                  <p>The gap between data and decisions is where most organizations fail. They collect everything but connect nothing. AI bridges this gap, but only when you understand the decision architecture of your business.</p>
+                  <p>Which decisions are made daily? Weekly? Who makes them? What information do they need? Map these decision points first, then design your AI systems to serve them.</p>
+                  <p>The companies winning with AI aren&rsquo;t the ones with the most data. They&rsquo;re the ones who know which decisions matter most.</p>
+                </div>
+                <div class="chapter-page-num">87</div>
+              </div>
+            </div>
+            <!-- Page 3: Chapter 9 -->
+            <div class="book-page" data-page="3">
+              <div class="book-page-face book-chapter-page">
+                <div class="chapter-label">SAMPLE CHAPTER</div>
+                <div class="chapter-number">Chapter 9</div>
+                <h3 class="chapter-title">The AI-Ready Organization</h3>
+                <div class="chapter-divider"></div>
+                <div class="chapter-text">
+                  <p>An AI-ready organization is not one that has adopted the latest tools. It is one where people at every level understand how to think alongside intelligent systems.</p>
+                  <p>This requires a cultural shift, not a technology upgrade. Leaders must move from asking &ldquo;What can AI do?&rdquo; to asking &ldquo;How should our organization think differently now that AI exists?&rdquo;</p>
+                  <p>The organizations that thrive will be those that treat AI as a thinking partner, not a magic solution. They build feedback loops, encourage experimentation, and accept that transformation is continuous.</p>
+                  <p>Becoming AI-ready is not a destination. It is an ongoing practice of adaptation.</p>
+                </div>
+                <div class="chapter-page-num">156</div>
+              </div>
+            </div>
+            <!-- Navigation arrows -->
+            <button class="book-nav book-nav-prev" id="bookPrev" aria-label="Previous page">&larr;</button>
+            <button class="book-nav book-nav-next" id="bookNext" aria-label="Next page">&rarr;</button>
+            <!-- Page indicator -->
+            <div class="book-page-dots">
+              <span class="book-dot active" data-dot="0"></span>
+              <span class="book-dot" data-dot="1"></span>
+              <span class="book-dot" data-dot="2"></span>
+              <span class="book-dot" data-dot="3"></span>
             </div>
           </div>
-          <div class="book-shadow"></div>
-          <div class="book-hover-hint">Hover to open</div>
         </div>
         <div class="book-info">
           <div class="book-category">PUBLISHED WORKS</div>
@@ -319,5 +363,48 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="../js/forest.js"></script>
   <script src="../js/app.js"></script>
+  <script>
+  (function() {
+    var reader = document.getElementById('bookReader');
+    if (!reader) return;
+    var pages = reader.querySelectorAll('.book-page');
+    var dots = reader.querySelectorAll('.book-dot');
+    var prevBtn = document.getElementById('bookPrev');
+    var nextBtn = document.getElementById('bookNext');
+    var current = 0;
+    var total = pages.length;
+
+    function goTo(idx) {
+      if (idx < 0 || idx >= total) return;
+      var oldPage = pages[current];
+      var newPage = pages[idx];
+      var goingForward = idx > current;
+
+      oldPage.classList.add(goingForward ? 'flip-left' : 'flip-right');
+      oldPage.classList.remove('active');
+
+      setTimeout(function() {
+        oldPage.classList.remove('flip-left', 'flip-right');
+        newPage.classList.add(goingForward ? 'enter-right' : 'enter-left');
+        newPage.classList.add('active');
+        setTimeout(function() {
+          newPage.classList.remove('enter-right', 'enter-left');
+        }, 50);
+      }, 400);
+
+      current = idx;
+      dots.forEach(function(d, i) { d.classList.toggle('active', i === current); });
+      prevBtn.style.opacity = current === 0 ? '0.2' : '1';
+      nextBtn.style.opacity = current === total - 1 ? '0.2' : '1';
+    }
+
+    prevBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current - 1); });
+    nextBtn.addEventListener('click', function(e) { e.stopPropagation(); goTo(current + 1); });
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function(e) { e.stopPropagation(); goTo(parseInt(dot.dataset.dot)); });
+    });
+    prevBtn.style.opacity = '0.2';
+  })();
+  </script>
 </body>
 </html>
