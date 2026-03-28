@@ -1422,12 +1422,17 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .book-reader {
   width: 380px; height: 540px;
   position: relative;
+}
+
+/* Pages clipping wrapper */
+.book-pages-clip {
+  position: absolute; inset: 0;
   border-radius: 4px 12px 12px 4px;
+  overflow: hidden;
   box-shadow:
     8px 8px 30px rgba(0,0,0,0.5),
     0 0 60px rgba(0,0,0,0.2),
     inset 0 0 0 1px rgba(122,154,110,0.05);
-  overflow: hidden;
 }
 
 /* --- Pages --- */
