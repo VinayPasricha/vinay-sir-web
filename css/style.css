@@ -1415,6 +1415,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .book-cover-wrap {
   flex-shrink: 0; width: 340px;
   display: flex; flex-direction: column; align-items: center;
+  perspective: 1200px;
 }
 
 /* --- 3D Book Container --- */
@@ -1422,7 +1423,6 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   width: 280px; height: 400px;
   position: relative;
   transform-style: preserve-3d;
-  perspective: 1200px;
   transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   cursor: pointer;
 }
