@@ -99,7 +99,7 @@
 
     setupScene() {
       this.scene = new THREE.Scene();
-      this.fog = new THREE.FogExp2(0x1a3020, 0.004);
+      this.fog = new THREE.FogExp2(0x4a7a50, 0.003);
       this.scene.fog = this.fog;
 
       /* ── Sky dome — gradient canvas on inverted sphere ── */
@@ -107,16 +107,16 @@
       skyCanvas.width = 2; skyCanvas.height = 512;
       const sctx = skyCanvas.getContext('2d');
       const skyGrad = sctx.createLinearGradient(0, 0, 0, 512);
-      /* Deep blue-purple zenith → blue → soft teal → warm golden horizon */
-      skyGrad.addColorStop(0, '#0a0e1a');
-      skyGrad.addColorStop(0.15, '#101830');
-      skyGrad.addColorStop(0.35, '#1a2a48');
-      skyGrad.addColorStop(0.55, '#2a4060');
-      skyGrad.addColorStop(0.72, '#3a5a60');
-      skyGrad.addColorStop(0.85, '#5a7a60');
-      skyGrad.addColorStop(0.92, '#8a9060');
-      skyGrad.addColorStop(0.97, '#c0a060');
-      skyGrad.addColorStop(1.0, '#e8b860');
+      /* Bright daytime sky — deep blue zenith → light blue → warm golden horizon */
+      skyGrad.addColorStop(0, '#1a2a4a');
+      skyGrad.addColorStop(0.15, '#2a4068');
+      skyGrad.addColorStop(0.35, '#3a6090');
+      skyGrad.addColorStop(0.55, '#5080a8');
+      skyGrad.addColorStop(0.72, '#70a0b0');
+      skyGrad.addColorStop(0.85, '#a0c0a0');
+      skyGrad.addColorStop(0.92, '#c8c880');
+      skyGrad.addColorStop(0.97, '#e8d080');
+      skyGrad.addColorStop(1.0, '#ffe8a0');
       sctx.fillStyle = skyGrad;
       sctx.fillRect(0, 0, 2, 512);
       const skyTex = new THREE.CanvasTexture(skyCanvas);
@@ -139,15 +139,16 @@
       const gctx = glowCanvas.getContext('2d');
       const cx = glowSize / 2, cy = glowSize / 2;
 
-      /* Outer soft glow */
+      /* Intense radial glow */
       const outerGlow = gctx.createRadialGradient(cx, cy, 0, cx, cy, cx);
-      outerGlow.addColorStop(0, 'rgba(255, 255, 220, 1)');
-      outerGlow.addColorStop(0.08, 'rgba(255, 250, 180, 1)');
-      outerGlow.addColorStop(0.15, 'rgba(255, 230, 120, 0.9)');
-      outerGlow.addColorStop(0.3, 'rgba(255, 200, 60, 0.4)');
-      outerGlow.addColorStop(0.5, 'rgba(255, 180, 40, 0.12)');
-      outerGlow.addColorStop(0.7, 'rgba(255, 160, 20, 0.04)');
-      outerGlow.addColorStop(1, 'rgba(255, 140, 0, 0)');
+      outerGlow.addColorStop(0, 'rgba(255, 255, 255, 1)');
+      outerGlow.addColorStop(0.05, 'rgba(255, 255, 230, 1)');
+      outerGlow.addColorStop(0.12, 'rgba(255, 245, 180, 1)');
+      outerGlow.addColorStop(0.2, 'rgba(255, 230, 120, 0.85)');
+      outerGlow.addColorStop(0.35, 'rgba(255, 210, 70, 0.5)');
+      outerGlow.addColorStop(0.5, 'rgba(255, 190, 50, 0.25)');
+      outerGlow.addColorStop(0.7, 'rgba(255, 170, 30, 0.08)');
+      outerGlow.addColorStop(1, 'rgba(255, 150, 10, 0)');
       gctx.fillStyle = outerGlow;
       gctx.fillRect(0, 0, glowSize, glowSize);
 
@@ -158,7 +159,7 @@
         depthWrite: false,
       });
       const glowSprite = new THREE.Sprite(glowSpriteMat);
-      glowSprite.scale.set(40, 40, 1);
+      glowSprite.scale.set(55, 55, 1);
       sunGroup.add(glowSprite);
       this.sunGlowSprite = glowSprite;
 
@@ -169,22 +170,23 @@
       const rctx = rayCanvas.getContext('2d');
       const rcx = raySize / 2, rcy = raySize / 2;
 
-      /* Draw long tapered ray beams */
-      const numRays = 16;
+      /* Draw bright, bold sun ray beams */
+      const numRays = 20;
       for (let i = 0; i < numRays; i++) {
         const angle = (i / numRays) * Math.PI * 2;
-        const rayLen = (i % 2 === 0) ? raySize * 0.48 : raySize * 0.35;
-        const rayWidth = (i % 2 === 0) ? 0.045 : 0.03;
+        const rayLen = (i % 3 === 0) ? raySize * 0.49 : (i % 2 === 0) ? raySize * 0.44 : raySize * 0.38;
+        const rayWidth = (i % 3 === 0) ? 0.07 : (i % 2 === 0) ? 0.05 : 0.035;
 
         rctx.save();
         rctx.translate(rcx, rcy);
         rctx.rotate(angle);
 
         const rayGrad = rctx.createLinearGradient(0, 0, rayLen, 0);
-        rayGrad.addColorStop(0, 'rgba(255, 245, 180, 0.7)');
-        rayGrad.addColorStop(0.2, 'rgba(255, 230, 100, 0.4)');
-        rayGrad.addColorStop(0.5, 'rgba(255, 210, 60, 0.15)');
-        rayGrad.addColorStop(1, 'rgba(255, 190, 30, 0)');
+        rayGrad.addColorStop(0, 'rgba(255, 255, 210, 0.95)');
+        rayGrad.addColorStop(0.1, 'rgba(255, 240, 150, 0.7)');
+        rayGrad.addColorStop(0.3, 'rgba(255, 220, 80, 0.4)');
+        rayGrad.addColorStop(0.6, 'rgba(255, 200, 50, 0.15)');
+        rayGrad.addColorStop(1, 'rgba(255, 180, 30, 0)');
 
         rctx.fillStyle = rayGrad;
         rctx.beginPath();
@@ -196,28 +198,29 @@
         rctx.restore();
       }
 
-      /* Extra bright center on ray canvas */
-      const centerGlow = rctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, raySize * 0.08);
-      centerGlow.addColorStop(0, 'rgba(255, 255, 240, 0.6)');
-      centerGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+      /* Bright center bloom on ray canvas */
+      const centerGlow = rctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, raySize * 0.12);
+      centerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+      centerGlow.addColorStop(0.5, 'rgba(255, 250, 200, 0.3)');
+      centerGlow.addColorStop(1, 'rgba(255, 240, 180, 0)');
       rctx.fillStyle = centerGlow;
       rctx.fillRect(0, 0, raySize, raySize);
 
       const rayTex = new THREE.CanvasTexture(rayCanvas);
       const raySpriteMat = new THREE.SpriteMaterial({
-        map: rayTex, transparent: true, opacity: 0.7,
+        map: rayTex, transparent: true, opacity: 0.9,
         blending: THREE.AdditiveBlending, fog: false,
         depthWrite: false,
       });
       const raySprite = new THREE.Sprite(raySpriteMat);
-      raySprite.scale.set(70, 70, 1);
+      raySprite.scale.set(90, 90, 1);
       sunGroup.add(raySprite);
       this.sunRaySprite = raySprite;
 
       /* --- Bright white sun disc (3D sphere) --- */
-      const sunDiscGeo = new THREE.SphereGeometry(3, 32, 32);
+      const sunDiscGeo = new THREE.SphereGeometry(4.5, 32, 32);
       const sunDiscMat = new THREE.MeshBasicMaterial({
-        color: 0xfffff0, fog: false,
+        color: 0xffffff, fog: false,
       });
       sunGroup.add(new THREE.Mesh(sunDiscGeo, sunDiscMat));
 
@@ -226,19 +229,19 @@
       this.scene.add(sunGroup);
       this.sunVisual = sunGroup;
 
-      /* Brighter lighting to match the sky */
-      this.scene.add(new THREE.HemisphereLight(0xb0d8f0, 0x4a7a3a, 1.0));
-      this.scene.add(new THREE.AmbientLight(0x3a5a2a, 0.8));
+      /* Bright sunlit scene lighting */
+      this.scene.add(new THREE.HemisphereLight(0xd0ecff, 0x6a9a4a, 1.6));
+      this.scene.add(new THREE.AmbientLight(0x6a8a5a, 1.2));
 
-      this.sun = new THREE.DirectionalLight(0xfff8e0, 2.5);
+      this.sun = new THREE.DirectionalLight(0xfff8e0, 3.5);
       this.sun.position.set(-15, 50, 15);
       this.scene.add(this.sun);
 
-      const fill = new THREE.DirectionalLight(0xc0e0c0, 0.8);
+      const fill = new THREE.DirectionalLight(0xd0f0d0, 1.2);
       fill.position.set(15, 30, -15);
       this.scene.add(fill);
 
-      const backFill = new THREE.DirectionalLight(0xffe8c0, 0.4);
+      const backFill = new THREE.DirectionalLight(0xffe8c0, 0.8);
       backFill.position.set(0, 20, -40);
       this.scene.add(backFill);
     }
@@ -1240,12 +1243,12 @@
         /* Slowly rotate the ray sprite for a beaming effect */
         if (this.sunRaySprite) {
           this.sunRaySprite.material.rotation = time * 0.04;
-          const rayPulse = 70 + Math.sin(time * 0.5) * 4;
+          const rayPulse = 90 + Math.sin(time * 0.5) * 5;
           this.sunRaySprite.scale.set(rayPulse, rayPulse, 1);
         }
         /* Gentle glow pulsation */
         if (this.sunGlowSprite) {
-          const glowPulse = 40 + Math.sin(time * 0.8) * 2;
+          const glowPulse = 55 + Math.sin(time * 0.8) * 3;
           this.sunGlowSprite.scale.set(glowPulse, glowPulse, 1);
         }
       }
