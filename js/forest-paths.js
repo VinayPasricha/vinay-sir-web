@@ -129,6 +129,49 @@
       this.scene.add(sky);
       this.sky = sky;
 
+      /* ── Beaming sun in the sky ── */
+      const sunGroup = new THREE.Group();
+
+      /* Sun core — bright glowing sphere */
+      const sunCoreGeo = new THREE.SphereGeometry(4, 32, 32);
+      const sunCoreMat = new THREE.MeshBasicMaterial({
+        color: 0xfff4d0, fog: false,
+      });
+      const sunCore = new THREE.Mesh(sunCoreGeo, sunCoreMat);
+      sunGroup.add(sunCore);
+
+      /* Inner glow — slightly larger, semi-transparent */
+      const sunGlowGeo = new THREE.SphereGeometry(5.5, 32, 32);
+      const sunGlowMat = new THREE.MeshBasicMaterial({
+        color: 0xffe080, transparent: true, opacity: 0.35, fog: false,
+      });
+      sunGroup.add(new THREE.Mesh(sunGlowGeo, sunGlowMat));
+
+      /* Outer halo — soft wide glow */
+      const sunHaloGeo = new THREE.SphereGeometry(8, 32, 32);
+      const sunHaloMat = new THREE.MeshBasicMaterial({
+        color: 0xffcc44, transparent: true, opacity: 0.12, fog: false,
+      });
+      sunGroup.add(new THREE.Mesh(sunHaloGeo, sunHaloMat));
+
+      /* Sun rays — flat planes radiating outward */
+      const rayMat = new THREE.MeshBasicMaterial({
+        color: 0xffe880, transparent: true, opacity: 0.18,
+        side: THREE.DoubleSide, fog: false,
+      });
+      for (let i = 0; i < 12; i++) {
+        const rayGeo = new THREE.PlaneGeometry(1.2, 14);
+        const ray = new THREE.Mesh(rayGeo, rayMat);
+        ray.rotation.z = (i / 12) * Math.PI * 2;
+        ray.position.y = 0;
+        sunGroup.add(ray);
+      }
+
+      /* Position the sun in the sky dome, matching directional light */
+      sunGroup.position.set(-25, 55, -30);
+      this.scene.add(sunGroup);
+      this.sunVisual = sunGroup;
+
       /* Brighter lighting to match the sky */
       this.scene.add(new THREE.HemisphereLight(0xb0d8f0, 0x4a7a3a, 1.0));
       this.scene.add(new THREE.AmbientLight(0x3a5a2a, 0.8));
@@ -1131,6 +1174,13 @@
       /* Sky dome follows camera */
       if (this.sky) {
         this.sky.position.copy(this.camera.position);
+      }
+
+      /* Sun visual — slow ray rotation + gentle pulse */
+      if (this.sunVisual) {
+        this.sunVisual.rotation.z = time * 0.05;
+        const pulse = 1 + Math.sin(time * 0.8) * 0.08;
+        this.sunVisual.scale.setScalar(pulse);
       }
 
 
