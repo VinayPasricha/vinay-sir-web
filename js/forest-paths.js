@@ -279,14 +279,19 @@
       const c = document.createElement('canvas');
       c.width = 512; c.height = 512;
       const ctx = c.getContext('2d');
-      ctx.fillStyle = '#1e2e18';
+      ctx.fillStyle = '#1a3818';
       ctx.fillRect(0, 0, 512, 512);
-      for (let pass = 0; pass < 2; pass++) {
-        for (let i = 0; i < [2000, 1000][pass]; i++) {
-          const g = 20 + pass * 15 + Math.random() * 30;
-          ctx.fillStyle = `rgba(${g * 0.4},${g},${5 + Math.random() * 10},${[0.25, 0.12][pass]})`;
+      /* Rich forest floor with moss, leaves, earth tones */
+      for (let pass = 0; pass < 3; pass++) {
+        const counts = [3000, 1500, 800];
+        const alphas = [0.3, 0.15, 0.2];
+        const sizes = [3, 5, 2];
+        for (let i = 0; i < counts[pass]; i++) {
+          const g = 25 + pass * 12 + Math.random() * 35;
+          const brownMix = Math.random() > 0.7 ? 1.2 : 0.5;
+          ctx.fillStyle = `rgba(${g * brownMix},${g},${5 + Math.random() * 12},${alphas[pass]})`;
           ctx.beginPath();
-          ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * [2, 5][pass], 0, Math.PI * 2);
+          ctx.arc(Math.random() * 512, Math.random() * 512, Math.random() * sizes[pass], 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -295,7 +300,7 @@
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       tex.repeat.set(6, 6);
 
-      const geo = new THREE.PlaneGeometry(120, 120, 32, 32);
+      const geo = new THREE.PlaneGeometry(140, 140, 40, 40);
       const pos = geo.attributes.position.array;
       for (let i = 2; i < pos.length; i += 3) {
         const px = pos[i - 2] * 0.12, py = pos[i - 1] * 0.12;
@@ -481,46 +486,46 @@
         return Math.sqrt(min);
       };
 
+      /* ── Dense forest: 600 trees over a larger area ── */
       const positions = [];
       let tries = 0;
-      while (positions.length < 250 && tries < 2000) {
+      while (positions.length < 600 && tries < 5000) {
         tries++;
-        const x = (Math.random() - 0.5) * 80, z = (Math.random() - 0.5) * 80;
-        if (x * x + z * z < 20) continue;  // center clearing
-        if (distPaths(x, z) < 2.5) continue;  // path corridors
+        const x = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100;
+        if (x * x + z * z < 16) continue;  // center clearing
+        if (distPaths(x, z) < 2.0) continue;  // narrower path corridors
         let ok = true;
-        for (let j = positions.length - 1; j >= Math.max(0, positions.length - 15); j--) {
-          if ((x - positions[j].x) ** 2 + (z - positions[j].z) ** 2 < 2.5) { ok = false; break; }
+        for (let j = positions.length - 1; j >= Math.max(0, positions.length - 20); j--) {
+          if ((x - positions[j].x) ** 2 + (z - positions[j].z) ** 2 < 1.8) { ok = false; break; }
         }
         if (!ok) continue;
-        positions.push({ x, z, s: 0.6 + Math.random() * 0.8, r: Math.random() * Math.PI * 2, ci: Math.floor(Math.random() * 6), type: Math.random() > 0.2 ? 'c' : 'r' });
+        /* More variety: 55% conifer, 30% broadleaf, 15% tall broadleaf */
+        const rr = Math.random();
+        const type = rr < 0.55 ? 'c' : rr < 0.85 ? 'r' : 'tall';
+        positions.push({ x, z, s: 0.7 + Math.random() * 1.0, r: Math.random() * Math.PI * 2, ci: Math.floor(Math.random() * 8), type });
       }
 
       const count = positions.length;
       const trunkMat = new THREE.MeshStandardMaterial({ color: 0x2a1808, roughness: 0.92 });
-      const canopyMat = new THREE.MeshStandardMaterial({ roughness: 0.82 });
+      const canopyMat = new THREE.MeshStandardMaterial({ roughness: 0.78 });
 
-      const trunkGeo = new THREE.CylinderGeometry(0.08, 0.16, 2.0, 4);
-      const cone1 = new THREE.ConeGeometry(1.0, 2.2, 5);
-      const cone2 = new THREE.ConeGeometry(0.75, 1.6, 5);
-      const cone3 = new THREE.ConeGeometry(0.5, 1.2, 5);
-      const crownGeo = new THREE.IcosahedronGeometry(0.85, 0);
+      /* Taller trunks for a more mature forest */
+      const trunkGeo = new THREE.CylinderGeometry(0.1, 0.22, 3.0, 5);
+      const cone1 = new THREE.ConeGeometry(1.2, 2.6, 6);
+      const cone2 = new THREE.ConeGeometry(0.9, 2.0, 6);
+      const cone3 = new THREE.ConeGeometry(0.6, 1.5, 6);
+      const crownGeo = new THREE.IcosahedronGeometry(1.1, 1);
 
-      const greens = [0x2a7228, 0x328430, 0x266622, 0x3a8e36, 0x2e7a2e, 0x408840].map(c => new THREE.Color(c));
+      const greens = [0x1a5a18, 0x2a7228, 0x328430, 0x266622, 0x3a8e36, 0x2e7a2e, 0x408840, 0x4a9a48].map(c => new THREE.Color(c));
 
       const trunkMesh = new THREE.InstancedMesh(trunkGeo, trunkMat, count);
-      /* shadows disabled for performance */
       const c1Mesh = new THREE.InstancedMesh(cone1, canopyMat.clone(), count);
-
       c1Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const c2Mesh = new THREE.InstancedMesh(cone2, canopyMat.clone(), count);
-
       c2Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const c3Mesh = new THREE.InstancedMesh(cone3, canopyMat.clone(), count);
-
       c3Mesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
       const crMesh = new THREE.InstancedMesh(crownGeo, canopyMat.clone(), count);
-
       crMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(count * 3), 3);
 
       const d = new THREE.Object3D();
@@ -530,28 +535,94 @@
       positions.forEach((p, i) => {
         const s = p.s;
         col.copy(greens[p.ci]);
-        col.r += (Math.random() - 0.5) * 0.03;
-        col.g += (Math.random() - 0.5) * 0.04;
+        col.r += (Math.random() - 0.5) * 0.04;
+        col.g += (Math.random() - 0.5) * 0.06;
 
-        d.position.set(p.x, s * 1.0, p.z); d.scale.set(s, s, s); d.rotation.set(0, p.r, 0); d.updateMatrix();
+        /* Trunk */
+        d.position.set(p.x, s * 1.5, p.z); d.scale.set(s, s, s); d.rotation.set(0, p.r, 0); d.updateMatrix();
         trunkMesh.setMatrixAt(i, d.matrix);
 
         if (p.type === 'c') {
-          d.position.set(p.x, s * 2.4, p.z); d.scale.set(s, s * (0.8 + Math.random() * 0.4), s); d.updateMatrix();
+          /* Conifer — 3 stacked cones, taller */
+          d.position.set(p.x, s * 3.2, p.z); d.scale.set(s, s * (0.9 + Math.random() * 0.5), s); d.updateMatrix();
           c1Mesh.setMatrixAt(i, d.matrix); c1Mesh.instanceColor.setXYZ(i, col.r, col.g, col.b);
-          d.position.y = s * 3.6; d.scale.set(s * 0.8, s * (0.7 + Math.random() * 0.4), s * 0.8); d.updateMatrix();
+          d.position.y = s * 4.6; d.scale.set(s * 0.8, s * (0.8 + Math.random() * 0.5), s * 0.8); d.updateMatrix();
           c2Mesh.setMatrixAt(i, d.matrix); c2Mesh.instanceColor.setXYZ(i, col.r * 0.95, col.g * 1.05, col.b * 0.95);
-          d.position.y = s * 4.5; d.scale.set(s * 0.6, s * (0.6 + Math.random() * 0.3), s * 0.6); d.updateMatrix();
+          d.position.y = s * 5.8; d.scale.set(s * 0.6, s * (0.6 + Math.random() * 0.4), s * 0.6); d.updateMatrix();
           c3Mesh.setMatrixAt(i, d.matrix); c3Mesh.instanceColor.setXYZ(i, col.r * 0.9, col.g * 1.1, col.b * 0.9);
           hide(); crMesh.setMatrixAt(i, d.matrix);
+        } else if (p.type === 'tall') {
+          /* Tall broadleaf — big round crown on a tall trunk */
+          d.position.set(p.x, s * 4.0, p.z);
+          d.scale.set(s * (1.3 + Math.random() * 0.5), s * (1.0 + Math.random() * 0.5), s * (1.3 + Math.random() * 0.5));
+          d.updateMatrix();
+          crMesh.setMatrixAt(i, d.matrix); crMesh.instanceColor.setXYZ(i, col.r * 0.9, col.g * 1.2, col.b * 0.8);
+          hide(); c1Mesh.setMatrixAt(i, d.matrix); c2Mesh.setMatrixAt(i, d.matrix); c3Mesh.setMatrixAt(i, d.matrix);
         } else {
-          d.position.set(p.x, s * 2.0, p.z); d.scale.set(s * (1 + Math.random() * 0.3), s * (0.7 + Math.random() * 0.4), s * (1 + Math.random() * 0.3)); d.updateMatrix();
+          /* Standard broadleaf */
+          d.position.set(p.x, s * 2.8, p.z);
+          d.scale.set(s * (1.1 + Math.random() * 0.4), s * (0.8 + Math.random() * 0.5), s * (1.1 + Math.random() * 0.4));
+          d.updateMatrix();
           crMesh.setMatrixAt(i, d.matrix); crMesh.instanceColor.setXYZ(i, col.r * 1.1, col.g * 1.15, col.b);
           hide(); c1Mesh.setMatrixAt(i, d.matrix); c2Mesh.setMatrixAt(i, d.matrix); c3Mesh.setMatrixAt(i, d.matrix);
         }
       });
 
       this.scene.add(trunkMesh, c1Mesh, c2Mesh, c3Mesh, crMesh);
+
+      /* ── Undergrowth: bushes & ferns scattered on the ground ── */
+      const bushPositions = [];
+      let bt = 0;
+      while (bushPositions.length < 400 && bt < 4000) {
+        bt++;
+        const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
+        if (x * x + z * z < 12) continue;
+        if (distPaths(x, z) < 1.5) continue;
+        bushPositions.push({ x, z });
+      }
+
+      const bushGreens = [0x1e5a1e, 0x2a6a22, 0x367a30, 0x2e6e28, 0x448844, 0x1a4a18].map(c => new THREE.Color(c));
+      const bushGeo = new THREE.IcosahedronGeometry(0.4, 0);
+      const bushMat = new THREE.MeshStandardMaterial({ roughness: 0.85, color: 0x2a6a22 });
+      const bushMesh = new THREE.InstancedMesh(bushGeo, bushMat, bushPositions.length);
+      bushMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(bushPositions.length * 3), 3);
+
+      bushPositions.forEach((bp, i) => {
+        const bScale = 0.5 + Math.random() * 1.0;
+        d.position.set(bp.x, bScale * 0.3, bp.z);
+        d.scale.set(bScale * (0.8 + Math.random() * 0.6), bScale * (0.5 + Math.random() * 0.5), bScale * (0.8 + Math.random() * 0.6));
+        d.rotation.set(0, Math.random() * Math.PI * 2, 0);
+        d.updateMatrix();
+        bushMesh.setMatrixAt(i, d.matrix);
+        const bc = bushGreens[Math.floor(Math.random() * bushGreens.length)].clone();
+        bc.r += (Math.random() - 0.5) * 0.03;
+        bc.g += (Math.random() - 0.5) * 0.05;
+        bushMesh.instanceColor.setXYZ(i, bc.r, bc.g, bc.b);
+      });
+
+      this.scene.add(bushMesh);
+
+      /* ── Tall grass patches near paths ── */
+      const grassGeo = new THREE.ConeGeometry(0.08, 0.6, 3);
+      const grassMat = new THREE.MeshStandardMaterial({ color: 0x3a8a30, roughness: 0.9 });
+      const grassCount = 800;
+      const grassMesh = new THREE.InstancedMesh(grassGeo, grassMat, grassCount);
+      grassMesh.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(grassCount * 3), 3);
+
+      for (let i = 0; i < grassCount; i++) {
+        const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
+        const gs = 0.4 + Math.random() * 0.8;
+        d.position.set(x, gs * 0.3, z);
+        d.scale.set(gs * (0.6 + Math.random() * 0.4), gs, gs * (0.6 + Math.random() * 0.4));
+        d.rotation.set((Math.random() - 0.5) * 0.3, Math.random() * Math.PI * 2, (Math.random() - 0.5) * 0.3);
+        d.updateMatrix();
+        grassMesh.setMatrixAt(i, d.matrix);
+        const gc = new THREE.Color(0x2a7a28);
+        gc.g += Math.random() * 0.08;
+        gc.r += (Math.random() - 0.5) * 0.02;
+        grassMesh.instanceColor.setXYZ(i, gc.r, gc.g, gc.b);
+      }
+      this.scene.add(grassMesh);
     }
 
     createCenterGlow() {
@@ -579,11 +650,11 @@
     }
 
     createFireflies() {
-      const count = 30;
+      const count = 60;
       const positions = new Float32Array(count * 3);
       this.fireflyData = [];
       for (let i = 0; i < count; i++) {
-        const x = (Math.random() - 0.5) * 40, y = 1 + Math.random() * 3, z = (Math.random() - 0.5) * 40;
+        const x = (Math.random() - 0.5) * 60, y = 1 + Math.random() * 5, z = (Math.random() - 0.5) * 60;
         positions[i * 3] = x; positions[i * 3 + 1] = y; positions[i * 3 + 2] = z;
         this.fireflyData.push({ baseX: x, baseY: y, baseZ: z, phase: Math.random() * Math.PI * 2, speed: 0.2 + Math.random() * 0.5, radius: 0.5 + Math.random() * 2 });
       }
