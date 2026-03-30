@@ -132,42 +132,96 @@
       /* ── Beaming sun in the sky ── */
       const sunGroup = new THREE.Group();
 
-      /* Sun core — bright glowing sphere */
-      const sunCoreGeo = new THREE.SphereGeometry(4, 32, 32);
-      const sunCoreMat = new THREE.MeshBasicMaterial({
-        color: 0xfff4d0, fog: false,
-      });
-      const sunCore = new THREE.Mesh(sunCoreGeo, sunCoreMat);
-      sunGroup.add(sunCore);
+      /* --- Sun glow sprite (canvas-drawn radial gradient) --- */
+      const glowSize = 512;
+      const glowCanvas = document.createElement('canvas');
+      glowCanvas.width = glowSize; glowCanvas.height = glowSize;
+      const gctx = glowCanvas.getContext('2d');
+      const cx = glowSize / 2, cy = glowSize / 2;
 
-      /* Inner glow — slightly larger, semi-transparent */
-      const sunGlowGeo = new THREE.SphereGeometry(5.5, 32, 32);
-      const sunGlowMat = new THREE.MeshBasicMaterial({
-        color: 0xffe080, transparent: true, opacity: 0.35, fog: false,
-      });
-      sunGroup.add(new THREE.Mesh(sunGlowGeo, sunGlowMat));
+      /* Outer soft glow */
+      const outerGlow = gctx.createRadialGradient(cx, cy, 0, cx, cy, cx);
+      outerGlow.addColorStop(0, 'rgba(255, 255, 220, 1)');
+      outerGlow.addColorStop(0.08, 'rgba(255, 250, 180, 1)');
+      outerGlow.addColorStop(0.15, 'rgba(255, 230, 120, 0.9)');
+      outerGlow.addColorStop(0.3, 'rgba(255, 200, 60, 0.4)');
+      outerGlow.addColorStop(0.5, 'rgba(255, 180, 40, 0.12)');
+      outerGlow.addColorStop(0.7, 'rgba(255, 160, 20, 0.04)');
+      outerGlow.addColorStop(1, 'rgba(255, 140, 0, 0)');
+      gctx.fillStyle = outerGlow;
+      gctx.fillRect(0, 0, glowSize, glowSize);
 
-      /* Outer halo — soft wide glow */
-      const sunHaloGeo = new THREE.SphereGeometry(8, 32, 32);
-      const sunHaloMat = new THREE.MeshBasicMaterial({
-        color: 0xffcc44, transparent: true, opacity: 0.12, fog: false,
+      const glowTex = new THREE.CanvasTexture(glowCanvas);
+      const glowSpriteMat = new THREE.SpriteMaterial({
+        map: glowTex, transparent: true, opacity: 1.0,
+        blending: THREE.AdditiveBlending, fog: false,
+        depthWrite: false,
       });
-      sunGroup.add(new THREE.Mesh(sunHaloGeo, sunHaloMat));
+      const glowSprite = new THREE.Sprite(glowSpriteMat);
+      glowSprite.scale.set(40, 40, 1);
+      sunGroup.add(glowSprite);
+      this.sunGlowSprite = glowSprite;
 
-      /* Sun rays — flat planes radiating outward */
-      const rayMat = new THREE.MeshBasicMaterial({
-        color: 0xffe880, transparent: true, opacity: 0.18,
-        side: THREE.DoubleSide, fog: false,
-      });
-      for (let i = 0; i < 12; i++) {
-        const rayGeo = new THREE.PlaneGeometry(1.2, 14);
-        const ray = new THREE.Mesh(rayGeo, rayMat);
-        ray.rotation.z = (i / 12) * Math.PI * 2;
-        ray.position.y = 0;
-        sunGroup.add(ray);
+      /* --- Sun rays sprite (canvas-drawn beams) --- */
+      const raySize = 1024;
+      const rayCanvas = document.createElement('canvas');
+      rayCanvas.width = raySize; rayCanvas.height = raySize;
+      const rctx = rayCanvas.getContext('2d');
+      const rcx = raySize / 2, rcy = raySize / 2;
+
+      /* Draw long tapered ray beams */
+      const numRays = 16;
+      for (let i = 0; i < numRays; i++) {
+        const angle = (i / numRays) * Math.PI * 2;
+        const rayLen = (i % 2 === 0) ? raySize * 0.48 : raySize * 0.35;
+        const rayWidth = (i % 2 === 0) ? 0.045 : 0.03;
+
+        rctx.save();
+        rctx.translate(rcx, rcy);
+        rctx.rotate(angle);
+
+        const rayGrad = rctx.createLinearGradient(0, 0, rayLen, 0);
+        rayGrad.addColorStop(0, 'rgba(255, 245, 180, 0.7)');
+        rayGrad.addColorStop(0.2, 'rgba(255, 230, 100, 0.4)');
+        rayGrad.addColorStop(0.5, 'rgba(255, 210, 60, 0.15)');
+        rayGrad.addColorStop(1, 'rgba(255, 190, 30, 0)');
+
+        rctx.fillStyle = rayGrad;
+        rctx.beginPath();
+        rctx.moveTo(0, -rayLen * rayWidth);
+        rctx.lineTo(rayLen, 0);
+        rctx.lineTo(0, rayLen * rayWidth);
+        rctx.closePath();
+        rctx.fill();
+        rctx.restore();
       }
 
-      /* Position the sun high in the sky, offset so it's visible from camera */
+      /* Extra bright center on ray canvas */
+      const centerGlow = rctx.createRadialGradient(rcx, rcy, 0, rcx, rcy, raySize * 0.08);
+      centerGlow.addColorStop(0, 'rgba(255, 255, 240, 0.6)');
+      centerGlow.addColorStop(1, 'rgba(255, 255, 200, 0)');
+      rctx.fillStyle = centerGlow;
+      rctx.fillRect(0, 0, raySize, raySize);
+
+      const rayTex = new THREE.CanvasTexture(rayCanvas);
+      const raySpriteMat = new THREE.SpriteMaterial({
+        map: rayTex, transparent: true, opacity: 0.7,
+        blending: THREE.AdditiveBlending, fog: false,
+        depthWrite: false,
+      });
+      const raySprite = new THREE.Sprite(raySpriteMat);
+      raySprite.scale.set(70, 70, 1);
+      sunGroup.add(raySprite);
+      this.sunRaySprite = raySprite;
+
+      /* --- Bright white sun disc (3D sphere) --- */
+      const sunDiscGeo = new THREE.SphereGeometry(3, 32, 32);
+      const sunDiscMat = new THREE.MeshBasicMaterial({
+        color: 0xfffff0, fog: false,
+      });
+      sunGroup.add(new THREE.Mesh(sunDiscGeo, sunDiscMat));
+
+      /* Position the sun in the sky */
       sunGroup.position.set(-20, 70, -40);
       this.scene.add(sunGroup);
       this.sunVisual = sunGroup;
@@ -1176,16 +1230,24 @@
         this.sky.position.copy(this.camera.position);
       }
 
-      /* Sun visual — follow camera + slow ray rotation + gentle pulse */
+      /* Sun visual — follow camera, rotate rays, pulse glow */
       if (this.sunVisual) {
         this.sunVisual.position.set(
           this.camera.position.x - 20,
           this.camera.position.y + 15,
           this.camera.position.z - 65
         );
-        this.sunVisual.rotation.z = time * 0.05;
-        const pulse = 1 + Math.sin(time * 0.8) * 0.08;
-        this.sunVisual.scale.setScalar(pulse);
+        /* Slowly rotate the ray sprite for a beaming effect */
+        if (this.sunRaySprite) {
+          this.sunRaySprite.material.rotation = time * 0.04;
+          const rayPulse = 70 + Math.sin(time * 0.5) * 4;
+          this.sunRaySprite.scale.set(rayPulse, rayPulse, 1);
+        }
+        /* Gentle glow pulsation */
+        if (this.sunGlowSprite) {
+          const glowPulse = 40 + Math.sin(time * 0.8) * 2;
+          this.sunGlowSprite.scale.set(glowPulse, glowPulse, 1);
+        }
       }
 
 
