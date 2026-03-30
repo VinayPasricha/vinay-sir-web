@@ -492,8 +492,8 @@
       while (positions.length < 600 && tries < 5000) {
         tries++;
         const x = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100;
-        if (x * x + z * z < 16) continue;  // center clearing
-        if (distPaths(x, z) < 2.0) continue;  // narrower path corridors
+        if (x * x + z * z < 64) continue;  // center clearing (radius ~8)
+        if (distPaths(x, z) < 3.5) continue;  // keep paths clearly visible
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 20); j--) {
           if ((x - positions[j].x) ** 2 + (z - positions[j].z) ** 2 < 1.8) { ok = false; break; }
@@ -576,8 +576,8 @@
       while (bushPositions.length < 400 && bt < 4000) {
         bt++;
         const x = (Math.random() - 0.5) * 90, z = (Math.random() - 0.5) * 90;
-        if (x * x + z * z < 12) continue;
-        if (distPaths(x, z) < 1.5) continue;
+        if (x * x + z * z < 50) continue;
+        if (distPaths(x, z) < 2.5) continue;
         bushPositions.push({ x, z });
       }
 
@@ -888,9 +888,9 @@
           map: spriteTex, transparent: true, depthTest: true, sizeAttenuation: true,
         });
         const sprite = new THREE.Sprite(spriteMat);
-        /* Position above the endpoint, facing camera always */
-        sprite.position.set(ep.x, 4.5, ep.z);
-        sprite.scale.set(5, 1.6, 1);
+        /* Position well above treeline so markers are always visible */
+        sprite.position.set(ep.x, 7.5, ep.z);
+        sprite.scale.set(6, 1.9, 1);
         this.scene.add(sprite);
 
         this.markers.push({ pathIndex: i, sprite, plank });
