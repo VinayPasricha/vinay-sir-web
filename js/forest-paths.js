@@ -167,8 +167,8 @@
         sunGroup.add(ray);
       }
 
-      /* Position the sun in the sky dome, matching directional light */
-      sunGroup.position.set(-25, 55, -30);
+      /* Position the sun high in the sky, offset so it's visible from camera */
+      sunGroup.position.set(-20, 70, -40);
       this.scene.add(sunGroup);
       this.sunVisual = sunGroup;
 
@@ -1176,8 +1176,13 @@
         this.sky.position.copy(this.camera.position);
       }
 
-      /* Sun visual — slow ray rotation + gentle pulse */
+      /* Sun visual — follow camera + slow ray rotation + gentle pulse */
       if (this.sunVisual) {
+        this.sunVisual.position.set(
+          this.camera.position.x - 20,
+          this.camera.position.y + 15,
+          this.camera.position.z - 65
+        );
         this.sunVisual.rotation.z = time * 0.05;
         const pulse = 1 + Math.sin(time * 0.8) * 0.08;
         this.sunVisual.scale.setScalar(pulse);
