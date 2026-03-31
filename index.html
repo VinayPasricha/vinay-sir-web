@@ -37,6 +37,7 @@
       <button class="menu-close">Close</button>
       <ul class="menu-links">
         <li><a href="index.html">Home</a></li>
+        <li><a href="blog/index.html">Blog</a></li>
         <li><a href="pages/faq.html">FAQ</a></li>
         <li><a href="pages/connect.html">Connect</a></li>
         <li><a href="pages/course.html">AI Course</a></li>
@@ -80,11 +81,24 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 
+  <!-- React 18 UMD -->
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Framer Motion (global: Motion) -->
+  <script src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.js"></script>
+
+  <!-- Signal React UI is active before Three.js loads -->
+  <script>window.ForestUI = { mounted: true };</script>
+
   <!-- Three.js Post-Processing -->
   <script src="js/postprocessing.js"></script>
 
   <!-- Forest Paths 3D Experience -->
-  <script src="js/forest-paths.js"></script>
+  <script src="js/forest-paths.js?v=5"></script>
   <script src="js/app.js"></script>
+
+  <!-- React UI Overlay (React + Motion powered) -->
+  <div id="forest-ui-root"></div>
+  <script src="js/forest-ui.js"></script>
 </body>
 </html>
