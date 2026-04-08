@@ -518,6 +518,8 @@
         tries++;
         const x = (Math.random() - 0.5) * 100, z = (Math.random() - 0.5) * 100;
         if (x * x + z * z < 64) continue;
+        /* Wide clearance along entrance path (x≈0, z=0..35) so camera descent is unobstructed */
+        if (z > -2 && z < 38 && Math.abs(x) < 6) continue;
         if (distPaths(x, z) < 3.5) continue;
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 20); j--) {
