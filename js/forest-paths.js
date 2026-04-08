@@ -864,7 +864,6 @@
     /* ── PATH MARKERS — Wooden signposts with readable text + floating name sprites ── */
     createPathMarkers() {
       this.markers = [];
-      const postMat = new THREE.MeshStandardMaterial({ color: 0x3a2510, roughness: 0.9 });
 
       PATH_DATA.forEach((path, i) => {
         const ep = this.pathEndpoints[i];
@@ -873,51 +872,6 @@
         /* Position markers 40% along path (closer to center) so they're visible from junction */
         const mx = ep.x * 0.4;
         const mz = ep.z * 0.4;
-
-        /* Tall wooden signpost */
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 2.8, 6), postMat);
-        pole.position.set(mx, 1.4, mz);
-        this.scene.add(pole);
-
-        /* Wooden plank with text rendered on canvas */
-        const signCanvas = document.createElement('canvas');
-        signCanvas.width = 512; signCanvas.height = 128;
-        const sctx = signCanvas.getContext('2d');
-        sctx.fillStyle = '#5a4020';
-        sctx.fillRect(0, 0, 512, 128);
-        sctx.globalAlpha = 0.15;
-        for (let g = 0; g < 30; g++) {
-          sctx.strokeStyle = g % 2 === 0 ? '#3a2510' : '#6a5535';
-          sctx.lineWidth = 1 + Math.random() * 2;
-          sctx.beginPath();
-          sctx.moveTo(0, Math.random() * 128);
-          sctx.lineTo(512, Math.random() * 128);
-          sctx.stroke();
-        }
-        sctx.globalAlpha = 1;
-        sctx.strokeStyle = '#3a2510';
-        sctx.lineWidth = 6;
-        sctx.strokeRect(3, 3, 506, 122);
-        sctx.fillStyle = '#f2ece0';
-        sctx.font = 'bold 42px Georgia, serif';
-        sctx.textAlign = 'center';
-        sctx.textBaseline = 'middle';
-        sctx.shadowColor = 'rgba(0,0,0,0.6)';
-        sctx.shadowBlur = 4;
-        sctx.fillText(path.name, 256, 50);
-        sctx.font = '24px Georgia, serif';
-        sctx.fillStyle = '#d4c8a8';
-        sctx.shadowBlur = 2;
-        sctx.fillText(path.sub, 256, 95);
-
-        const signTex = new THREE.CanvasTexture(signCanvas);
-        const signMat = new THREE.MeshStandardMaterial({
-          map: signTex, roughness: 0.8, metalness: 0.05,
-        });
-        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.5, 0.08), signMat);
-        plank.position.set(mx, 2.6, mz);
-        plank.lookAt(0, 2.6, 0);
-        this.scene.add(plank);
 
         /* Floating name sprite — visible from center junction */
         const spriteCanvas = document.createElement('canvas');
@@ -960,7 +914,7 @@
         sprite.renderOrder = 999;
         this.scene.add(sprite);
 
-        this.markers.push({ pathIndex: i, sprite, plank });
+        this.markers.push({ pathIndex: i, sprite });
       });
     }
 
