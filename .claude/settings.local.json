@@ -11,7 +11,8 @@
       "Bash(done)",
       "mcp__653c2c97-89b0-4c67-9057-ce121e5d861b__deploy_to_vercel",
       "Bash(npx vercel --version)",
-      "Bash(npx vercel deploy --prod --yes)"
+      "Bash(npx vercel deploy --prod --yes)",
+      "Bash(curl -s \"https://vinay-pasricha-website.vercel.app/pages/path6.html\")"
     ]
   }
 }

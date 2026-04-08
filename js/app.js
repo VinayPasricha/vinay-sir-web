@@ -266,6 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (pathsContainer && typeof ForestPaths !== 'undefined') {
     /* Initialize Forest Paths scene — it handles its own splash/entry overlay */
     forestPaths = new ForestPaths('forest-paths-container');
+    window._forestInstance = forestPaths;
 
     /* ---- MICRO SOUND EFFECTS ---- */
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
