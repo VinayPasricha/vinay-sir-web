@@ -61,9 +61,9 @@
       this.setupPostProcessing();
       this.createTerrain();
       this.buildBranchingPaths(BRANCH_TREE, null);
+      this.createPond();
       this.plantInstancedForest();
       this.plantGrass();
-      this.createPond();
       this.createCenterGlow();
       this.createFireflies();
       this.createHUD();
@@ -521,8 +521,14 @@
         if (x * x + z * z < 64) continue;
         /* Wide clearance along entrance path (x≈0, z=0..35) so camera descent is unobstructed */
         if (z > -2 && z < 38 && Math.abs(x) < 6) continue;
-        /* Keep trees out of the pond area */
-        if (((x - 14) * (x - 14)) / 81 + ((z - 16) * (z - 16)) / 49 < 1.2) continue;
+        /* Keep trees out of water bodies */
+        if (this.waterExclusions) {
+          let inWater = false;
+          for (const ex of this.waterExclusions) {
+            if ((x - ex.x) ** 2 + (z - ex.z) ** 2 < (ex.r + 1) ** 2) { inWater = true; break; }
+          }
+          if (inWater) continue;
+        }
         if (distPaths(x, z) < 3.5) continue;
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 20); j--) {
@@ -684,8 +690,14 @@
         const x = r * Math.cos(theta);
         const z = r * Math.sin(theta);
         if (isOnPath(x, z)) continue;
-        /* Keep grass out of the pond */
-        if (((x - 14) * (x - 14)) / 64 + ((z - 16) * (z - 16)) / 36 < 1) continue;
+        /* Keep grass out of water bodies */
+        if (this.waterExclusions) {
+          let inWater = false;
+          for (const ex of this.waterExclusions) {
+            if ((x - ex.x) ** 2 + (z - ex.z) ** 2 < ex.r * ex.r) { inWater = true; break; }
+          }
+          if (inWater) continue;
+        }
         /* Only skip ~5% for tiny dirt patches */
         const n = snoise(x * 0.06, z * 0.06);
         if (n > 0.92) continue;
@@ -706,119 +718,160 @@
     }
 
     createPond() {
-      /* ── Natural pond to the right of the entrance path ── */
-      const pondX = 14, pondZ = 16;
-      const pondRadiusX = 7, pondRadiusZ = 5;
-      const segments = 48;
+      if (!THREE.Water) { console.warn('Water shader not loaded'); return; }
 
-      /* Organic pond shape — circle with noise displacement */
-      const pondVerts = [];
-      const pondUvs = [];
-      const pondIndices = [];
-
-      /* Center vertex */
-      pondVerts.push(0, 0, 0);
-      pondUvs.push(0.5, 0.5);
-
-      for (let i = 0; i <= segments; i++) {
-        const a = (i / segments) * Math.PI * 2;
-        /* Noise on radius for organic shape */
-        const wobble = 1 + 0.15 * Math.sin(a * 3.7) + 0.1 * Math.cos(a * 5.3) + 0.08 * Math.sin(a * 7.1);
-        const rx = pondRadiusX * wobble;
-        const rz = pondRadiusZ * wobble;
-        const x = Math.cos(a) * rx;
-        const z = Math.sin(a) * rz;
-        pondVerts.push(x, 0, z);
-        pondUvs.push(0.5 + x / (pondRadiusX * 2.5), 0.5 + z / (pondRadiusZ * 2.5));
-        if (i > 0) {
-          pondIndices.push(0, i, i + 1);
-        }
-      }
-
-      const pondGeo = new THREE.BufferGeometry();
-      pondGeo.setAttribute('position', new THREE.Float32BufferAttribute(pondVerts, 3));
-      pondGeo.setAttribute('uv', new THREE.Float32BufferAttribute(pondUvs, 2));
-      pondGeo.setIndex(pondIndices);
-      pondGeo.computeVertexNormals();
-
-      /* Water material — dark reflective surface with animated ripples */
-      const waterMat = new THREE.MeshPhongMaterial({
-        color: 0x1a3a4a,
-        specular: 0x88bbcc,
-        shininess: 90,
-        transparent: true,
-        opacity: 0.85,
-        side: THREE.DoubleSide,
+      /* Shared water normal map */
+      const waterNormals = new THREE.TextureLoader().load('assets/images/waternormals.jpg', (tex) => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
       });
+      const sunDir = new THREE.Vector3(0.5, 0.7, 0.5).normalize();
 
-      waterMat.onBeforeCompile = (shader) => {
+      /* ── Expensive: reflective Water shader (max 2 instances) ── */
+      const makeReflectiveWater = (x, z, w, h) => {
+        const geo = new THREE.PlaneGeometry(w, h, 1, 1);
+        const water = new THREE.Water(geo, {
+          textureWidth: 256, textureHeight: 256,
+          waterNormals, sunDirection: sunDir,
+          sunColor: 0xfff5e0, waterColor: 0x001e0f,
+          distortionScale: 2.5, alpha: 0.9, fog: false,
+        });
+        water.rotation.x = -Math.PI / 2;
+        water.position.set(x, 0.05, z);
+        this.scene.add(water);
+        /* Dark bed underneath */
+        const bed = new THREE.Mesh(
+          new THREE.PlaneGeometry(w, h),
+          new THREE.MeshStandardMaterial({ color: 0x1a2a1e, roughness: 1 })
+        );
+        bed.rotation.x = -Math.PI / 2;
+        bed.position.set(x, -0.25, z);
+        this.scene.add(bed);
+        return water;
+      };
+
+      /* ── Cheap: simple animated water (no reflection pass) ── */
+      const cheapWaterMat = new THREE.MeshPhongMaterial({
+        color: 0x1a4a4a, specular: 0x88bbcc, shininess: 80,
+        transparent: true, opacity: 0.7, side: THREE.DoubleSide,
+      });
+      cheapWaterMat.onBeforeCompile = (shader) => {
         shader.uniforms.uTime = { value: 0 };
         shader.vertexShader = 'uniform float uTime;\n' + shader.vertexShader;
         shader.vertexShader = shader.vertexShader.replace(
           '#include <begin_vertex>',
           `#include <begin_vertex>
-           float ripple1 = sin(position.x * 2.0 + uTime * 1.5) * cos(position.z * 2.5 + uTime * 1.2) * 0.06;
-           float ripple2 = sin(position.x * 4.0 - uTime * 2.0) * cos(position.z * 3.0 + uTime * 0.8) * 0.03;
-           float ripple3 = sin((position.x + position.z) * 1.5 + uTime * 0.6) * 0.04;
-           transformed.y += ripple1 + ripple2 + ripple3;`
+           transformed.y += sin(position.x * 3.0 + uTime * 1.5) * cos(position.z * 2.5 + uTime) * 0.04;`
         );
-        /* Subtle normal distortion for shimmering reflections */
-        shader.fragmentShader = 'uniform float uTime;\n' + shader.fragmentShader;
-        shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <normal_fragment_maps>',
-          `#include <normal_fragment_maps>
-           float nx = sin(vViewPosition.x * 3.0 + uTime * 1.8) * 0.15;
-           float nz = cos(vViewPosition.z * 3.0 + uTime * 1.3) * 0.15;
-           normal = normalize(normal + vec3(nx, 0.0, nz));`
+        cheapWaterMat.userData.shader = shader;
+      };
+      this.cheapWaterMat = cheapWaterMat;
+
+      const makeCheapWater = (x, z, w, h, rotZ) => {
+        const geo = new THREE.PlaneGeometry(w, h, 8, 8);
+        const mesh = new THREE.Mesh(geo, cheapWaterMat);
+        mesh.rotation.x = -Math.PI / 2;
+        if (rotZ) mesh.rotation.z = rotZ;
+        mesh.position.set(x, 0.04, z);
+        this.scene.add(mesh);
+        /* Bed */
+        const bed = new THREE.Mesh(
+          new THREE.PlaneGeometry(w, h),
+          new THREE.MeshStandardMaterial({ color: 0x1a2a1e, roughness: 1 })
         );
-        waterMat.userData.shader = shader;
+        bed.rotation.x = -Math.PI / 2;
+        if (rotZ) bed.rotation.z = rotZ;
+        bed.position.set(x, -0.2, z);
+        this.scene.add(bed);
       };
 
-      const pond = new THREE.Mesh(pondGeo, waterMat);
-      pond.position.set(pondX, 0.08, pondZ);
-      pond.rotation.x = -Math.PI / 2;
-      this.scene.add(pond);
-      this.waterMaterial = waterMat;
-
-      /* ── Pond bed — darker ground underneath visible through transparent water ── */
-      const bedMat = new THREE.MeshStandardMaterial({
-        color: 0x0a1a1e,
-        roughness: 1, metalness: 0,
-      });
-      const bed = new THREE.Mesh(pondGeo.clone(), bedMat);
-      bed.position.set(pondX, -0.05, pondZ);
-      bed.rotation.x = -Math.PI / 2;
-      this.scene.add(bed);
-
-      /* ── Rocks around the pond edge ── */
-      const rockMat = new THREE.MeshStandardMaterial({
-        color: 0x555550, roughness: 0.95, metalness: 0.05,
-      });
-      const rockPositions = [
-        { x: -5.5, z: 2.5, s: 0.6 }, { x: -4, z: -3.8, s: 0.45 },
-        { x: 3.5, z: -4.2, s: 0.55 }, { x: 6.5, z: 0.5, s: 0.7 },
-        { x: 5.5, z: 3.5, s: 0.4 }, { x: -2, z: 4.5, s: 0.5 },
-        { x: -6, z: -1, s: 0.35 }, { x: 1, z: -5, s: 0.5 },
-        { x: 7, z: -1.5, s: 0.45 }, { x: -3.5, z: 4, s: 0.3 },
-      ];
-
-      rockPositions.forEach(rp => {
-        const rockGeo = new THREE.DodecahedronGeometry(rp.s, 1);
-        /* Distort vertices for natural look */
-        const posAttr = rockGeo.attributes.position;
-        for (let i = 0; i < posAttr.count; i++) {
-          posAttr.setX(i, posAttr.getX(i) * (0.7 + Math.random() * 0.6));
-          posAttr.setY(i, posAttr.getY(i) * (0.5 + Math.random() * 0.4));
-          posAttr.setZ(i, posAttr.getZ(i) * (0.7 + Math.random() * 0.6));
+      /* ── Pebbles helper ── */
+      const addPebbles = (cx, cz, w, h, count) => {
+        const pebMat = new THREE.MeshStandardMaterial({ color: 0x908070, roughness: 0.85 });
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const px = Math.cos(angle) * (w / 2) * (0.85 + Math.random() * 0.3);
+          const pz = Math.sin(angle) * (h / 2) * (0.85 + Math.random() * 0.3);
+          const s = 0.08 + Math.random() * 0.18;
+          const geo = new THREE.SphereGeometry(s, 5, 4);
+          const pos = geo.attributes.position;
+          for (let v = 0; v < pos.count; v++) pos.setY(v, pos.getY(v) * 0.3);
+          geo.computeVertexNormals();
+          const peb = new THREE.Mesh(geo, pebMat.clone());
+          peb.material.color.setHSL(0.07 + Math.random() * 0.06, 0.12, 0.3 + Math.random() * 0.2);
+          peb.position.set(cx + px, 0.01, cz + pz);
+          peb.rotation.y = Math.random() * Math.PI * 2;
+          this.scene.add(peb);
         }
-        rockGeo.computeVertexNormals();
-        const rock = new THREE.Mesh(rockGeo, rockMat.clone());
-        rock.material.color.setHSL(0.1, 0.05, 0.25 + Math.random() * 0.15);
-        rock.position.set(pondX + rp.x, 0.1 + Math.random() * 0.15, pondZ + rp.z);
-        rock.rotation.set(Math.random() * 0.5, Math.random() * Math.PI * 2, Math.random() * 0.3);
-        rock.castShadow = true;
-        this.scene.add(rock);
-      });
+      };
+
+      /* ── Find gaps between paths for natural placement ── */
+      const pathAngles = BRANCH_TREE.children.map(c => Math.atan2(c.end[2], c.end[0]));
+      const sorted = [...pathAngles].sort((a, b) => a - b);
+      const gaps = [];
+      for (let i = 0; i < sorted.length; i++) {
+        const a1 = sorted[i], a2 = sorted[(i + 1) % sorted.length];
+        let mid = (a1 + a2) / 2, span = a2 - a1;
+        if (span < 0) span += Math.PI * 2;
+        if (span > Math.PI) mid += Math.PI;
+        gaps.push(mid);
+      }
+      for (let i = gaps.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [gaps[i], gaps[j]] = [gaps[j], gaps[i]];
+      }
+
+      this.waterBodies = [];
+      this.waterExclusions = [];
+
+      /* ── 1. Main pond (reflective) — close to center ── */
+      const mainAng = gaps[0], mainDist = 8 + Math.random() * 2;
+      const mainX = Math.cos(mainAng) * mainDist, mainZ = Math.sin(mainAng) * mainDist;
+      const mainW = 6 + Math.random() * 2, mainH = 4 + Math.random() * 1.5;
+      this.waterBodies.push(makeReflectiveWater(mainX, mainZ, mainW, mainH));
+      this.waterExclusions.push({ x: mainX, z: mainZ, r: Math.max(mainW, mainH) / 2 + 1 });
+      addPebbles(mainX, mainZ, mainW, mainH, 12);
+
+      /* ── 2. Second pond (reflective) — another gap ── */
+      if (gaps.length > 1) {
+        const ang2 = gaps[1], dist2 = 10 + Math.random() * 4;
+        const x2 = Math.cos(ang2) * dist2, z2 = Math.sin(ang2) * dist2;
+        const w2 = 4 + Math.random() * 1.5, h2 = 3 + Math.random();
+        this.waterBodies.push(makeReflectiveWater(x2, z2, w2, h2));
+        this.waterExclusions.push({ x: x2, z: z2, r: Math.max(w2, h2) / 2 + 1 });
+        addPebbles(x2, z2, w2, h2, 8);
+      }
+
+      /* ── 3. Stream (cheap material) — winding through forest ── */
+      if (gaps.length > 2) {
+        const streamAng = gaps[2];
+        const streamStart = 28 + Math.random() * 8, streamEnd = 12 + Math.random() * 3;
+        const segments = 8;
+        const streamW = 1.5 + Math.random() * 0.5;
+
+        for (let i = 0; i < segments; i++) {
+          const t = i / (segments - 1);
+          const r = streamStart + (streamEnd - streamStart) * t;
+          const wobble = Math.sin(t * 4) * 0.3 + Math.cos(t * 2.5) * 0.15;
+          const ang = streamAng + wobble;
+          const sx = Math.cos(ang) * r, sz = Math.sin(ang) * r;
+          makeCheapWater(sx, sz, streamW, 1.5 + Math.random(), ang + Math.PI / 2);
+          this.waterExclusions.push({ x: sx, z: sz, r: 1.5 });
+        }
+      }
+
+      /* ── 4. Puddles (cheap material) — scattered naturally ── */
+      for (let i = 0; i < 5; i++) {
+        const pr = 14 + Math.random() * 22;
+        const pa = Math.random() * Math.PI * 2;
+        const px = Math.cos(pa) * pr, pz = Math.sin(pa) * pr;
+        let tooClose = false;
+        for (const ex of this.waterExclusions) {
+          if ((px - ex.x) ** 2 + (pz - ex.z) ** 2 < (ex.r + 2) ** 2) { tooClose = true; break; }
+        }
+        if (tooClose) continue;
+        makeCheapWater(px, pz, 1 + Math.random() * 1.2, 0.8 + Math.random() * 0.8, 0);
+        this.waterExclusions.push({ x: px, z: pz, r: 1.2 });
+      }
     }
 
     createCenterGlow() {
@@ -1438,9 +1491,15 @@
         this.grassMaterial.userData.shader.uniforms.uTime.value = time;
       }
 
-      /* Water ripple animation */
-      if (this.waterMaterial && this.waterMaterial.userData.shader) {
-        this.waterMaterial.userData.shader.uniforms.uTime.value = time;
+      /* Water ripple animation — reflective ponds only (max 2) */
+      if (this.waterBodies) {
+        for (const w of this.waterBodies) {
+          w.material.uniforms['time'].value += 1.0 / 60.0;
+        }
+      }
+      /* Cheap water (stream + puddles) */
+      if (this.cheapWaterMat && this.cheapWaterMat.userData.shader) {
+        this.cheapWaterMat.userData.shader.uniforms.uTime.value = time;
       }
 
       /* Center light pulse */
