@@ -63,6 +63,7 @@
       this.buildBranchingPaths(BRANCH_TREE, null);
       this.plantInstancedForest();
       this.plantGrass();
+      this.createPond();
       this.createCenterGlow();
       this.createFireflies();
       this.createHUD();
@@ -520,6 +521,8 @@
         if (x * x + z * z < 64) continue;
         /* Wide clearance along entrance path (x≈0, z=0..35) so camera descent is unobstructed */
         if (z > -2 && z < 38 && Math.abs(x) < 6) continue;
+        /* Keep trees out of the pond area */
+        if (((x - 14) * (x - 14)) / 81 + ((z - 16) * (z - 16)) / 49 < 1.2) continue;
         if (distPaths(x, z) < 3.5) continue;
         let ok = true;
         for (let j = positions.length - 1; j >= Math.max(0, positions.length - 20); j--) {
@@ -681,6 +684,8 @@
         const x = r * Math.cos(theta);
         const z = r * Math.sin(theta);
         if (isOnPath(x, z)) continue;
+        /* Keep grass out of the pond */
+        if (((x - 14) * (x - 14)) / 64 + ((z - 16) * (z - 16)) / 36 < 1) continue;
         /* Only skip ~5% for tiny dirt patches */
         const n = snoise(x * 0.06, z * 0.06);
         if (n > 0.92) continue;
@@ -698,6 +703,122 @@
       grass.instanceMatrix.needsUpdate = true;
       this.scene.add(grass);
       this.grassMaterial = grassMat;
+    }
+
+    createPond() {
+      /* ── Natural pond to the right of the entrance path ── */
+      const pondX = 14, pondZ = 16;
+      const pondRadiusX = 7, pondRadiusZ = 5;
+      const segments = 48;
+
+      /* Organic pond shape — circle with noise displacement */
+      const pondVerts = [];
+      const pondUvs = [];
+      const pondIndices = [];
+
+      /* Center vertex */
+      pondVerts.push(0, 0, 0);
+      pondUvs.push(0.5, 0.5);
+
+      for (let i = 0; i <= segments; i++) {
+        const a = (i / segments) * Math.PI * 2;
+        /* Noise on radius for organic shape */
+        const wobble = 1 + 0.15 * Math.sin(a * 3.7) + 0.1 * Math.cos(a * 5.3) + 0.08 * Math.sin(a * 7.1);
+        const rx = pondRadiusX * wobble;
+        const rz = pondRadiusZ * wobble;
+        const x = Math.cos(a) * rx;
+        const z = Math.sin(a) * rz;
+        pondVerts.push(x, 0, z);
+        pondUvs.push(0.5 + x / (pondRadiusX * 2.5), 0.5 + z / (pondRadiusZ * 2.5));
+        if (i > 0) {
+          pondIndices.push(0, i, i + 1);
+        }
+      }
+
+      const pondGeo = new THREE.BufferGeometry();
+      pondGeo.setAttribute('position', new THREE.Float32BufferAttribute(pondVerts, 3));
+      pondGeo.setAttribute('uv', new THREE.Float32BufferAttribute(pondUvs, 2));
+      pondGeo.setIndex(pondIndices);
+      pondGeo.computeVertexNormals();
+
+      /* Water material — dark reflective surface with animated ripples */
+      const waterMat = new THREE.MeshPhongMaterial({
+        color: 0x1a3a4a,
+        specular: 0x88bbcc,
+        shininess: 90,
+        transparent: true,
+        opacity: 0.85,
+        side: THREE.DoubleSide,
+      });
+
+      waterMat.onBeforeCompile = (shader) => {
+        shader.uniforms.uTime = { value: 0 };
+        shader.vertexShader = 'uniform float uTime;\n' + shader.vertexShader;
+        shader.vertexShader = shader.vertexShader.replace(
+          '#include <begin_vertex>',
+          `#include <begin_vertex>
+           float ripple1 = sin(position.x * 2.0 + uTime * 1.5) * cos(position.z * 2.5 + uTime * 1.2) * 0.06;
+           float ripple2 = sin(position.x * 4.0 - uTime * 2.0) * cos(position.z * 3.0 + uTime * 0.8) * 0.03;
+           float ripple3 = sin((position.x + position.z) * 1.5 + uTime * 0.6) * 0.04;
+           transformed.y += ripple1 + ripple2 + ripple3;`
+        );
+        /* Subtle normal distortion for shimmering reflections */
+        shader.fragmentShader = 'uniform float uTime;\n' + shader.fragmentShader;
+        shader.fragmentShader = shader.fragmentShader.replace(
+          '#include <normal_fragment_maps>',
+          `#include <normal_fragment_maps>
+           float nx = sin(vViewPosition.x * 3.0 + uTime * 1.8) * 0.15;
+           float nz = cos(vViewPosition.z * 3.0 + uTime * 1.3) * 0.15;
+           normal = normalize(normal + vec3(nx, 0.0, nz));`
+        );
+        waterMat.userData.shader = shader;
+      };
+
+      const pond = new THREE.Mesh(pondGeo, waterMat);
+      pond.position.set(pondX, 0.08, pondZ);
+      pond.rotation.x = -Math.PI / 2;
+      this.scene.add(pond);
+      this.waterMaterial = waterMat;
+
+      /* ── Pond bed — darker ground underneath visible through transparent water ── */
+      const bedMat = new THREE.MeshStandardMaterial({
+        color: 0x0a1a1e,
+        roughness: 1, metalness: 0,
+      });
+      const bed = new THREE.Mesh(pondGeo.clone(), bedMat);
+      bed.position.set(pondX, -0.05, pondZ);
+      bed.rotation.x = -Math.PI / 2;
+      this.scene.add(bed);
+
+      /* ── Rocks around the pond edge ── */
+      const rockMat = new THREE.MeshStandardMaterial({
+        color: 0x555550, roughness: 0.95, metalness: 0.05,
+      });
+      const rockPositions = [
+        { x: -5.5, z: 2.5, s: 0.6 }, { x: -4, z: -3.8, s: 0.45 },
+        { x: 3.5, z: -4.2, s: 0.55 }, { x: 6.5, z: 0.5, s: 0.7 },
+        { x: 5.5, z: 3.5, s: 0.4 }, { x: -2, z: 4.5, s: 0.5 },
+        { x: -6, z: -1, s: 0.35 }, { x: 1, z: -5, s: 0.5 },
+        { x: 7, z: -1.5, s: 0.45 }, { x: -3.5, z: 4, s: 0.3 },
+      ];
+
+      rockPositions.forEach(rp => {
+        const rockGeo = new THREE.DodecahedronGeometry(rp.s, 1);
+        /* Distort vertices for natural look */
+        const posAttr = rockGeo.attributes.position;
+        for (let i = 0; i < posAttr.count; i++) {
+          posAttr.setX(i, posAttr.getX(i) * (0.7 + Math.random() * 0.6));
+          posAttr.setY(i, posAttr.getY(i) * (0.5 + Math.random() * 0.4));
+          posAttr.setZ(i, posAttr.getZ(i) * (0.7 + Math.random() * 0.6));
+        }
+        rockGeo.computeVertexNormals();
+        const rock = new THREE.Mesh(rockGeo, rockMat.clone());
+        rock.material.color.setHSL(0.1, 0.05, 0.25 + Math.random() * 0.15);
+        rock.position.set(pondX + rp.x, 0.1 + Math.random() * 0.15, pondZ + rp.z);
+        rock.rotation.set(Math.random() * 0.5, Math.random() * Math.PI * 2, Math.random() * 0.3);
+        rock.castShadow = true;
+        this.scene.add(rock);
+      });
     }
 
     createCenterGlow() {
@@ -1315,6 +1436,11 @@
       /* Grass wind animation */
       if (this.grassMaterial && this.grassMaterial.userData.shader) {
         this.grassMaterial.userData.shader.uniforms.uTime.value = time;
+      }
+
+      /* Water ripple animation */
+      if (this.waterMaterial && this.waterMaterial.userData.shader) {
+        this.waterMaterial.userData.shader.uniforms.uTime.value = time;
       }
 
       /* Center light pulse */
