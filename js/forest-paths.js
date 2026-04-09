@@ -554,7 +554,7 @@
       const isOnPath = (x, z) => {
         for (let i = 0; i < pathSamples.length; i += 2) {
           const dx = x - pathSamples[i], dz = z - pathSamples[i + 1];
-          if (dx * dx + dz * dz < 10) return true;
+          if (dx * dx + dz * dz < 3) return true;
         }
         return false;
       };
