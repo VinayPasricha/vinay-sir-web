@@ -1908,6 +1908,102 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 }
 
 /* ============================================
+   BOOKS CAROUSEL (Writer page — auto-scroll)
+   ============================================ */
+.books-carousel {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 1rem 0;
+  mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+}
+.books-carousel-track {
+  display: flex;
+  gap: 2.5rem;
+  width: max-content;
+  animation: booksScroll 20s linear infinite;
+  padding: 0 1rem;
+}
+.books-carousel:hover .books-carousel-track {
+  animation-play-state: paused;
+}
+@keyframes booksScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.book-carousel-card {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  min-width: 480px;
+  max-width: 520px;
+  padding: 2rem 2.5rem;
+  background: rgba(15, 40, 21, 0.4);
+  border: 1px solid rgba(122, 154, 110, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+.book-carousel-card:hover {
+  background: rgba(15, 40, 21, 0.6);
+  border-color: rgba(196, 160, 69, 0.25);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), 0 0 40px rgba(196, 160, 69, 0.08);
+}
+.book-carousel-cover {
+  width: 120px;
+  height: 170px;
+  flex-shrink: 0;
+  border-radius: 3px 8px 8px 3px;
+  overflow: hidden;
+  box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.4);
+}
+.book-carousel-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.book-carousel-info {
+  flex: 1;
+  min-width: 0;
+}
+.book-carousel-info h3 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--text-primary);
+  margin-bottom: 0.6rem;
+  line-height: 1.2;
+}
+.book-carousel-info p {
+  font-family: var(--font-accent);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+.book-carousel-info .book-brief-cta {
+  font-family: var(--font-body);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: gap 0.3s ease;
+}
+.book-carousel-card:hover .book-brief-cta {
+  gap: 0.8rem;
+}
+
+/* ============================================
    FLOATING BOOK BUBBLE (Writer page)
    ============================================ */
 .book-float-bubble {
@@ -2586,6 +2682,10 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .book-brief-card { flex-direction: column; text-align: center; gap: 2rem; padding: 2.5rem; }
   .book-brief-text p { max-width: 100%; }
   .book-brief-text { display: flex; flex-direction: column; align-items: center; }
+  /* Carousel — tablet */
+  .book-carousel-card { min-width: 380px; max-width: 420px; padding: 1.5rem 2rem; gap: 1.5rem; }
+  .book-carousel-cover { width: 100px; height: 140px; }
+  .book-carousel-info h3 { font-size: 1.2rem; }
   .split-section, .split-section:nth-child(even) { flex-direction: column; }
   .split-text { padding: var(--space-md) 0; }
   .stats-grid { grid-template-columns: repeat(2,1fr); }
@@ -2625,6 +2725,12 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
   .menu-overlay-right { width: 100%; padding: 2rem; border: none; }
   .menu-nav-items li a .nav-title { font-size: 2rem; }
   .venture-card { min-width: 260px; max-width: 280px; height: 55vh; padding: 2rem 1.5rem; }
+  /* Carousel — mobile */
+  .book-carousel-card { min-width: 320px; max-width: 360px; flex-direction: column; text-align: center; padding: 1.5rem; gap: 1.2rem; }
+  .book-carousel-cover { width: 100px; height: 140px; }
+  .book-carousel-info h3 { font-size: 1.1rem; }
+  .book-carousel-info p { font-size: 0.78rem; }
+  .books-carousel-track { gap: 1.5rem; }
 
   /* Compact branch labels on mobile */
   .branch-label {
