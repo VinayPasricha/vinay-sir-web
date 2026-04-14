@@ -86,19 +86,55 @@
       </div>
     </section>
 
-    <!-- Book Brief Card -->
-    <section class="books-showcase" style="min-height: auto; padding: 4rem 2rem;">
-      <a href="book.html" class="book-brief-card reveal">
-        <div class="book-brief-cover book-brief-cover-img">
-          <img src="../assets/images/book-cover-hd.jpg" alt="AI For Business Leaders by Vinay Pasricha" loading="lazy">
+    <!-- Books Carousel -->
+    <section class="books-showcase" style="min-height: auto; padding: 4rem 0; overflow: hidden;">
+      <div class="section-label gold" style="text-align: center; margin-bottom: 2rem;">PUBLISHED WORKS</div>
+      <div class="books-carousel">
+        <div class="books-carousel-track">
+          <!-- First set -->
+          <a href="book.html" class="book-carousel-card">
+            <div class="book-carousel-cover">
+              <img src="../assets/images/book-cover-hd.jpg" alt="AI For Business Leaders by Vinay Pasricha" loading="lazy">
+            </div>
+            <div class="book-carousel-info">
+              <h3>AI For Business Leaders</h3>
+              <p>A practical guide to building your company brain with AI &mdash; frameworks, case studies, and real-world strategies.</p>
+              <div class="book-brief-cta">Read more <span>&rarr;</span></div>
+            </div>
+          </a>
+          <a href="siv-method-book.html" class="book-carousel-card">
+            <div class="book-carousel-cover">
+              <img src="../assets/images/SIV_Method_eBook_Cover.jpg" alt="The SIV Method by Vinay Pasricha" loading="lazy">
+            </div>
+            <div class="book-carousel-info">
+              <h3>The SIV Method</h3>
+              <p>A brutal framework for understanding reality before execution &mdash; multi-lens thinking and AI-amplified inquiry.</p>
+              <div class="book-brief-cta">Read more <span>&rarr;</span></div>
+            </div>
+          </a>
+          <!-- Duplicate set for seamless loop -->
+          <a href="book.html" class="book-carousel-card" aria-hidden="true">
+            <div class="book-carousel-cover">
+              <img src="../assets/images/book-cover-hd.jpg" alt="AI For Business Leaders by Vinay Pasricha" loading="lazy">
+            </div>
+            <div class="book-carousel-info">
+              <h3>AI For Business Leaders</h3>
+              <p>A practical guide to building your company brain with AI &mdash; frameworks, case studies, and real-world strategies.</p>
+              <div class="book-brief-cta">Read more <span>&rarr;</span></div>
+            </div>
+          </a>
+          <a href="siv-method-book.html" class="book-carousel-card" aria-hidden="true">
+            <div class="book-carousel-cover">
+              <img src="../assets/images/SIV_Method_eBook_Cover.jpg" alt="The SIV Method by Vinay Pasricha" loading="lazy">
+            </div>
+            <div class="book-carousel-info">
+              <h3>The SIV Method</h3>
+              <p>A brutal framework for understanding reality before execution &mdash; multi-lens thinking and AI-amplified inquiry.</p>
+              <div class="book-brief-cta">Read more <span>&rarr;</span></div>
+            </div>
+          </a>
         </div>
-        <div class="book-brief-text">
-          <div class="book-category">PUBLISHED WORKS</div>
-          <h3>AI For Business Leaders</h3>
-          <p>A practical guide to building your company brain with AI &mdash; frameworks, case studies, and real-world strategies from decades of entrepreneurship.</p>
-          <div class="book-brief-cta">Read more &amp; preview chapters <span>&rarr;</span></div>
-        </div>
-      </a>
+      </div>
     </section>
 
     <!-- Writing Themes Section -->
@@ -180,8 +216,8 @@
   </nav>
 
   <!-- Floating Book Bubble -->
-  <a href="book.html" class="book-float-bubble" aria-label="Read AI For Business Leaders">
-    <div class="book-float-label"><span>The Book</span></div>
+  <a href="book.html" class="book-float-bubble" aria-label="Read the Books">
+    <div class="book-float-label"><span>Books</span></div>
     <div class="book-float-icon">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 4H3a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1zM4 18V6h7v12H4zm9 0V6h7v12h-7z"/></svg>
     </div>
