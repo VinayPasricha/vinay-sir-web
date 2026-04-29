@@ -122,34 +122,44 @@
     SOUND
   </button>
 
-  <!-- CDN Libraries -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-
-  <!-- React 18 UMD -->
-  <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
-  <!-- Framer Motion (global: Motion) -->
-  <script src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.js"></script>
-
   <!-- Signal React UI is active before Three.js loads -->
   <script>window.ForestUI = { mounted: true };</script>
 
+  <!-- React UI Overlay mount point (must exist before deferred forest-ui.js runs) -->
+  <div id="forest-ui-root"></div>
+
+  <!--
+    All scripts below use `defer` so the browser can finish parsing + painting the
+    initial HTML before executing any JS. Deferred scripts execute in document
+    order after DOMContentLoaded, which preserves every dependency chain
+    (Three.js → forest-paths.js, React/Motion → forest-ui.js) while removing the
+    parser-blocking cost that made the home page feel laggy on first load.
+  -->
+
+  <!-- CDN Libraries -->
+  <script defer src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+  <!-- React 18 UMD -->
+  <script defer crossorigin src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script defer crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Framer Motion (global: Motion) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/motion@11/dist/motion.js"></script>
+
   <!-- Three.js Post-Processing -->
-  <script src="js/postprocessing.js"></script>
+  <script defer src="js/postprocessing.js"></script>
 
   <!-- EZ-Tree Procedural Trees -->
-  <script src="js/ez-tree.umd.js"></script>
+  <script defer src="js/ez-tree.umd.js"></script>
 
   <!-- Three.js Water Shader (ported from examples/jsm/objects/Water.js) -->
-  <script src="js/water.js"></script>
+  <script defer src="js/water.js"></script>
 
   <!-- Forest Paths 3D Experience -->
-  <script src="js/forest-paths.js?v=7"></script>
-  <script src="js/app.js"></script>
+  <script defer src="js/forest-paths.js?v=7"></script>
+  <script defer src="js/app.js"></script>
 
   <!-- React UI Overlay (React + Motion powered) -->
-  <div id="forest-ui-root"></div>
-  <script src="js/forest-ui.js"></script>
+  <script defer src="js/forest-ui.js"></script>
 </body>
 </html>

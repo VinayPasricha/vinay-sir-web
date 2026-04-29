@@ -80,6 +80,8 @@
     }
 
     setupRenderer() {
+      /* Cache loaded textures/JSON across reloads inside the same session — pure perf, no visual change */
+      if (THREE && THREE.Cache) THREE.Cache.enabled = true;
       this.renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
       this.renderer.setSize(window.innerWidth, window.innerHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
@@ -87,6 +89,8 @@
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.8;
       this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+      /* Skip per-frame draw-call counter reset; we don't read renderer.info */
+      if (this.renderer.info) this.renderer.info.autoReset = false;
       this.container.appendChild(this.renderer.domElement);
     }
 
@@ -1262,15 +1266,20 @@
         if (this.state === 'atEntrance') this.walkToCenter();
       });
 
-      /* Resize */
+      /* Resize — rAF-throttled so dragging the window edge doesn't fire setSize on every pixel */
+      let _resizeRaf = 0;
       window.addEventListener('resize', () => {
-        this.camera.aspect = window.innerWidth / window.innerHeight;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        if (this.composer) {
-          const pr = this.renderer.getPixelRatio();
-          this.composer.setSize(window.innerWidth * pr, window.innerHeight * pr);
-        }
+        if (_resizeRaf) return;
+        _resizeRaf = requestAnimationFrame(() => {
+          _resizeRaf = 0;
+          this.camera.aspect = window.innerWidth / window.innerHeight;
+          this.camera.updateProjectionMatrix();
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          if (this.composer) {
+            const pr = this.renderer.getPixelRatio();
+            this.composer.setSize(window.innerWidth * pr, window.innerHeight * pr);
+          }
+        });
       });
     }
 
@@ -1456,6 +1465,8 @@
 
     animate() {
       requestAnimationFrame(() => this.animate());
+      /* Skip the entire frame when the tab is hidden — saves GPU/CPU with zero visual cost (browser already throttles RAF, but a stray frame can still fire) */
+      if (typeof document !== 'undefined' && document.hidden) return;
       const delta = Math.min(this.clock.getDelta(), 0.05);
       const time = this.clock.getElapsedTime();
 
