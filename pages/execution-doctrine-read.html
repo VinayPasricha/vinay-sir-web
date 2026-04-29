@@ -1088,6 +1088,18 @@
 
       const chapter = CHAPTERS[currentChapterIndex];
       const paragraphs = chapter.content;
+
+      useEffect(() => {
+        if (window.trackEvent) {
+          window.trackEvent('chapter_started', {
+            book: 'execution_doctrine',
+            chapter_num: chapter.num,
+            chapter_title: chapter.title,
+            chapter_index: currentChapterIndex
+          });
+        }
+      }, [currentChapterIndex]);
+
       const PARA_PER_PAGE = 4;
       const totalPages = Math.ceil(paragraphs.length / PARA_PER_PAGE);
       const startPara = currentPage * PARA_PER_PAGE;
