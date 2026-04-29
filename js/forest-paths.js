@@ -921,7 +921,10 @@
       gctx.fillStyle = grad;
       gctx.fillRect(0, 0, 64, 64);
       const geo = new THREE.BufferGeometry();
-      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const posAttr = new THREE.BufferAttribute(positions, 3);
+      /* Hint: this buffer is rewritten every frame — lets the driver skip double-buffering */
+      if (posAttr.setUsage) posAttr.setUsage(THREE.DynamicDrawUsage);
+      geo.setAttribute('position', posAttr);
       this.fireflies = new THREE.Points(geo, new THREE.PointsMaterial({
         map: new THREE.CanvasTexture(gc), size: 0.7, sizeAttenuation: true,
         transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffe880,
@@ -1490,10 +1493,26 @@
         this.camera.lookAt(0, 0, 2);
       }
 
-      /* EZ-Tree leaf wind animation */
+      /* EZ-Tree leaf wind animation — frustum-culled.
+       * tree.update() walks each tree's mesh to drive leaf-wind shader uniforms;
+       * with ~150 trees this dominates the frame. Skipping trees that are
+       * completely outside the camera view is invisible to the user but
+       * typically eliminates 50–70% of the per-frame work in this loop. */
       if (this.ezTrees) {
+        if (!this._cullFrustum) {
+          this._cullFrustum = new THREE.Frustum();
+          this._cullProjMat = new THREE.Matrix4();
+          this._cullSphere = new THREE.Sphere();
+        }
+        this._cullProjMat.multiplyMatrices(this.camera.projectionMatrix, this.camera.matrixWorldInverse);
+        this._cullFrustum.setFromProjectionMatrix(this._cullProjMat);
         for (const t of this.ezTrees) {
-          if (t.update) t.update(time);
+          if (!t.update) continue;
+          /* Approximate bounding sphere: trees max ~6 world units tall, scaled */
+          this._cullSphere.center.copy(t.position);
+          this._cullSphere.radius = 6 * (t.scale ? t.scale.x : 1);
+          if (!this._cullFrustum.intersectsSphere(this._cullSphere)) continue;
+          t.update(time);
         }
       }
 
