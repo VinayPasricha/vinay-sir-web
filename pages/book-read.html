@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Read: AI For Business Leaders — Vinay Pasricha</title>
+  <meta name="description" content="Read AI For Business Leaders in full — A practical guide to AI strategy, operations, and governance. By Vinay Pasricha.">
+  <link rel="canonical" href="https://vinaypasricha.com/pages/book-read.html">
+  <style>
+    html, body { margin: 0; padding: 0; background: #FAF7F2; font-family: Georgia, serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    button { font-family: inherit; }
+    a { -webkit-tap-highlight-color: transparent; }
+    .ai-site-link {
+      position: fixed; top: 16px; left: 40px; z-index: 300;
+      font-family: Georgia, serif; font-size: 13px;
+      color: #8B6914; text-decoration: none; font-weight: 600;
+      letter-spacing: 0.3px; padding: 6px 10px;
+      border-radius: 2px; transition: all .25s ease;
+    }
+    .ai-site-link:hover { background: rgba(139,105,20,0.08); }
+    #ai-loading {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: #FAF7F2; z-index: 999; color: #8B6914; font-size: 14px; letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="ai-loading">Loading the book&hellip;</div>
+  <a href="book.html" class="ai-site-link" id="back-to-site" style="display:none;">&larr; Back to Book Page</a>
+  <div id="root"></div>
+  <div id="chapters-data" style="display:none;"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <script src="book-read-content.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback } = React;
+    const CHAPTERS = window.AI_BOOK_CHAPTERS || [];
+
+    const ColorScheme = {
+      background: '#FAF7F2',
+      card: '#FFFFFF',
+      text: '#2C2416',
+      textMedium: '#5C4A32',
+      textLight: '#9C8B72',
+      textFaint: '#C4B59E',
+      accent: '#8B6914',
+      accentLight: '#B8942A',
+      accentSoft: '#F0E5C7',
+      lines: 'rgba(139,105,20,0.12)'
+    };
+
+    const fonts = {
+      serif: '"Georgia", serif',
+      system: 'system-ui, -apple-system, sans-serif'
+    };
+
+    const StyleInjector = () => {
+      useEffect(() => {
+        if (document.getElementById('ai-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'ai-styles';
+        style.textContent = `
+          @keyframes aiFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+        `;
+        document.head.appendChild(style);
+      }, []);
+      return null;
+    };
+
+    const NetworkBackground = () => {
+      const canvasRef = useRef(null);
+      const nodesRef = useRef([]);
+      const animationRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        if (nodesRef.current.length === 0) {
+          for (let i = 0; i < 25; i++) {
+            nodesRef.current.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              vx: (Math.random() - 0.5) * 0.3,
+              vy: (Math.random() - 0.5) * 0.3,
+              radius: Math.random() * 2 + 1
+            });
+          }
+        }
+
+        const animate = () => {
+          if (document.hidden) {
+            animationRef.current = requestAnimationFrame(animate);
+            return;
+          }
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = ColorScheme.lines;
+          nodesRef.current.forEach(node => {
+            node.x += node.vx;
+            node.y += node.vy;
+            if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+            if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          for (let i = 0; i < nodesRef.current.length; i++) {
+            for (let j = i + 1; j < nodesRef.current.length; j++) {
+              const dx = nodesRef.current[i].x - nodesRef.current[j].x;
+              const dy = nodesRef.current[i].y - nodesRef.current[j].y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 150) {
+                ctx.strokeStyle = `rgba(139,105,20,${0.1 * (1 - dist / 150)})`;
+                ctx.beginPath();
+                ctx.moveTo(nodesRef.current[i].x, nodesRef.current[i].y);
+                ctx.lineTo(nodesRef.current[j].x, nodesRef.current[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+          animationRef.current = requestAnimationFrame(animate);
+        };
+        animate();
+
+        let resizeRaf = 0;
+        const handleResize = () => {
+          if (resizeRaf) return;
+          resizeRaf = requestAnimationFrame(() => {
+            resizeRaf = 0;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+          });
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+          window.removeEventListener('resize', handleResize);
+          cancelAnimationFrame(animationRef.current);
+        };
+      }, []);
+
+      return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, zIndex: 0, opacity: 0.5, pointerEvents: 'none' }} />;
+    };
+
+    const FadeInSection = ({ children }) => {
+      const [isVisible, setIsVisible] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setIsVisible(true);
+              observer.unobserve(entry.target);
+            }
+          },
+          { threshold: 0.1 }
+        );
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+      }, []);
+      return (
+        <div ref={ref} style={{ opacity: isVisible ? 1 : 0, transform: `translateY(${isVisible ? 0 : 20}px)`, transition: 'all 0.8s ease-out' }}>
+          {children}
+        </div>
+      );
+    };
+
+    const BrainDiagram = () => (
+      <svg viewBox="0 0 500 320" style={{ width: '100%', maxWidth: '480px', margin: '0 auto', display: 'block' }}>
+        <defs>
+          <marker id="brainArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+            <polygon points="0 0, 10 5, 0 10" fill={ColorScheme.accent} />
+          </marker>
+        </defs>
+        {[
+          {x: 60, y: 140, label: 'MEMORY', sub: 'What we know'},
+          {x: 190, y: 60, label: 'REASONING', sub: 'How we think'},
+          {x: 320, y: 140, label: 'ACTION', sub: 'What we do'},
+          {x: 190, y: 240, label: 'FEEDBACK', sub: 'How we learn'}
+        ].map((b, i) => (
+          <g key={i}>
+            <rect x={b.x} y={b.y - 22} width="120" height="50" rx="4" fill={ColorScheme.accentSoft} stroke={ColorScheme.accent} strokeWidth="1.5" />
+            <text x={b.x + 60} y={b.y - 2} textAnchor="middle" fontSize="12" fill={ColorScheme.text} fontWeight="700" fontFamily={fonts.serif}>{b.label}</text>
+            <text x={b.x + 60} y={b.y + 16} textAnchor="middle" fontSize="10" fill={ColorScheme.textMedium} fontFamily={fonts.serif}>{b.sub}</text>
+          </g>
+        ))}
+        <line x1="180" y1="135" x2="190" y2="100" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#brainArrow)" />
+        <line x1="310" y1="80" x2="320" y2="135" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#brainArrow)" />
+        <line x1="310" y1="170" x2="310" y2="240" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#brainArrow)" />
+        <line x1="180" y1="250" x2="120" y2="170" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#brainArrow)" />
+        <text x="250" y="305" textAnchor="middle" fontSize="11" fill={ColorScheme.textLight} fontStyle="italic" fontFamily={fonts.serif}>The Company Brain</text>
+      </svg>
+    );
+
+    const FiveCapabilities = () => {
+      const items = [
+        { num: '1', title: 'Automating Work', desc: 'Repetitive tasks, document-heavy work' },
+        { num: '2', title: 'Supporting Decisions', desc: 'Patterns, predictions, prioritisation' },
+        { num: '3', title: 'Powering Agents', desc: 'Multi-step work across systems' },
+        { num: '4', title: 'Enabling Creativity', desc: 'Drafts, variants, more shots on goal' },
+        { num: '5', title: 'Building Memory', desc: 'Turning chaos into competence' }
+      ];
+      return (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', maxWidth: '1100px', margin: '0 auto' }}>
+          {items.map((it, i) => (
+            <div key={i} style={{ padding: '24px 20px', backgroundColor: ColorScheme.background, borderTop: `3px solid ${ColorScheme.accent}`, borderRadius: '2px' }}>
+              <div style={{ fontSize: '32px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.accent, lineHeight: '1', marginBottom: '8px' }}>{it.num}</div>
+              <div style={{ fontSize: '15px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.text, marginBottom: '6px' }}>{it.title}</div>
+              <div style={{ fontSize: '13px', fontFamily: fonts.serif, color: ColorScheme.textMedium, lineHeight: '1.5' }}>{it.desc}</div>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    const HomePage = ({ onStartReading }) => {
+      return (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <section style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', textAlign: 'center' }}>
+            <FadeInSection>
+              <div style={{ fontSize: '13px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '20px', fontWeight: '600' }}>The Book</div>
+              <h1 style={{ fontSize: '60px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.text, margin: '0 0 16px 0', lineHeight: '1.1', letterSpacing: '-1px' }}>AI For Business Leaders</h1>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', margin: '0 0 28px 0' }}>
+                <div style={{ width: '50px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                <div style={{ fontSize: '20px', color: ColorScheme.accent, fontFamily: fonts.serif }}>◆</div>
+                <div style={{ width: '50px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+              </div>
+              <h2 style={{ fontSize: '22px', fontFamily: fonts.serif, fontWeight: '400', color: ColorScheme.accent, margin: '0 0 40px 0', fontStyle: 'italic' }}>A Practical Guide to AI Strategy, Operations, and Governance</h2>
+              <p style={{ fontSize: '20px', fontFamily: fonts.serif, color: ColorScheme.textMedium, margin: '0 0 18px 0', maxWidth: '720px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.5', fontStyle: 'italic' }}>
+                "This is not a book about how AI works. It's a book about how your business can work differently because of AI."
+              </p>
+              <p style={{ fontSize: '16px', fontFamily: fonts.serif, color: ColorScheme.textLight, margin: '0 0 50px 0', maxWidth: '640px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.7' }}>
+                For founders, CEOs, business owners and senior executives who want practical leverage in the middle of the AI hype — without becoming machine learning experts.
+              </p>
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => onStartReading(0)} style={{ padding: '14px 40px', backgroundColor: ColorScheme.accent, color: ColorScheme.card, border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', letterSpacing: '0.5px' }}
+                  onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentLight; }}
+                  onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accent; }}>
+                  Read the Book
+                </button>
+                <button style={{ padding: '14px 40px', backgroundColor: 'transparent', color: ColorScheme.accent, border: `2px solid ${ColorScheme.accent}`, borderRadius: '2px', fontFamily: fonts.serif, fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', letterSpacing: '0.5px' }}
+                  onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; }}
+                  onMouseLeave={(e) => { e.target.style.backgroundColor = 'transparent'; }}
+                  onClick={() => document.getElementById('chapters-section').scrollIntoView({ behavior: 'smooth' })}>
+                  Browse Chapters
+                </button>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>The Premise</div>
+                <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '30px', textAlign: 'center' }}>You don't need another technical manual</h2>
+                <p style={{ fontSize: '18px', fontFamily: fonts.serif, color: ColorScheme.textMedium, lineHeight: '1.85', textAlign: 'left' }}>
+                  Your world is being quietly rewired. Competitors you've never heard of are using AI to move faster, serve better, and run leaner. Your own teams are experimenting with tools you may not even know they've installed. Somewhere between the hype and the headlines, real advantage is being built.
+                </p>
+                <p style={{ fontSize: '18px', fontFamily: fonts.serif, color: ColorScheme.textMedium, lineHeight: '1.85', textAlign: 'left', marginTop: '20px' }}>
+                  This book is an attempt to give you practical leverage in the middle of that tension. You don't need to become an AI expert. You do need to become an <em>AI-literate leader</em>.
+                </p>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>The Framework</div>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '40px', textAlign: 'center' }}>Your Company as a Brain</h2>
+              <BrainDiagram />
+              <p style={{ fontSize: '15px', fontFamily: fonts.serif, color: ColorScheme.textLight, textAlign: 'center', marginTop: '30px', maxWidth: '640px', marginLeft: 'auto', marginRight: 'auto', fontStyle: 'italic' }}>
+                Every business already has these four parts. AI gives you new ways to strengthen each — if you design for it.
+              </p>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>What AI Actually Does</div>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '50px', textAlign: 'center' }}>Five Capabilities, Not Magic</h2>
+              <FiveCapabilities />
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px', fontWeight: '600' }}>The Core Promise</div>
+                <blockquote style={{ fontSize: '28px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, lineHeight: '1.45', margin: '0 auto', maxWidth: '780px', fontStyle: 'italic', borderLeft: 'none', padding: 0 }}>
+                  "AI will not magically fix a broken business model, a toxic culture or a lack of discipline. What it can do — if used well — is amplify your strengths, expose your blind spots faster and free up your best people to do higher-value work."
+                </blockquote>
+                <div style={{ marginTop: '24px', fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.textLight, letterSpacing: '1px' }}>— Note to the Reader</div>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section id="chapters-section" style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>Contents</div>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '60px', textAlign: 'center' }}>Chapter Map</h2>
+              <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                {CHAPTERS.map((ch, i) => (
+                  <button key={i} onClick={() => onStartReading(i)} style={{ padding: '20px', backgroundColor: ColorScheme.card, border: `1px solid ${ColorScheme.lines}`, borderRadius: '2px', cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s ease' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = ColorScheme.accentSoft; e.currentTarget.style.borderColor = ColorScheme.accent; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ColorScheme.card; e.currentTarget.style.borderColor = ColorScheme.lines; }}>
+                    <div style={{ fontSize: '11px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px', fontWeight: '700' }}>{ch.num}</div>
+                    <div style={{ fontSize: '16px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '8px', lineHeight: '1.3' }}>{ch.title}</div>
+                    <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.textLight }}>{ch.time}</div>
+                  </button>
+                ))}
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '720px', margin: '0 auto', textAlign: 'center' }}>
+                <p style={{ fontSize: '20px', fontFamily: fonts.serif, color: ColorScheme.text, lineHeight: '1.8', marginBottom: '40px', fontStyle: 'italic' }}>
+                  By the time you put this book down, you will know where AI can create real value in your specific business, have a shortlist of practical use cases for the next 90 days, and see a clear path to building an AI-ready organisation over the next 12 months.
+                </p>
+                <button onClick={() => onStartReading(0)} style={{ padding: '14px 40px', backgroundColor: ColorScheme.accent, color: ColorScheme.card, border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '16px', fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', letterSpacing: '0.5px' }}
+                  onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentLight; }}
+                  onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accent; }}>
+                  Begin Reading
+                </button>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '40px 20px', backgroundColor: ColorScheme.accent, textAlign: 'center', borderTop: `1px solid ${ColorScheme.lines}` }}>
+            <p style={{ fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.card, margin: '0 0 8px 0' }}>AI For Business Leaders · By Vinay Pasricha</p>
+            <p style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.card, opacity: 0.8, margin: 0 }}>A Practical Guide to AI Strategy, Operations, and Governance</p>
+          </section>
+        </div>
+      );
+    };
+
+    const ReaderPage = ({ onBack, initialChapter = 0 }) => {
+      const [currentChapterIndex, setCurrentChapterIndex] = useState(initialChapter);
+      const [currentPage, setCurrentPage] = useState(0);
+      const [showChapterMenu, setShowChapterMenu] = useState(false);
+
+      const chapter = CHAPTERS[currentChapterIndex];
+      const paragraphs = chapter.content;
+      const PARA_PER_PAGE = 5;
+      const totalPages = Math.max(1, Math.ceil(paragraphs.length / PARA_PER_PAGE));
+      const startPara = currentPage * PARA_PER_PAGE;
+      const endPara = Math.min(startPara + PARA_PER_PAGE, paragraphs.length);
+      const currentParagraphs = paragraphs.slice(startPara, endPara);
+
+      const goToNext = () => {
+        if (currentPage < totalPages - 1) {
+          setCurrentPage(currentPage + 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (currentChapterIndex < CHAPTERS.length - 1) {
+          setCurrentChapterIndex(currentChapterIndex + 1);
+          setCurrentPage(0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      const goToPrev = () => {
+        if (currentPage > 0) {
+          setCurrentPage(currentPage - 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (currentChapterIndex > 0) {
+          const prev = CHAPTERS[currentChapterIndex - 1];
+          setCurrentChapterIndex(currentChapterIndex - 1);
+          setCurrentPage(Math.max(0, Math.ceil(prev.content.length / PARA_PER_PAGE) - 1));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      const handleKeydown = useCallback((e) => {
+        if (e.key === 'ArrowRight') goToNext();
+        if (e.key === 'ArrowLeft') goToPrev();
+      }, [currentPage, currentChapterIndex]);
+
+      useEffect(() => {
+        window.addEventListener('keydown', handleKeydown);
+        return () => window.removeEventListener('keydown', handleKeydown);
+      }, [handleKeydown]);
+
+      const totalParas = CHAPTERS.reduce((sum, ch) => sum + ch.content.length, 0);
+      const parasBeforeCurrentChapter = CHAPTERS.slice(0, currentChapterIndex).reduce((sum, ch) => sum + ch.content.length, 0);
+      const parasRead = parasBeforeCurrentChapter + Math.min((currentPage + 1) * PARA_PER_PAGE, paragraphs.length);
+      const progress = (parasRead / totalParas) * 100;
+
+      return (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, right: 0, backgroundColor: ColorScheme.card, borderBottom: `1px solid ${ColorScheme.lines}`, padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
+            <button onClick={onBack} style={{ background: 'none', border: 'none', color: ColorScheme.accent, fontFamily: fonts.serif, fontSize: '14px', cursor: 'pointer', fontWeight: '600' }}>← Home</button>
+            <div style={{ textAlign: 'center', flex: 1, padding: '0 12px' }}>
+              <div style={{ fontSize: '11px', fontFamily: fonts.system, color: ColorScheme.textLight, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600' }}>{chapter.num}</div>
+              <div style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text }}>{chapter.title}</div>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowChapterMenu(!showChapterMenu)} style={{ background: 'none', border: 'none', color: ColorScheme.accent, fontFamily: fonts.serif, fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600' }}>Chapters ▾</button>
+              {showChapterMenu && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, backgroundColor: ColorScheme.card, border: `1px solid ${ColorScheme.lines}`, borderRadius: '2px', maxHeight: '400px', overflowY: 'auto', zIndex: 200, minWidth: '300px', marginTop: '8px', boxShadow: '0 8px 24px rgba(44,36,22,0.12)' }}>
+                  {CHAPTERS.map((ch, i) => (
+                    <button key={i} onClick={() => { setCurrentChapterIndex(i); setCurrentPage(0); setShowChapterMenu(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      style={{ width: '100%', padding: '12px 16px', textAlign: 'left', border: 'none', background: i === currentChapterIndex ? ColorScheme.accentSoft : 'transparent', cursor: 'pointer', borderBottom: `1px solid ${ColorScheme.lines}`, fontFamily: fonts.serif, fontSize: '13px', color: ColorScheme.text, transition: 'all 0.2s ease' }}
+                      onMouseEnter={(e) => { if (i !== currentChapterIndex) e.target.style.backgroundColor = ColorScheme.background; }}
+                      onMouseLeave={(e) => { if (i !== currentChapterIndex) e.target.style.backgroundColor = 'transparent'; }}>
+                      <div style={{ fontSize: '10px', color: ColorScheme.accent, marginBottom: '3px', letterSpacing: '0.8px', fontWeight: '700' }}>{ch.num}</div>
+                      <div style={{ fontWeight: '600', lineHeight: '1.3' }}>{ch.title}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{ position: 'fixed', top: '70px', left: 0, right: 0, height: '2px', backgroundColor: ColorScheme.lines, zIndex: 99 }}>
+            <div style={{ height: '100%', backgroundColor: ColorScheme.accent, width: `${progress}%`, transition: 'width 0.3s ease' }} />
+          </div>
+
+          <div style={{ maxWidth: '720px', margin: '0 auto', padding: '100px 40px 40px 40px', minHeight: '100vh' }}>
+            {currentPage === 0 && (
+              <div style={{ marginBottom: '60px' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px', fontWeight: '700' }}>{chapter.num}</div>
+                <h1 style={{ fontSize: '40px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.text, margin: 0, lineHeight: '1.2', letterSpacing: '-0.5px' }}>{chapter.title}</h1>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '24px 0 0 0' }}>
+                  <div style={{ width: '40px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                  <div style={{ fontSize: '14px', color: ColorScheme.accent, fontFamily: fonts.serif }}>◆</div>
+                  <div style={{ width: '40px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                </div>
+                <div style={{ fontSize: '13px', fontFamily: fonts.system, color: ColorScheme.textLight, marginTop: '20px', letterSpacing: '0.5px' }}>{chapter.time} read</div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '60px' }}>
+              {currentParagraphs.map((para, i) => {
+                const isFirstParaOfChapter = currentPage === 0 && i === 0;
+                const isPullQuote = para.length < 130 && para.length > 10 && !para.endsWith(':') && !/^\d+\./.test(para) && !/^[•◆]/.test(para);
+                const isHeading = (/^[A-Z][A-Z0-9\s&,'\-]+$/.test(para.trim()) && para.length < 60) || /^##\s/.test(para);
+                const isExercise = /^✈/.test(para) || /^Flight Exercise/i.test(para);
+                const cleanPara = para.replace(/^##\s*/, '');
+                const firstLetter = isFirstParaOfChapter && !isPullQuote && !isHeading && !isExercise ? cleanPara.charAt(0) : null;
+                const restOfPara = isFirstParaOfChapter && !isPullQuote && !isHeading && !isExercise ? cleanPara.slice(1) : cleanPara;
+
+                if (isExercise) {
+                  return (
+                    <div key={i} style={{ background: ColorScheme.accentSoft, border: `2px solid ${ColorScheme.accent}`, borderRadius: '4px', padding: '20px 24px', margin: '36px 0', animation: `aiFadeIn 0.5s ease ${i * 0.1}s both` }}>
+                      <h3 style={{ fontSize: '18px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.accent, margin: 0 }}>{cleanPara}</h3>
+                    </div>
+                  );
+                }
+                if (isHeading) {
+                  return (
+                    <h3 key={i} style={{ fontSize: '15px', fontFamily: fonts.system, fontWeight: '700', color: ColorScheme.accent, letterSpacing: '2px', margin: '40px 0 20px 0', textTransform: 'uppercase', animation: `aiFadeIn 0.5s ease ${i * 0.1}s both` }}>{cleanPara}</h3>
+                  );
+                }
+                if (isPullQuote) {
+                  return (
+                    <div key={i} style={{ borderLeft: `4px solid ${ColorScheme.accent}`, padding: '16px 24px', margin: '32px 0', backgroundColor: ColorScheme.accentSoft, borderRadius: '0 2px 2px 0', animation: `aiFadeIn 0.5s ease ${i * 0.15}s both` }}>
+                      <p style={{ fontSize: '20px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, lineHeight: '1.5', margin: 0, fontStyle: 'italic' }}>{cleanPara}</p>
+                    </div>
+                  );
+                }
+                return (
+                  <p key={i} style={{ fontSize: '17px', fontFamily: fonts.serif, color: ColorScheme.text, lineHeight: '1.85', margin: 0, paddingBottom: '24px', animation: `aiFadeIn 0.5s ease ${i * 0.1}s both` }}>
+                    {isFirstParaOfChapter && firstLetter && (
+                      <span style={{ float: 'left', fontSize: '64px', lineHeight: '50px', fontWeight: '700', color: ColorScheme.accent, fontFamily: fonts.serif, marginRight: '8px', marginTop: '6px' }}>{firstLetter}</span>
+                    )}
+                    {isFirstParaOfChapter && firstLetter ? restOfPara : cleanPara}
+                  </p>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '30px 0', borderTop: `1px solid ${ColorScheme.lines}`, gap: '16px', flexWrap: 'wrap' }}>
+              <button onClick={goToPrev} disabled={currentChapterIndex === 0 && currentPage === 0} style={{ padding: '10px 20px', backgroundColor: ColorScheme.accentSoft, color: ColorScheme.text, border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '14px', cursor: currentChapterIndex === 0 && currentPage === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: currentChapterIndex === 0 && currentPage === 0 ? 0.3 : 1, transition: 'all 0.3s ease' }}
+                onMouseEnter={(e) => { if (!(currentChapterIndex === 0 && currentPage === 0)) { e.target.style.backgroundColor = ColorScheme.accent; e.target.style.color = ColorScheme.card; } }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; e.target.style.color = ColorScheme.text; }}>← Previous</button>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button key={i} onClick={() => { setCurrentPage(i); window.scrollTo({ top: 0, behavior: 'smooth' }); }} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: i === currentPage ? ColorScheme.accent : ColorScheme.lines, border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', padding: 0 }} />
+                ))}
+              </div>
+              <button onClick={goToNext} disabled={currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1} style={{ padding: '10px 20px', backgroundColor: ColorScheme.accentSoft, color: ColorScheme.text, border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '14px', cursor: currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '8px', opacity: currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1 ? 0.3 : 1, transition: 'all 0.3s ease' }}
+                onMouseEnter={(e) => { if (!(currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1)) { e.target.style.backgroundColor = ColorScheme.accent; e.target.style.color = ColorScheme.card; } }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; e.target.style.color = ColorScheme.text; }}>Next →</button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const TopNav = ({ mode, onNavigate }) => {
+      if (mode !== 'home') return null;
+      return (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, backgroundColor: ColorScheme.card, borderBottom: `1px solid ${ColorScheme.lines}`, padding: '16px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 50 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <a href="book.html" style={{ color: ColorScheme.textMedium, textDecoration: 'none', fontFamily: fonts.serif, fontSize: '13px', fontWeight: '500', marginRight: '6px' }}>← Site</a>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: `linear-gradient(135deg, ${ColorScheme.accentLight}, ${ColorScheme.accent})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.card, letterSpacing: '-0.5px' }}>AI</span>
+            </div>
+            <div style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text }}>AI For Business Leaders</div>
+          </div>
+          <div style={{ display: 'flex', gap: '30px', fontSize: '14px', fontFamily: fonts.serif }}>
+            <button onClick={() => onNavigate('home')} style={{ background: 'none', border: 'none', color: ColorScheme.text, cursor: 'pointer', fontWeight: '500', transition: 'color 0.3s ease' }}
+              onMouseEnter={(e) => { e.target.style.color = ColorScheme.accent; }}
+              onMouseLeave={(e) => { e.target.style.color = ColorScheme.text; }}>Home</button>
+            <button onClick={() => onNavigate('read')} style={{ background: 'none', border: 'none', color: ColorScheme.accent, cursor: 'pointer', fontWeight: '600' }}>Read</button>
+          </div>
+        </div>
+      );
+    };
+
+    function AIBookApp() {
+      const [mode, setMode] = useState('home');
+      const [startChapter, setStartChapter] = useState(0);
+
+      const handleStartReading = (chapterIndex) => {
+        setStartChapter(typeof chapterIndex === 'number' ? chapterIndex : 0);
+        setMode('read');
+      };
+
+      useEffect(() => {
+        const loader = document.getElementById('ai-loading');
+        if (loader) loader.remove();
+        const link = document.getElementById('back-to-site');
+        if (link) link.style.display = mode === 'read' ? 'block' : 'none';
+      }, [mode]);
+
+      if (CHAPTERS.length === 0) {
+        return <div style={{ padding: '40px', fontFamily: fonts.serif, color: ColorScheme.text }}>Loading book content…</div>;
+      }
+
+      return (
+        <div style={{ backgroundColor: ColorScheme.background, color: ColorScheme.text, fontFamily: fonts.serif, minHeight: '100vh' }}>
+          <StyleInjector />
+          <NetworkBackground />
+          <TopNav mode={mode} onNavigate={setMode} />
+          {mode === 'home' ? (
+            <HomePage onStartReading={handleStartReading} />
+          ) : (
+            <ReaderPage onBack={() => setMode('home')} initialChapter={startChapter} />
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AIBookApp />);
+  </script>
+</body>
+</html>
