@@ -66,7 +66,7 @@
       z-index: 1;
     }
 
-    .signal-shell { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 24px 20px 200px; min-height: 100vh; min-height: 100dvh; }
+    .signal-shell { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 24px 20px 240px; min-height: 100vh; min-height: 100dvh; }
 
     /* Header */
     .signal-header {
@@ -332,14 +332,26 @@
       // Persist
       useEffect(() => { saveSession(messages); }, [messages]);
 
-      // Auto-scroll on every change. Use scrollIntoView on a sentinel for reliability.
+      // Auto-scroll on every change. Use window.scrollTo with overshoot so we land
+      // past the fixed composer; rAF + double-tick to wait for layout to settle.
       useEffect(() => {
-        // Wait one frame so layout settles, then scroll
-        requestAnimationFrame(() => {
-          if (bottomRef.current) {
-            bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-          }
+        const doScroll = () => {
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth'
+          });
+        };
+        // Two animation frames to ensure DOM/layout has settled (especially after
+        // textarea auto-resize and message bubble growth)
+        const r1 = requestAnimationFrame(() => {
+          const r2 = requestAnimationFrame(doScroll);
+          // Backup hard scroll after a beat in case smooth scroll gets interrupted
+          const t = setTimeout(() => {
+            window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
+          }, 350);
+          return () => { cancelAnimationFrame(r2); clearTimeout(t); };
         });
+        return () => cancelAnimationFrame(r1);
       }, [messages, pending, error]);
 
       // Auto-resize textarea
