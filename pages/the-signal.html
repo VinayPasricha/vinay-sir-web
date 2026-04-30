@@ -583,23 +583,7 @@
       const silenceTimerRef = useRef(null);
 
       const hasUserMessage = messages.some(m => m.role === 'user');
-
-      // Show the lead form before the chat
-      if (!identity) {
-        return (
-          <div className="signal-shell">
-            <header className="signal-header">
-              <a href="../index.html" className="signal-back">&larr;<span className="signal-back-text"> vinaypasricha.com</span></a>
-              <div className="signal-brand">
-                <span className="signal-brand-dot"></span>
-                The Signal
-              </div>
-              <span style={{width: 70}}></span>
-            </header>
-            <IdentityGate onSubmit={(id) => setIdentity(id)} />
-          </div>
-        );
-      }
+      const gated = !identity;
 
       // Auto-start: insert opening if no messages yet
       useEffect(() => {
@@ -826,10 +810,12 @@
               <span className="signal-brand-dot"></span>
               The Signal
             </div>
-            <button className="signal-restart" onClick={restart}>New Session</button>
+            {gated ? <span style={{width: 70}}></span> : <button className="signal-restart" onClick={restart}>New Session</button>}
           </header>
 
-          {!hasUserMessage && (
+          {gated && <IdentityGate onSubmit={(id) => setIdentity(id)} />}
+
+          {!gated && !hasUserMessage && (
             <section className="signal-hero">
               <div className="signal-eyebrow">Session 0 · The Split</div>
               <h1 className="signal-title">A diagnostic <em>resonance</em> encounter.</h1>
@@ -843,30 +829,33 @@
             </section>
           )}
 
-          <main className="signal-messages">
-            {messages.map((m, i) => (
-              <div key={i} className={`signal-msg ${m.role}`}>{m.content}</div>
-            ))}
-            {pending && (
-              <div className="signal-msg assistant thinking">
-                Listening
-                <span className="signal-thinking-dots"><span></span><span></span><span></span></span>
-              </div>
-            )}
-            {error && (
-              <div className="signal-error">
-                <div>
-                  <strong>Couldn't reach the model.</strong><br />
-                  {error}
+          {!gated && (
+            <main className="signal-messages">
+              {messages.map((m, i) => (
+                <div key={i} className={`signal-msg ${m.role}`}>{m.content}</div>
+              ))}
+              {pending && (
+                <div className="signal-msg assistant thinking">
+                  Listening
+                  <span className="signal-thinking-dots"><span></span><span></span><span></span></span>
                 </div>
-                {lastFailedMessages && (
-                  <button className="signal-error-retry" onClick={retry}>Retry</button>
-                )}
-              </div>
-            )}
-            <div ref={bottomRef} className="signal-bottom-anchor"></div>
-          </main>
+              )}
+              {error && (
+                <div className="signal-error">
+                  <div>
+                    <strong>Couldn't reach the model.</strong><br />
+                    {error}
+                  </div>
+                  {lastFailedMessages && (
+                    <button className="signal-error-retry" onClick={retry}>Retry</button>
+                  )}
+                </div>
+              )}
+              <div ref={bottomRef} className="signal-bottom-anchor"></div>
+            </main>
+          )}
 
+          {!gated && (
           <div className="signal-composer-wrap">
             <div className="signal-composer">
               <textarea
@@ -902,6 +891,7 @@
               {micError ? <span style={{color: 'var(--error)'}}>{micError}</span> : (isRecording ? 'Tap the red square to stop · Edit before sending' : (SPEECH_SUPPORTED ? 'Enter to send · Shift + Enter for new line · Click mic to speak' : 'Enter to send · Shift + Enter for a new line'))}
             </div>
           </div>
+          )}
         </div>
       );
     }
