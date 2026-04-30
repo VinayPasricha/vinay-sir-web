@@ -67,6 +67,7 @@
     }
 
     .signal-shell { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 24px 20px 240px; min-height: 100vh; min-height: 100dvh; }
+    .signal-shell.gated { padding-bottom: 32px; }
 
     /* Header */
     .signal-header {
@@ -585,13 +586,14 @@
       const hasUserMessage = messages.some(m => m.role === 'user');
       const gated = !identity;
 
-      // Auto-start: insert opening if no messages yet
+      // Auto-start: insert opening once the user is past the gate
       useEffect(() => {
+        if (!identity) return;
         if (messages.length === 0) {
           setMessages([{ role: 'assistant', content: OPENING }]);
           if (window.trackEvent) window.trackEvent('signal_session_started');
         }
-      }, []);
+      }, [identity]);
 
       // Persist
       useEffect(() => { saveSession(messages); }, [messages]);
@@ -599,6 +601,7 @@
       // Auto-scroll on every change. Use window.scrollTo with overshoot so we land
       // past the fixed composer; rAF + double-tick to wait for layout to settle.
       useEffect(() => {
+        if (!identity) return; // don't auto-scroll while the gate is showing
         const doScroll = () => {
           window.scrollTo({
             top: document.documentElement.scrollHeight,
@@ -616,7 +619,7 @@
           return () => { cancelAnimationFrame(r2); clearTimeout(t); };
         });
         return () => cancelAnimationFrame(r1);
-      }, [messages, pending, error]);
+      }, [messages, pending, error, identity]);
 
       // Auto-resize textarea
       useEffect(() => {
@@ -803,7 +806,7 @@
       }, [pending, error]);
 
       return (
-        <div className="signal-shell">
+        <div className={`signal-shell ${gated ? 'gated' : ''}`}>
           <header className="signal-header">
             <a href="../index.html" className="signal-back">&larr;<span className="signal-back-text"> vinaypasricha.com</span></a>
             <div className="signal-brand">
