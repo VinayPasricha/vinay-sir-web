@@ -331,6 +331,7 @@
       const textareaRef = useRef(null);
       const recognitionRef = useRef(null);
       const baseInputRef = useRef('');
+      const silenceTimerRef = useRef(null);
 
       const hasUserMessage = messages.some(m => m.role === 'user');
 
@@ -402,6 +403,13 @@
       }, []);
 
       const send = useCallback(() => {
+        // If currently recording, stop first so the latest transcript lands in input.
+        if (recognitionRef.current) {
+          try { recognitionRef.current.stop(); } catch {}
+          if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+          recognitionRef.current = null;
+          setIsRecording(false);
+        }
         const text = input.trim();
         if (!text || pending) return;
         const next = [...messages, { role: 'user', content: text }];
@@ -431,6 +439,29 @@
       };
 
       // Speech-to-text
+      const SILENCE_MS = 2200; // auto-stop after this many ms of silence
+
+      const armSilenceTimer = useCallback(() => {
+        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+        silenceTimerRef.current = setTimeout(() => {
+          if (recognitionRef.current) {
+            try { recognitionRef.current.stop(); } catch {}
+          }
+        }, SILENCE_MS);
+      }, []);
+
+      const stopRecording = useCallback(() => {
+        if (silenceTimerRef.current) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = null;
+        }
+        if (recognitionRef.current) {
+          try { recognitionRef.current.stop(); } catch {}
+          recognitionRef.current = null;
+        }
+        setIsRecording(false);
+      }, []);
+
       const startRecording = useCallback(() => {
         if (!SPEECH_SUPPORTED) {
           setMicError('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
@@ -455,38 +486,36 @@
             }
             if (finalText) baseInputRef.current += finalText;
             setInput((baseInputRef.current + interimText).replace(/\s+/g, ' ').trimStart());
+            armSilenceTimer();
           };
+          recognition.onspeechstart = () => armSilenceTimer();
           recognition.onerror = (event) => {
             if (event.error === 'not-allowed') {
               setMicError('Microphone permission denied. Allow access in your browser settings.');
-            } else if (event.error === 'no-speech') {
+            } else if (event.error === 'no-speech' || event.error === 'aborted') {
               // silent stop, no error
             } else {
               setMicError('Voice input error: ' + event.error);
             }
+            if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
             setIsRecording(false);
           };
           recognition.onend = () => {
+            if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+            recognitionRef.current = null;
             setIsRecording(false);
           };
 
           recognition.start();
           recognitionRef.current = recognition;
           setIsRecording(true);
+          armSilenceTimer();
           if (window.trackEvent) window.trackEvent('signal_voice_started');
         } catch (e) {
           setMicError('Could not start voice input: ' + String(e.message || e));
           setIsRecording(false);
         }
-      }, [input]);
-
-      const stopRecording = useCallback(() => {
-        if (recognitionRef.current) {
-          try { recognitionRef.current.stop(); } catch {}
-          recognitionRef.current = null;
-        }
-        setIsRecording(false);
-      }, []);
+      }, [input, armSilenceTimer]);
 
       const toggleRecording = () => {
         if (isRecording) stopRecording();
@@ -496,6 +525,7 @@
       // Cleanup on unmount
       useEffect(() => {
         return () => {
+          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
           if (recognitionRef.current) {
             try { recognitionRef.current.stop(); } catch {}
           }
