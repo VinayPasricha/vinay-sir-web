@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics 4 -->
+  <script defer src="../js/analytics.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Signal — Session 0 with Vinay Pasricha</title>
+  <meta name="description" content="A diagnostic resonance encounter. Convert emotional turbulence into visible structure through slow precision descent. Free, private, no signup.">
+  <link rel="canonical" href="https://vinaypasricha.com/pages/the-signal.html">
+  <!-- Open Graph -->
+  <meta property="og:title" content="The Signal — Session 0">
+  <meta property="og:description" content="A diagnostic resonance encounter. Convert emotional turbulence into visible structure through slow precision descent.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vinaypasricha.com/pages/the-signal.html">
+  <meta property="og:image" content="https://vinaypasricha.com/assets/images/vinay-avatar.png">
+  <meta property="og:site_name" content="Vinay Pasricha">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Signal — Session 0">
+  <meta name="twitter:description" content="A diagnostic resonance encounter. Convert emotional turbulence into visible structure through slow precision descent.">
+  <meta name="twitter:image" content="https://vinaypasricha.com/assets/images/vinay-avatar.png">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "The Signal — Session 0",
+    "description": "A diagnostic resonance encounter that converts emotional turbulence into visible structure.",
+    "url": "https://vinaypasricha.com/pages/the-signal.html",
+    "author": { "@type": "Person", "name": "Vinay Pasricha", "url": "https://vinaypasricha.com" },
+    "applicationCategory": "Lifestyle",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #FAF7F2; font-family: Georgia, serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; min-height: 100vh; }
+    button { font-family: inherit; }
+    a { color: inherit; -webkit-tap-highlight-color: transparent; }
+
+    .signal-app { max-width: 720px; margin: 0 auto; padding: 32px 20px 120px; min-height: 100vh; display: flex; flex-direction: column; }
+
+    .signal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid #E8E0D4; margin-bottom: 32px; }
+    .signal-back { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 13px; color: #6B5D4A; text-decoration: none; letter-spacing: 0.5px; }
+    .signal-back:hover { color: #8B6914; }
+    .signal-brand { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #8B6914; font-weight: 700; }
+
+    .signal-intro { padding: 12px 0 36px; }
+    .signal-title { font-size: 36px; font-weight: 700; color: #1F1A14; margin: 0 0 12px; letter-spacing: -0.5px; line-height: 1.15; }
+    .signal-subtitle { font-size: 17px; color: #4A4035; line-height: 1.55; margin: 0 0 18px; }
+    .signal-meta { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 12px; color: #8A7E68; letter-spacing: 0.4px; }
+
+    .signal-messages { flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 12px 0; }
+    .signal-msg { padding: 14px 18px; border-radius: 14px; font-size: 16px; line-height: 1.6; max-width: 88%; white-space: pre-wrap; word-wrap: break-word; }
+    .signal-msg.assistant { background: #FFFFFF; color: #1F1A14; border: 1px solid #EDE5D5; align-self: flex-start; }
+    .signal-msg.user { background: #1F1A14; color: #FAF7F2; align-self: flex-end; }
+    .signal-msg.system-error { background: #FBEEEC; color: #7B2D20; border: 1px solid #F2D2CC; align-self: stretch; max-width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 13px; }
+    .signal-msg.thinking { color: #8A7E68; font-style: italic; }
+
+    .signal-input-row { position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #FAF7F2 75%, rgba(250,247,242,0)); padding: 24px 20px 28px; }
+    .signal-input-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; }
+    .signal-textarea { flex: 1; resize: none; min-height: 56px; max-height: 200px; padding: 16px 18px; font-family: Georgia, serif; font-size: 16px; line-height: 1.5; color: #1F1A14; background: #FFFFFF; border: 1px solid #D8CDB7; border-radius: 12px; outline: none; transition: border-color 150ms; }
+    .signal-textarea:focus { border-color: #8B6914; }
+    .signal-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
+    .signal-send { padding: 0 22px; min-width: 84px; background: #1F1A14; color: #FAF7F2; border: none; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; transition: background 150ms; }
+    .signal-send:hover:not(:disabled) { background: #2D2620; }
+    .signal-send:disabled { background: #8A7E68; cursor: not-allowed; }
+
+    .signal-footer-note { text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 11px; color: #8A7E68; margin-top: 8px; letter-spacing: 0.3px; }
+    .signal-restart { background: none; border: 1px solid #D8CDB7; color: #6B5D4A; padding: 6px 14px; border-radius: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 12px; cursor: pointer; }
+    .signal-restart:hover { border-color: #8B6914; color: #8B6914; }
+
+    @media (max-width: 600px) {
+      .signal-app { padding: 20px 16px 140px; }
+      .signal-title { font-size: 28px; }
+      .signal-subtitle { font-size: 16px; }
+      .signal-msg { font-size: 15px; padding: 12px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="signal-root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback } = React;
+    const STORAGE_KEY = 'thesignal:session';
+
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch { return []; }
+    }
+    function saveSession(messages) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch {}
+    }
+
+    function App() {
+      const [messages, setMessages] = useState(() => loadSession());
+      const [input, setInput] = useState('');
+      const [pending, setPending] = useState(false);
+      const [error, setError] = useState(null);
+      const scrollRef = useRef(null);
+      const textareaRef = useRef(null);
+
+      // Auto-start the session if empty
+      useEffect(() => {
+        if (messages.length === 0) {
+          setMessages([{
+            role: 'assistant',
+            content: 'Tell me what is creating the most internal friction right now. Do not summarize it. Give it to me as it is.'
+          }]);
+          if (window.trackEvent) window.trackEvent('signal_session_started');
+        }
+      }, []);
+
+      // Persist on every change
+      useEffect(() => { saveSession(messages); }, [messages]);
+
+      // Scroll to bottom on new messages
+      useEffect(() => {
+        if (scrollRef.current) {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+      }, [messages, pending]);
+
+      // Auto-resize textarea
+      useEffect(() => {
+        const el = textareaRef.current;
+        if (el) {
+          el.style.height = 'auto';
+          el.style.height = Math.min(el.scrollHeight, 200) + 'px';
+        }
+      }, [input]);
+
+      const send = useCallback(async () => {
+        const text = input.trim();
+        if (!text || pending) return;
+        setError(null);
+        const next = [...messages, { role: 'user', content: text }];
+        setMessages(next);
+        setInput('');
+        setPending(true);
+        try {
+          const res = await fetch('/api/signal-chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: next })
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Request failed');
+          setMessages([...next, data.message]);
+          if (window.trackEvent) window.trackEvent('signal_message_exchanged', { msg_count: next.length + 1 });
+        } catch (e) {
+          setError(String(e.message || e));
+        } finally {
+          setPending(false);
+        }
+      }, [input, messages, pending]);
+
+      const onKeyDown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          send();
+        }
+      };
+
+      const restart = () => {
+        if (!confirm('Start a new session? Your current conversation will be cleared.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        setMessages([]);
+        setError(null);
+        if (window.trackEvent) window.trackEvent('signal_session_restarted');
+      };
+
+      return (
+        <div className="signal-app">
+          <div className="signal-header">
+            <a href="../index.html" className="signal-back">&larr; vinaypasricha.com</a>
+            <div className="signal-brand">The Signal</div>
+            <button className="signal-restart" onClick={restart}>New Session</button>
+          </div>
+
+          <div className="signal-intro">
+            <h1 className="signal-title">Session 0</h1>
+            <p className="signal-subtitle">A diagnostic resonance encounter. The task is to take whatever is generating internal noise right now and reduce it into visible structure — slowly, precisely, until you can see the split that's actually creating the friction.</p>
+            <p className="signal-meta">Free · Private · No signup · Conversation stays in your browser</p>
+          </div>
+
+          <div className="signal-messages" ref={scrollRef}>
+            {messages.map((m, i) => (
+              <div key={i} className={`signal-msg ${m.role}`}>{m.content}</div>
+            ))}
+            {pending && <div className="signal-msg assistant thinking">Listening…</div>}
+            {error && <div className="signal-msg system-error">{error}</div>}
+          </div>
+
+          <div className="signal-input-row">
+            <div className="signal-input-inner">
+              <textarea
+                ref={textareaRef}
+                className="signal-textarea"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Speak as it is. Do not summarize."
+                disabled={pending}
+                rows={1}
+              />
+              <button className="signal-send" onClick={send} disabled={pending || !input.trim()}>
+                {pending ? '…' : 'Send'}
+              </button>
+            </div>
+            <div className="signal-footer-note">Enter to send · Shift+Enter for new line</div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('signal-root')).render(<App />);
+  </script>
+</body>
+</html>
