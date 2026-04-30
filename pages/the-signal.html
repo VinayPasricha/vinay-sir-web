@@ -219,6 +219,89 @@
     /* Sentinel for reliable scroll */
     .signal-bottom-anchor { height: 1px; }
 
+    /* Identity gate (lead capture form) */
+    .signal-gate {
+      max-width: 520px;
+      margin: 8vh auto 0;
+      padding: 36px 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 24px 48px -24px rgba(0,0,0,0.7);
+      animation: fadeIn 600ms ease-out;
+    }
+    .signal-gate-eyebrow {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 600;
+      margin-bottom: 16px;
+    }
+    .signal-gate-title {
+      font-size: 28px; font-weight: 600;
+      color: var(--text); margin: 0 0 12px;
+      letter-spacing: -0.4px; line-height: 1.15;
+    }
+    .signal-gate-sub {
+      font-size: 15px; line-height: 1.55;
+      color: var(--text-soft); margin: 0 0 28px;
+      font-weight: 400;
+    }
+    .signal-gate-fields {
+      display: flex; flex-direction: column; gap: 14px;
+      margin-bottom: 20px;
+    }
+    .signal-gate-label {
+      display: flex; flex-direction: column; gap: 6px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-mute); font-weight: 600;
+    }
+    .signal-gate-input {
+      padding: 13px 14px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-strong);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 200ms;
+    }
+    .signal-gate-input:focus { border-color: var(--accent); }
+    .signal-gate-input::placeholder { color: var(--text-mute); font-style: italic; opacity: 0.6; }
+    .signal-gate-submit {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #1A1610;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px; font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .signal-gate-submit:hover:not(:disabled) { background: #DDB95A; transform: translateY(-1px); }
+    .signal-gate-submit:disabled { background: var(--border-strong); color: var(--text-mute); cursor: not-allowed; }
+    .signal-gate-privacy {
+      margin-top: 16px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; line-height: 1.5; color: var(--text-mute);
+      text-align: center;
+      letter-spacing: 0.2px;
+    }
+    .signal-gate-error {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12px;
+    }
+
     /* Composer */
     .signal-composer-wrap {
       position: fixed; bottom: 0; left: 0; right: 0;
@@ -330,6 +413,12 @@
 
       .signal-error { padding: 12px 14px; font-size: 12px; gap: 12px; }
       .signal-error-retry { padding: 5px 10px; font-size: 11px; }
+
+      .signal-gate { margin-top: 4vh; padding: 26px 22px; border-radius: 14px; }
+      .signal-gate-title { font-size: 24px; }
+      .signal-gate-sub { font-size: 14px; margin-bottom: 22px; }
+      .signal-gate-input { font-size: 16px; padding: 12px 14px; }
+      .signal-gate-submit { padding: 13px; font-size: 13px; }
     }
 
     /* Very small phones (iPhone SE, etc.) */
@@ -362,6 +451,8 @@
   <script type="text/babel" data-presets="react">
     const { useState, useEffect, useRef, useCallback } = React;
     const STORAGE_KEY = 'thesignal:session:v2';
+    const IDENTITY_KEY = 'thesignal:identity:v1';
+    const WEB3FORMS_ACCESS_KEY = '21e0a980-121e-40f4-b35a-fba117bb0cc2';
 
     function loadSession() {
       try {
@@ -374,14 +465,110 @@
     function saveSession(messages) {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch {}
     }
+    function loadIdentity() {
+      try {
+        const raw = localStorage.getItem(IDENTITY_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && parsed.email ? parsed : null;
+      } catch { return null; }
+    }
+    function saveIdentity(identity) {
+      try { localStorage.setItem(IDENTITY_KEY, JSON.stringify(identity)); } catch {}
+    }
 
     const OPENING = 'Tell me what is creating the most internal friction right now. Do not summarize it. Give it to me as it is.';
+
+    function IdentityGate({ onSubmit }) {
+      const [name, setName] = useState('');
+      const [email, setEmail] = useState('');
+      const [phone, setPhone] = useState('');
+      const [submitting, setSubmitting] = useState(false);
+      const [error, setError] = useState(null);
+
+      const isValid = name.trim().length >= 2
+        && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+        && phone.trim().length >= 6;
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!isValid || submitting) return;
+        setSubmitting(true);
+        setError(null);
+
+        const identity = {
+          name: name.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          submittedAt: new Date().toISOString()
+        };
+
+        try {
+          const res = await fetch('https://api.web3forms.com/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              access_key: WEB3FORMS_ACCESS_KEY,
+              subject: 'New Signal — Session 0 lead',
+              from_name: 'The Signal',
+              name: identity.name,
+              email: identity.email,
+              phone: identity.phone,
+              source: 'the-signal.html',
+              referrer: document.referrer || 'direct',
+              submitted_at: identity.submittedAt
+            })
+          });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.message || 'Submission failed');
+        } catch (err) {
+          // Even if Web3Forms fails, let the user proceed — the identity is saved locally.
+          // Log silently; this should not block the experience.
+          console.error('[signal-gate] web3forms error', err);
+        }
+
+        saveIdentity(identity);
+        if (window.trackEvent) window.trackEvent('signal_lead_captured');
+        setSubmitting(false);
+        onSubmit(identity);
+      };
+
+      return (
+        <div className="signal-gate">
+          <div className="signal-gate-eyebrow">Session 0 · The Split</div>
+          <h1 className="signal-gate-title">Before we begin.</h1>
+          <p className="signal-gate-sub">A diagnostic resonance encounter — slowly, precisely, until you can see the split that is actually creating the friction. We'll send your Resonance Record to your email at the end of the session.</p>
+          <form onSubmit={handleSubmit}>
+            <div className="signal-gate-fields">
+              <label className="signal-gate-label">
+                Name
+                <input className="signal-gate-input" type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required autoComplete="name" />
+              </label>
+              <label className="signal-gate-label">
+                Email
+                <input className="signal-gate-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required autoComplete="email" />
+              </label>
+              <label className="signal-gate-label">
+                Phone
+                <input className="signal-gate-input" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+91 ..." required autoComplete="tel" />
+              </label>
+            </div>
+            <button className="signal-gate-submit" type="submit" disabled={!isValid || submitting}>
+              {submitting ? 'Starting…' : 'Begin Session 0 →'}
+            </button>
+          </form>
+          {error && <div className="signal-gate-error">{error}</div>}
+          <p className="signal-gate-privacy">Your information stays with Vinay Pasricha. We'll only contact you about The Signal — never sold or shared.</p>
+        </div>
+      );
+    }
 
     // Speech-to-text setup (Web Speech API)
     const SpeechRecognitionImpl = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
     const SPEECH_SUPPORTED = !!SpeechRecognitionImpl;
 
     function App() {
+      const [identity, setIdentity] = useState(() => loadIdentity());
       const [messages, setMessages] = useState(() => loadSession());
       const [input, setInput] = useState('');
       const [pending, setPending] = useState(false);
@@ -396,6 +583,23 @@
       const silenceTimerRef = useRef(null);
 
       const hasUserMessage = messages.some(m => m.role === 'user');
+
+      // Show the lead form before the chat
+      if (!identity) {
+        return (
+          <div className="signal-shell">
+            <header className="signal-header">
+              <a href="../index.html" className="signal-back">&larr;<span className="signal-back-text"> vinaypasricha.com</span></a>
+              <div className="signal-brand">
+                <span className="signal-brand-dot"></span>
+                The Signal
+              </div>
+              <span style={{width: 70}}></span>
+            </header>
+            <IdentityGate onSubmit={(id) => setIdentity(id)} />
+          </div>
+        );
+      }
 
       // Auto-start: insert opening if no messages yet
       useEffect(() => {
