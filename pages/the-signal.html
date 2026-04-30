@@ -4,7 +4,7 @@
   <!-- Google Analytics 4 -->
   <script defer src="../js/analytics.js"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Signal — Session 0 with Vinay Pasricha</title>
   <meta name="description" content="A diagnostic resonance encounter. Convert emotional turbulence into visible structure through slow precision descent. Free, private, no signup.">
   <link rel="canonical" href="https://vinaypasricha.com/pages/the-signal.html">
@@ -31,48 +31,257 @@
     "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    html, body { margin: 0; padding: 0; background: #FAF7F2; font-family: Georgia, serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; min-height: 100vh; }
-    button { font-family: inherit; }
-    a { color: inherit; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #0E0D0B;
+      --bg-elevated: #14130F;
+      --surface: #1B1A15;
+      --surface-2: #232118;
+      --border: #2A2820;
+      --border-strong: #3A3729;
+      --text: #F2EDE0;
+      --text-soft: #B5AC97;
+      --text-mute: #6F6852;
+      --accent: #C9A24A;
+      --accent-soft: #8B6914;
+      --error: #C66B5C;
+      --error-bg: #2A1812;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Fraunces', Georgia, serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; min-height: 100vh; min-height: 100dvh; overscroll-behavior: none; }
+    button, input, textarea { font-family: inherit; }
+    a { color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 
-    .signal-app { max-width: 720px; margin: 0 auto; padding: 32px 20px 120px; min-height: 100vh; display: flex; flex-direction: column; }
+    /* Subtle ambient grain */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.78 0 0 0 0 0.65 0 0 0 0 0.30 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      mix-blend-mode: overlay;
+      z-index: 1;
+    }
 
-    .signal-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 24px; border-bottom: 1px solid #E8E0D4; margin-bottom: 32px; }
-    .signal-back { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 13px; color: #6B5D4A; text-decoration: none; letter-spacing: 0.5px; }
-    .signal-back:hover { color: #8B6914; }
-    .signal-brand { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #8B6914; font-weight: 700; }
+    .signal-shell { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; padding: 24px 20px 200px; min-height: 100vh; min-height: 100dvh; }
 
-    .signal-intro { padding: 12px 0 36px; }
-    .signal-title { font-size: 36px; font-weight: 700; color: #1F1A14; margin: 0 0 12px; letter-spacing: -0.5px; line-height: 1.15; }
-    .signal-subtitle { font-size: 17px; color: #4A4035; line-height: 1.55; margin: 0 0 18px; }
-    .signal-meta { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 12px; color: #8A7E68; letter-spacing: 0.4px; }
+    /* Header */
+    .signal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+    .signal-back {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-mute); letter-spacing: 0.4px;
+      transition: color 200ms;
+    }
+    .signal-back:hover { color: var(--accent); }
+    .signal-brand {
+      display: flex; align-items: center; gap: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+    }
+    .signal-brand-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .signal-restart {
+      background: transparent;
+      border: 1px solid var(--border-strong);
+      color: var(--text-soft);
+      padding: 7px 14px;
+      border-radius: 100px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; font-weight: 500; letter-spacing: 0.3px;
+      cursor: pointer;
+      transition: all 200ms;
+    }
+    .signal-restart:hover { border-color: var(--accent); color: var(--accent); }
 
-    .signal-messages { flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 12px 0; }
-    .signal-msg { padding: 14px 18px; border-radius: 14px; font-size: 16px; line-height: 1.6; max-width: 88%; white-space: pre-wrap; word-wrap: break-word; }
-    .signal-msg.assistant { background: #FFFFFF; color: #1F1A14; border: 1px solid #EDE5D5; align-self: flex-start; }
-    .signal-msg.user { background: #1F1A14; color: #FAF7F2; align-self: flex-end; }
-    .signal-msg.system-error { background: #FBEEEC; color: #7B2D20; border: 1px solid #F2D2CC; align-self: stretch; max-width: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 13px; }
-    .signal-msg.thinking { color: #8A7E68; font-style: italic; }
+    /* Hero — only shows before first message */
+    .signal-hero {
+      padding: 32px 0 56px;
+      animation: fadeIn 600ms ease-out;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .signal-eyebrow {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); font-weight: 600;
+      margin-bottom: 18px;
+    }
+    .signal-title {
+      font-size: clamp(40px, 7vw, 64px); font-weight: 600;
+      color: var(--text); margin: 0 0 20px;
+      letter-spacing: -1.2px; line-height: 1.05;
+    }
+    .signal-title em { font-style: italic; color: var(--accent); font-weight: 500; }
+    .signal-tagline {
+      font-size: 18px; line-height: 1.55;
+      color: var(--text-soft); margin: 0 0 28px;
+      max-width: 580px;
+      font-weight: 400;
+    }
+    .signal-meta {
+      display: flex; gap: 18px; flex-wrap: wrap;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase;
+      color: var(--text-mute); font-weight: 500;
+    }
+    .signal-meta span { display: inline-flex; align-items: center; gap: 6px; }
+    .signal-meta span::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--text-mute); }
 
-    .signal-input-row { position: fixed; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, #FAF7F2 75%, rgba(250,247,242,0)); padding: 24px 20px 28px; }
-    .signal-input-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 10px; }
-    .signal-textarea { flex: 1; resize: none; min-height: 56px; max-height: 200px; padding: 16px 18px; font-family: Georgia, serif; font-size: 16px; line-height: 1.5; color: #1F1A14; background: #FFFFFF; border: 1px solid #D8CDB7; border-radius: 12px; outline: none; transition: border-color 150ms; }
-    .signal-textarea:focus { border-color: #8B6914; }
-    .signal-textarea:disabled { opacity: 0.6; cursor: not-allowed; }
-    .signal-send { padding: 0 22px; min-width: 84px; background: #1F1A14; color: #FAF7F2; border: none; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer; transition: background 150ms; }
-    .signal-send:hover:not(:disabled) { background: #2D2620; }
-    .signal-send:disabled { background: #8A7E68; cursor: not-allowed; }
+    /* Messages */
+    .signal-messages {
+      display: flex; flex-direction: column; gap: 14px;
+      padding-bottom: 12px;
+    }
+    .signal-msg {
+      max-width: 92%;
+      padding: 16px 20px;
+      font-size: 17px; line-height: 1.62;
+      white-space: pre-wrap; word-wrap: break-word;
+      animation: msgIn 320ms cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+    @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .signal-msg.assistant {
+      align-self: flex-start;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 4px 18px 18px 18px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset, 0 16px 32px -24px rgba(0,0,0,0.6);
+    }
+    .signal-msg.user {
+      align-self: flex-end;
+      background: var(--accent);
+      color: #1A1610;
+      border-radius: 18px 4px 18px 18px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px; font-weight: 500;
+      letter-spacing: -0.01em;
+      box-shadow: 0 8px 24px -12px rgba(201,162,74,0.35);
+    }
+    .signal-msg.assistant.thinking {
+      color: var(--text-mute);
+      font-style: italic;
+      display: inline-flex; align-items: center; gap: 10px;
+      background: transparent;
+      border-color: transparent;
+      box-shadow: none;
+    }
+    .signal-thinking-dots {
+      display: inline-flex; gap: 4px;
+    }
+    .signal-thinking-dots span {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      animation: dot 1.2s ease-in-out infinite;
+    }
+    .signal-thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .signal-thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dot { 0%, 80%, 100% { opacity: 0.3; transform: scale(0.85); } 40% { opacity: 1; transform: scale(1); } }
 
-    .signal-footer-note { text-align: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 11px; color: #8A7E68; margin-top: 8px; letter-spacing: 0.3px; }
-    .signal-restart { background: none; border: 1px solid #D8CDB7; color: #6B5D4A; padding: 6px 14px; border-radius: 20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 12px; cursor: pointer; }
-    .signal-restart:hover { border-color: #8B6914; color: #8B6914; }
+    .signal-error {
+      align-self: stretch;
+      max-width: 100%;
+      padding: 14px 18px;
+      background: var(--error-bg);
+      color: var(--error);
+      border: 1px solid var(--error);
+      border-radius: 8px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 13px; line-height: 1.5;
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+    }
+    .signal-error-retry {
+      background: var(--error);
+      color: #1A1610;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .signal-error-retry:hover { background: #DC8478; }
+
+    /* Sentinel for reliable scroll */
+    .signal-bottom-anchor { height: 1px; }
+
+    /* Composer */
+    .signal-composer-wrap {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, var(--bg) 60%, rgba(14,13,11,0.85) 88%, rgba(14,13,11,0));
+      padding: 32px 20px 24px;
+      padding-bottom: max(24px, env(safe-area-inset-bottom));
+      z-index: 10;
+    }
+    .signal-composer {
+      max-width: 760px; margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 16px;
+      padding: 6px;
+      display: flex; gap: 4px;
+      transition: border-color 200ms;
+      box-shadow: 0 24px 48px -24px rgba(0,0,0,0.7);
+    }
+    .signal-composer:focus-within { border-color: var(--accent); }
+    .signal-textarea {
+      flex: 1;
+      resize: none;
+      min-height: 52px; max-height: 200px;
+      padding: 14px 16px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 17px; line-height: 1.5;
+      color: var(--text);
+      background: transparent;
+      border: none;
+      outline: none;
+    }
+    .signal-textarea::placeholder { color: var(--text-mute); font-style: italic; }
+    .signal-textarea:disabled { opacity: 0.5; cursor: not-allowed; }
+    .signal-send {
+      align-self: flex-end;
+      padding: 0;
+      width: 48px; height: 48px;
+      background: var(--accent);
+      color: #1A1610;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: all 200ms;
+      flex-shrink: 0;
+    }
+    .signal-send:hover:not(:disabled) { background: #DDB95A; transform: translateY(-1px); }
+    .signal-send:disabled { background: var(--border-strong); color: var(--text-mute); cursor: not-allowed; }
+    .signal-send svg { width: 18px; height: 18px; }
+
+    .signal-hint {
+      max-width: 760px; margin: 8px auto 0;
+      text-align: center;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 11px; color: var(--text-mute); letter-spacing: 0.4px;
+    }
 
     @media (max-width: 600px) {
-      .signal-app { padding: 20px 16px 140px; }
-      .signal-title { font-size: 28px; }
-      .signal-subtitle { font-size: 16px; }
-      .signal-msg { font-size: 15px; padding: 12px 16px; }
+      .signal-shell { padding: 16px 16px 200px; }
+      .signal-hero { padding: 16px 0 36px; }
+      .signal-msg { font-size: 16px; padding: 14px 16px; }
+      .signal-msg.user { font-size: 14px; }
+      .signal-textarea { font-size: 16px; }
     }
   </style>
 </head>
@@ -85,7 +294,7 @@
 
   <script type="text/babel" data-presets="react">
     const { useState, useEffect, useRef, useCallback } = React;
-    const STORAGE_KEY = 'thesignal:session';
+    const STORAGE_KEY = 'thesignal:session:v2';
 
     function loadSession() {
       try {
@@ -99,34 +308,39 @@
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch {}
     }
 
+    const OPENING = 'Tell me what is creating the most internal friction right now. Do not summarize it. Give it to me as it is.';
+
     function App() {
       const [messages, setMessages] = useState(() => loadSession());
       const [input, setInput] = useState('');
       const [pending, setPending] = useState(false);
       const [error, setError] = useState(null);
-      const scrollRef = useRef(null);
+      const [lastFailedMessages, setLastFailedMessages] = useState(null);
+      const bottomRef = useRef(null);
       const textareaRef = useRef(null);
 
-      // Auto-start the session if empty
+      const hasUserMessage = messages.some(m => m.role === 'user');
+
+      // Auto-start: insert opening if no messages yet
       useEffect(() => {
         if (messages.length === 0) {
-          setMessages([{
-            role: 'assistant',
-            content: 'Tell me what is creating the most internal friction right now. Do not summarize it. Give it to me as it is.'
-          }]);
+          setMessages([{ role: 'assistant', content: OPENING }]);
           if (window.trackEvent) window.trackEvent('signal_session_started');
         }
       }, []);
 
-      // Persist on every change
+      // Persist
       useEffect(() => { saveSession(messages); }, [messages]);
 
-      // Scroll to bottom on new messages
+      // Auto-scroll on every change. Use scrollIntoView on a sentinel for reliability.
       useEffect(() => {
-        if (scrollRef.current) {
-          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-        }
-      }, [messages, pending]);
+        // Wait one frame so layout settles, then scroll
+        requestAnimationFrame(() => {
+          if (bottomRef.current) {
+            bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          }
+        });
+      }, [messages, pending, error]);
 
       // Auto-resize textarea
       useEffect(() => {
@@ -137,30 +351,43 @@
         }
       }, [input]);
 
-      const send = useCallback(async () => {
-        const text = input.trim();
-        if (!text || pending) return;
+      const callApi = useCallback(async (msgList) => {
         setError(null);
-        const next = [...messages, { role: 'user', content: text }];
-        setMessages(next);
-        setInput('');
         setPending(true);
         try {
           const res = await fetch('/api/signal-chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ messages: next })
+            body: JSON.stringify({ messages: msgList })
           });
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Request failed');
-          setMessages([...next, data.message]);
-          if (window.trackEvent) window.trackEvent('signal_message_exchanged', { msg_count: next.length + 1 });
+          if (!res.ok) {
+            const msg = data.error || `Error ${res.status}`;
+            throw new Error(msg);
+          }
+          setMessages([...msgList, data.message]);
+          setLastFailedMessages(null);
+          if (window.trackEvent) window.trackEvent('signal_message_exchanged', { msg_count: msgList.length + 1 });
         } catch (e) {
           setError(String(e.message || e));
+          setLastFailedMessages(msgList);
         } finally {
           setPending(false);
         }
-      }, [input, messages, pending]);
+      }, []);
+
+      const send = useCallback(() => {
+        const text = input.trim();
+        if (!text || pending) return;
+        const next = [...messages, { role: 'user', content: text }];
+        setMessages(next);
+        setInput('');
+        callApi(next);
+      }, [input, messages, pending, callApi]);
+
+      const retry = () => {
+        if (lastFailedMessages) callApi(lastFailedMessages);
+      };
 
       const onKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -172,35 +399,63 @@
       const restart = () => {
         if (!confirm('Start a new session? Your current conversation will be cleared.')) return;
         localStorage.removeItem(STORAGE_KEY);
-        setMessages([]);
+        setMessages([{ role: 'assistant', content: OPENING }]);
         setError(null);
+        setLastFailedMessages(null);
         if (window.trackEvent) window.trackEvent('signal_session_restarted');
       };
 
       return (
-        <div className="signal-app">
-          <div className="signal-header">
+        <div className="signal-shell">
+          <header className="signal-header">
             <a href="../index.html" className="signal-back">&larr; vinaypasricha.com</a>
-            <div className="signal-brand">The Signal</div>
+            <div className="signal-brand">
+              <span className="signal-brand-dot"></span>
+              The Signal
+            </div>
             <button className="signal-restart" onClick={restart}>New Session</button>
-          </div>
+          </header>
 
-          <div className="signal-intro">
-            <h1 className="signal-title">Session 0</h1>
-            <p className="signal-subtitle">A diagnostic resonance encounter. The task is to take whatever is generating internal noise right now and reduce it into visible structure — slowly, precisely, until you can see the split that's actually creating the friction.</p>
-            <p className="signal-meta">Free · Private · No signup · Conversation stays in your browser</p>
-          </div>
+          {!hasUserMessage && (
+            <section className="signal-hero">
+              <div className="signal-eyebrow">Session 0 · The Split</div>
+              <h1 className="signal-title">A diagnostic <em>resonance</em> encounter.</h1>
+              <p className="signal-tagline">Take whatever is generating internal noise right now and reduce it into visible structure — slowly, precisely, until you can see the split that is actually creating the friction. No therapy. No advice. Only earned structure.</p>
+              <div className="signal-meta">
+                <span>Free</span>
+                <span>Private</span>
+                <span>No signup</span>
+                <span>Stays in your browser</span>
+              </div>
+            </section>
+          )}
 
-          <div className="signal-messages" ref={scrollRef}>
+          <main className="signal-messages">
             {messages.map((m, i) => (
               <div key={i} className={`signal-msg ${m.role}`}>{m.content}</div>
             ))}
-            {pending && <div className="signal-msg assistant thinking">Listening…</div>}
-            {error && <div className="signal-msg system-error">{error}</div>}
-          </div>
+            {pending && (
+              <div className="signal-msg assistant thinking">
+                Listening
+                <span className="signal-thinking-dots"><span></span><span></span><span></span></span>
+              </div>
+            )}
+            {error && (
+              <div className="signal-error">
+                <div>
+                  <strong>Couldn't reach the model.</strong><br />
+                  {error}
+                </div>
+                {lastFailedMessages && (
+                  <button className="signal-error-retry" onClick={retry}>Retry</button>
+                )}
+              </div>
+            )}
+            <div ref={bottomRef} className="signal-bottom-anchor"></div>
+          </main>
 
-          <div className="signal-input-row">
-            <div className="signal-input-inner">
+          <div className="signal-composer-wrap">
+            <div className="signal-composer">
               <textarea
                 ref={textareaRef}
                 className="signal-textarea"
@@ -211,11 +466,11 @@
                 disabled={pending}
                 rows={1}
               />
-              <button className="signal-send" onClick={send} disabled={pending || !input.trim()}>
-                {pending ? '…' : 'Send'}
+              <button className="signal-send" onClick={send} disabled={pending || !input.trim()} aria-label="Send">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
               </button>
             </div>
-            <div className="signal-footer-note">Enter to send · Shift+Enter for new line</div>
+            <div className="signal-hint">Enter to send · Shift + Enter for a new line</div>
           </div>
         </div>
       );
