@@ -532,6 +532,26 @@
         };
       }, []);
 
+      // Focus textarea on initial mount (desktop only — avoid mobile keyboard popup)
+      useEffect(() => {
+        const isCoarsePointer = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        if (!isCoarsePointer && textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, []);
+
+      // Focus textarea after each bot reply (pending goes true → false)
+      const prevPendingRef = useRef(pending);
+      useEffect(() => {
+        if (prevPendingRef.current === true && pending === false && !error) {
+          // Slight delay so the new bubble lands first, then we steal focus
+          setTimeout(() => {
+            if (textareaRef.current) textareaRef.current.focus();
+          }, 50);
+        }
+        prevPendingRef.current = pending;
+      }, [pending, error]);
+
       return (
         <div className="signal-shell">
           <header className="signal-header">
