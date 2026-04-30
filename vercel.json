@@ -1,0 +1,24 @@
+{
+  "redirects": [
+    {
+      "source": "/pages/writer.html",
+      "destination": "/pages/path6.html",
+      "permanent": true
+    },
+    {
+      "source": "/pages/thinker.html",
+      "destination": "/pages/path3.html",
+      "permanent": true
+    },
+    {
+      "source": "/pages/professional.html",
+      "destination": "/pages/path2.html",
+      "permanent": true
+    },
+    {
+      "source": "/the-siv-method.html",
+      "destination": "/pages/siv-method-read.html",
+      "permanent": true
+    }
+  ]
+}

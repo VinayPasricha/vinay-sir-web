@@ -5,12 +5,6 @@
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
   </url>
-  <url>
-    <loc>https://vinaypasricha.com/the-siv-method.html</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-
   <!-- Books -->
   <url>
     <loc>https://vinaypasricha.com/pages/book.html</loc>
@@ -78,21 +72,6 @@
   </url>
   <url>
     <loc>https://vinaypasricha.com/pages/path7.html</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://vinaypasricha.com/pages/writer.html</loc>
-    <priority>0.8</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://vinaypasricha.com/pages/thinker.html</loc>
-    <priority>0.7</priority>
-    <changefreq>monthly</changefreq>
-  </url>
-  <url>
-    <loc>https://vinaypasricha.com/pages/professional.html</loc>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
