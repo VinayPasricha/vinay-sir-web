@@ -281,12 +281,74 @@
       font-size: 11px; color: var(--text-mute); letter-spacing: 0.4px;
     }
 
+    /* Tablets / small laptops */
+    @media (max-width: 768px) {
+      .signal-shell { padding: 20px 18px 220px; }
+    }
+
+    /* Phones — dominant case */
     @media (max-width: 600px) {
-      .signal-shell { padding: 16px 16px 200px; }
-      .signal-hero { padding: 16px 0 36px; }
-      .signal-msg { font-size: 16px; padding: 14px 16px; }
-      .signal-msg.user { font-size: 14px; }
-      .signal-textarea { font-size: 16px; }
+      .signal-shell { padding: 14px 14px 180px; }
+
+      .signal-header {
+        padding: 6px 0 18px;
+        margin-bottom: 22px;
+      }
+      .signal-back { font-size: 11px; }
+      .signal-back-text { display: none; } /* Show only the arrow on small screens */
+      .signal-brand { font-size: 10px; letter-spacing: 2px; gap: 6px; }
+      .signal-restart { padding: 6px 10px; font-size: 10px; }
+
+      .signal-hero { padding: 12px 0 30px; }
+      .signal-eyebrow { font-size: 10px; letter-spacing: 2.5px; margin-bottom: 14px; }
+      .signal-title { font-size: 32px; letter-spacing: -0.6px; line-height: 1.1; margin-bottom: 14px; }
+      .signal-tagline { font-size: 15px; line-height: 1.55; margin-bottom: 22px; }
+      .signal-meta { font-size: 10px; gap: 14px; }
+
+      .signal-messages { gap: 12px; }
+      .signal-msg {
+        max-width: 90%;
+        font-size: 16px;
+        line-height: 1.55;
+        padding: 13px 16px;
+      }
+      .signal-msg.user { font-size: 15px; padding: 12px 16px; }
+
+      .signal-composer-wrap {
+        padding: 22px 12px 16px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+      }
+      .signal-composer { padding: 5px; gap: 4px; border-radius: 14px; }
+      .signal-textarea {
+        font-size: 16px; /* must be >=16px to prevent iOS zoom on focus */
+        padding: 12px 14px;
+        min-height: 48px;
+      }
+      .signal-send, .signal-mic { width: 44px; height: 44px; border-radius: 10px; }
+      .signal-send svg, .signal-mic svg { width: 16px; height: 16px; }
+      .signal-hint { font-size: 10px; margin-top: 6px; padding: 0 8px; }
+
+      .signal-error { padding: 12px 14px; font-size: 12px; gap: 12px; }
+      .signal-error-retry { padding: 5px 10px; font-size: 11px; }
+    }
+
+    /* Very small phones (iPhone SE, etc.) */
+    @media (max-width: 380px) {
+      .signal-shell { padding: 12px 12px 170px; }
+      .signal-title { font-size: 28px; }
+      .signal-tagline { font-size: 14px; }
+      .signal-meta { font-size: 9px; gap: 10px; }
+      .signal-meta span::before { width: 3px; height: 3px; }
+      .signal-msg { font-size: 15px; padding: 12px 14px; }
+      .signal-restart { padding: 5px 9px; font-size: 9px; }
+    }
+
+    /* Disable the desktop-y :hover transforms on touch devices to avoid sticky hover state */
+    @media (hover: none) {
+      .signal-back:hover { color: var(--text-mute); }
+      .signal-restart:hover { border-color: var(--border-strong); color: var(--text-soft); }
+      .signal-send:hover:not(:disabled) { background: var(--accent); transform: none; }
+      .signal-mic:hover:not(:disabled) { color: var(--text-soft); border-color: var(--border-strong); }
     }
   </style>
 </head>
@@ -555,7 +617,7 @@
       return (
         <div className="signal-shell">
           <header className="signal-header">
-            <a href="../index.html" className="signal-back">&larr; vinaypasricha.com</a>
+            <a href="../index.html" className="signal-back">&larr;<span className="signal-back-text"> vinaypasricha.com</span></a>
             <div className="signal-brand">
               <span className="signal-brand-dot"></span>
               The Signal
