@@ -160,8 +160,9 @@ export default async function handler(req, res) {
         systemInstruction: { parts: [{ text: SIGNAL_PROMPT }] },
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 1024,
-          topP: 0.9
+          maxOutputTokens: 2048,
+          topP: 0.9,
+          thinkingConfig: { thinkingBudget: 0 }
         },
         safetySettings: [
           { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
@@ -174,13 +175,16 @@ export default async function handler(req, res) {
 
     if (!upstream.ok) {
       const text = await upstream.text();
-      return res.status(502).json({ error: 'Upstream error', details: text.slice(0, 500) });
+      console.error('[signal-chat] upstream non-ok', upstream.status, text.slice(0, 500));
+      return res.status(502).json({ error: `Upstream ${upstream.status}`, details: text.slice(0, 500) });
     }
 
     const data = await upstream.json();
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) {
-      return res.status(502).json({ error: 'Empty response from model', details: JSON.stringify(data).slice(0, 500) });
+      const finishReason = data?.candidates?.[0]?.finishReason || 'unknown';
+      console.error('[signal-chat] empty response', finishReason, JSON.stringify(data).slice(0, 800));
+      return res.status(502).json({ error: `Empty response (finish: ${finishReason})`, details: JSON.stringify(data).slice(0, 500) });
     }
 
     return res.status(200).json({ message: { role: 'assistant', content: text } });
