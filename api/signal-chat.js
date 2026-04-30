@@ -149,7 +149,7 @@ export default async function handler(req, res) {
       parts: [{ text: String(m.content || '') }]
     }));
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   try {
     const upstream = await fetch(url, {
