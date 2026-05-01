@@ -582,6 +582,7 @@
       const recognitionRef = useRef(null);
       const baseInputRef = useRef('');
       const silenceTimerRef = useRef(null);
+      const userStoppedRef = useRef(false); // true when user manually clicks stop
 
       const hasUserMessage = messages.some(m => m.role === 'user');
       const gated = !identity;
@@ -658,6 +659,7 @@
       const send = useCallback(() => {
         // If currently recording, stop first so the latest transcript lands in input.
         if (recognitionRef.current) {
+          userStoppedRef.current = true;
           try { recognitionRef.current.stop(); } catch {}
           if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
           recognitionRef.current = null;
@@ -692,7 +694,7 @@
       };
 
       // Speech-to-text
-      const SILENCE_MS = 2200; // auto-stop after this many ms of silence
+      const SILENCE_MS = 2500; // auto-stop after this many ms of silence
 
       const armSilenceTimer = useCallback(() => {
         if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
@@ -704,6 +706,7 @@
       }, []);
 
       const stopRecording = useCallback(() => {
+        userStoppedRef.current = true; // signal: do NOT auto-restart
         if (silenceTimerRef.current) {
           clearTimeout(silenceTimerRef.current);
           silenceTimerRef.current = null;
@@ -715,21 +718,54 @@
         setIsRecording(false);
       }, []);
 
-      const startRecording = useCallback(() => {
+      const startRecording = useCallback(async () => {
+        console.log('[mic] startRecording called', { SPEECH_SUPPORTED });
         if (!SPEECH_SUPPORTED) {
-          setMicError('Voice input is not supported in this browser. Try Chrome, Edge, or Safari.');
+          setMicError('Voice input is not supported in this browser. Try Chrome or Edge.');
           return;
         }
         setMicError(null);
+
+        // 1. Explicitly request mic permission via getUserMedia FIRST.
+        // This forces the permission prompt and confirms the mic works
+        // before we hand control to SpeechRecognition (which historically
+        // fails silently on some browsers when permission is unclear).
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            console.log('[mic] requesting getUserMedia...');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            console.log('[mic] getUserMedia granted, tracks:', stream.getAudioTracks().length);
+            // We only needed to confirm permission; release the stream so
+            // SpeechRecognition can take over without conflict.
+            stream.getTracks().forEach(t => t.stop());
+          } catch (permErr) {
+            console.error('[mic] getUserMedia denied:', permErr);
+            setMicError('Microphone access denied. Click the lock icon in the address bar → Permissions → set Microphone to Allow, then refresh.');
+            return;
+          }
+        }
+
         try {
+          userStoppedRef.current = false; // fresh recording session
           const recognition = new SpeechRecognitionImpl();
           recognition.continuous = true;
           recognition.interimResults = true;
           recognition.lang = 'en-US';
+          recognition.maxAlternatives = 1;
 
           baseInputRef.current = input ? input.trim() + ' ' : '';
 
+          recognition.onstart = () => {
+            console.log('[mic] recognition.onstart');
+            armSilenceTimer();
+          };
+          recognition.onaudiostart = () => console.log('[mic] onaudiostart');
+          recognition.onspeechstart = () => {
+            console.log('[mic] onspeechstart');
+            armSilenceTimer();
+          };
           recognition.onresult = (event) => {
+            console.log('[mic] onresult', { resultIndex: event.resultIndex, total: event.results.length });
             let finalText = '';
             let interimText = '';
             for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -741,30 +777,63 @@
             setInput((baseInputRef.current + interimText).replace(/\s+/g, ' ').trimStart());
             armSilenceTimer();
           };
-          recognition.onspeechstart = () => armSilenceTimer();
           recognition.onerror = (event) => {
-            if (event.error === 'not-allowed') {
-              setMicError('Microphone permission denied. Allow access in your browser settings.');
-            } else if (event.error === 'no-speech' || event.error === 'aborted') {
-              // silent stop, no error
+            console.error('[mic] onerror:', event.error, event);
+            // Permission errors are fatal — stop and surface clearly
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+              setMicError('Microphone permission denied. Click the lock icon in the address bar → Permissions → Allow Microphone, then refresh.');
+              userStoppedRef.current = true;
+            } else if (event.error === 'audio-capture') {
+              setMicError('No microphone found. Check that your device has a working mic and that it is not muted.');
+              userStoppedRef.current = true;
+            } else if (event.error === 'network') {
+              setMicError('Speech recognition needs an internet connection.');
+              userStoppedRef.current = true;
+            } else if (event.error === 'no-speech') {
+              // browser's internal silence killer — let onend auto-restart
+              console.log('[mic] no-speech — will auto-restart in onend');
+            } else if (event.error === 'aborted') {
+              // user-initiated, no message needed
             } else {
               setMicError('Voice input error: ' + event.error);
             }
-            if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
-            setIsRecording(false);
           };
           recognition.onend = () => {
+            console.log('[mic] onend, userStopped=', userStoppedRef.current);
             if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+
+            // Auto-restart unless the user manually clicked stop or we hit a fatal error.
+            // This makes recognition feel continuous even when the browser's
+            // internal silence detection kills it every few seconds.
+            if (!userStoppedRef.current && recognitionRef.current === recognition) {
+              try {
+                console.log('[mic] auto-restarting recognition');
+                recognition.start();
+                return; // stay in recording mode
+              } catch (e) {
+                console.error('[mic] auto-restart failed:', e);
+              }
+            }
+
             recognitionRef.current = null;
             setIsRecording(false);
           };
 
+          console.log('[mic] calling recognition.start()');
           recognition.start();
           recognitionRef.current = recognition;
           setIsRecording(true);
-          armSilenceTimer();
           if (window.trackEvent) window.trackEvent('signal_voice_started');
+
+          // Watchdog: if no events fire within 4 seconds, surface a hint.
+          setTimeout(() => {
+            if (recognitionRef.current === recognition && !baseInputRef.current.includes(input.trim())) {
+              // Still recording, possibly nothing happening — that's fine, but log it
+              console.log('[mic] watchdog: 4s elapsed, still recording, baseInput:', baseInputRef.current.slice(0, 40));
+            }
+          }, 4000);
         } catch (e) {
+          console.error('[mic] start() threw:', e);
           setMicError('Could not start voice input: ' + String(e.message || e));
           setIsRecording(false);
         }
