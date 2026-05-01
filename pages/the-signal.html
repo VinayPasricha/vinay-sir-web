@@ -718,32 +718,13 @@
         setIsRecording(false);
       }, []);
 
-      const startRecording = useCallback(async () => {
-        console.log('[mic] startRecording called', { SPEECH_SUPPORTED });
+      const startRecording = useCallback(() => {
         if (!SPEECH_SUPPORTED) {
           setMicError('Voice input is not supported in this browser. Try Chrome or Edge.');
           return;
         }
         setMicError(null);
-
-        // 1. Explicitly request mic permission via getUserMedia FIRST.
-        // This forces the permission prompt and confirms the mic works
-        // before we hand control to SpeechRecognition (which historically
-        // fails silently on some browsers when permission is unclear).
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            console.log('[mic] requesting getUserMedia...');
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            console.log('[mic] getUserMedia granted, tracks:', stream.getAudioTracks().length);
-            // We only needed to confirm permission; release the stream so
-            // SpeechRecognition can take over without conflict.
-            stream.getTracks().forEach(t => t.stop());
-          } catch (permErr) {
-            console.error('[mic] getUserMedia denied:', permErr);
-            setMicError('Microphone access denied. Click the lock icon in the address bar → Permissions → set Microphone to Allow, then refresh.');
-            return;
-          }
-        }
+        setIsRecording(true); // flip UI immediately — no perceived delay
 
         try {
           userStoppedRef.current = false; // fresh recording session
@@ -819,19 +800,9 @@
             setIsRecording(false);
           };
 
-          console.log('[mic] calling recognition.start()');
           recognition.start();
           recognitionRef.current = recognition;
-          setIsRecording(true);
           if (window.trackEvent) window.trackEvent('signal_voice_started');
-
-          // Watchdog: if no events fire within 4 seconds, surface a hint.
-          setTimeout(() => {
-            if (recognitionRef.current === recognition && !baseInputRef.current.includes(input.trim())) {
-              // Still recording, possibly nothing happening — that's fine, but log it
-              console.log('[mic] watchdog: 4s elapsed, still recording, baseInput:', baseInputRef.current.slice(0, 40));
-            }
-          }, 4000);
         } catch (e) {
           console.error('[mic] start() threw:', e);
           setMicError('Could not start voice input: ' + String(e.message || e));
