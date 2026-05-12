@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script defer src="../js/analytics.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Read: AI For Business Leaders — Vinay Pasricha</title>
+  <meta name="description" content="Read AI For Business Leaders as a flipbook. By Vinay Pasricha.">
+  <link rel="canonical" href="https://vinaypasricha.com/pages/book-read-flipbook.html">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="shortcut icon" href="/favicon.png">
+
+  <!-- StPageFlip — open-source flipbook (MIT licensed) -->
+  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+  <style>
+    :root {
+      --paper: #f5efe1;
+      --paper-edge: #e8dec5;
+      --ink: #2c2416;
+      --ink-soft: #5c4a32;
+      --ink-faint: #9c8b72;
+      --accent: #8b6914;
+      --accent-soft: #f0e5c7;
+      --bg: #1a1611;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--bg);
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Subtle vignette background */
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Top bar */
+    .topbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 10;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
+      pointer-events: none;
+    }
+    .topbar a, .topbar button {
+      pointer-events: auto;
+    }
+    .back-link {
+      color: #d4c9a8;
+      text-decoration: none;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      padding: 8px 12px;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+    .back-link:hover { background: rgba(255,255,255,0.08); }
+
+    .book-title-bar {
+      color: #c9b88a;
+      font-size: 14px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    .toolbar {
+      display: flex; gap: 8px;
+    }
+    .tool-btn {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #d4c9a8;
+      width: 36px; height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .tool-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-1px); }
+    .tool-btn:active { transform: translateY(0); }
+
+    /* Book stage */
+    .stage {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1;
+      padding: 60px 80px 80px;
+    }
+    @media (max-width: 768px) {
+      .stage { padding: 50px 10px 80px; }
+    }
+
+    #book {
+      filter: drop-shadow(0 30px 60px rgba(0,0,0,0.5)) drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    }
+
+    /* Each page styling — StPageFlip renders each .page as a flipbook leaf */
+    .page {
+      background: var(--paper);
+      color: var(--ink);
+      overflow: hidden;
+      position: relative;
+      background-image:
+        repeating-linear-gradient(
+          90deg,
+          transparent 0,
+          transparent 2px,
+          rgba(139, 105, 20, 0.015) 2px,
+          rgba(139, 105, 20, 0.015) 4px
+        ),
+        radial-gradient(ellipse at top left, rgba(139, 105, 20, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(139, 105, 20, 0.03) 0%, transparent 50%);
+    }
+
+    .page-content {
+      padding: 60px 55px 70px;
+      height: 100%;
+      width: 100%;
+      display: flex; flex-direction: column;
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--ink);
+    }
+    @media (max-width: 768px) {
+      .page-content { padding: 40px 32px 56px; font-size: 14px; line-height: 1.7; }
+    }
+
+    .page-content p {
+      margin: 0 0 14px;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .ch-header {
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(139, 105, 20, 0.25);
+    }
+    .ch-num {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .ch-title {
+      font-size: 24px;
+      line-height: 1.2;
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      font-style: italic;
+    }
+    @media (max-width: 768px) {
+      .ch-title { font-size: 20px; }
+    }
+
+    /* Page number footer */
+    .page-num {
+      position: absolute;
+      bottom: 24px;
+      font-size: 11px;
+      color: var(--ink-faint);
+      letter-spacing: 1px;
+    }
+    .page.left .page-num { left: 55px; }
+    .page.right .page-num { right: 55px; }
+    .page:not(.left):not(.right) .page-num { left: 50%; transform: translateX(-50%); }
+
+    /* Running header (chapter name) */
+    .running-head {
+      position: absolute;
+      top: 24px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ink-faint);
+      font-weight: 600;
+    }
+    .page.left .running-head { left: 55px; }
+    .page.right .running-head { right: 55px; }
+
+    /* Cover page */
+    .page.cover {
+      background: linear-gradient(135deg, #2c2416 0%, #4a3a22 100%);
+      color: #f5efe1;
+      background-image: none;
+    }
+    .cover-inner {
+      padding: 80px 50px;
+      height: 100%;
+      width: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      color: #f5efe1;
+    }
+    .cover-inner .imprint {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: #c9a24a; margin-bottom: 40px; font-weight: 600;
+    }
+    .cover-inner .book-title {
+      font-size: 36px; line-height: 1.15; margin: 0 0 24px; font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    @media (max-width: 768px) { .cover-inner .book-title { font-size: 28px; } }
+    .cover-inner .ornament {
+      font-size: 22px; color: #c9a24a; margin: 20px 0;
+    }
+    .cover-inner .subtitle {
+      font-size: 15px; font-style: italic; color: #d4c9a8;
+      max-width: 340px; line-height: 1.5;
+    }
+    .cover-inner .author {
+      margin-top: auto;
+      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
+      color: #c9a24a; font-weight: 600;
+    }
+
+    /* TOC page */
+    .toc-inner { padding: 60px 55px; height: 100%; width: 100%; }
+    .toc-inner h2 {
+      font-size: 22px; font-weight: 700; margin: 0 0 28px;
+      letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+    }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li {
+      padding: 10px 0;
+      border-bottom: 1px dotted rgba(139, 105, 20, 0.25);
+      font-size: 13px;
+      display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .toc-list li:hover { color: var(--accent); }
+    .toc-list .toc-title { flex: 1; }
+    .toc-list .toc-page { color: var(--ink-faint); font-size: 12px; }
+    .toc-list .toc-num {
+      color: var(--accent); font-size: 11px; letter-spacing: 1px;
+      font-weight: 600; margin-right: 12px; min-width: 60px;
+    }
+
+    /* Bottom controls */
+    .controls {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: center;
+      padding: 18px 24px;
+      gap: 16px;
+      z-index: 10;
+      background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
+      pointer-events: none;
+    }
+    .controls > * { pointer-events: auto; }
+    .nav-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #d4c9a8;
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
+    .nav-btn:active { transform: scale(0.95); }
+    .nav-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+
+    .page-indicator {
+      color: #c9b88a;
+      font-size: 13px;
+      min-width: 80px;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+
+    /* Loading state */
+    .loading {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--bg);
+      color: #c9a24a;
+      font-size: 14px;
+      letter-spacing: 2px;
+      z-index: 100;
+    }
+    .loading.hidden { display: none; }
+    .loading-spinner {
+      width: 40px; height: 40px;
+      border: 2px solid rgba(201, 162, 74, 0.2);
+      border-top-color: #c9a24a;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Measuring container (off-screen) */
+    .page-measure {
+      position: fixed; left: -9999px; top: 0;
+      visibility: hidden; pointer-events: none;
+    }
+
+    /* Hide topbar/controls in fullscreen */
+    body.fs .topbar, body.fs .controls { opacity: 0.15; transition: opacity 0.3s; }
+    body.fs .topbar:hover, body.fs .controls:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <span>Preparing the book…</span>
+  </div>
+
+  <div class="topbar">
+    <a href="book.html" class="back-link">← Back to Book Page</a>
+    <div class="book-title-bar">AI For Business Leaders</div>
+    <div class="toolbar">
+      <button class="tool-btn" id="toc-btn" title="Table of Contents">☰</button>
+      <button class="tool-btn" id="fs-btn" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div id="book"></div>
+  </div>
+
+  <div class="controls">
+    <button class="nav-btn" id="prev-btn" aria-label="Previous page">‹</button>
+    <div class="page-indicator" id="page-indicator">1 / 1</div>
+    <button class="nav-btn" id="next-btn" aria-label="Next page">›</button>
+  </div>
+
+  <script src="book-read-content.js"></script>
+  <script>
+    (function () {
+      const CHAPTERS = window.AI_BOOK_CHAPTERS || [];
+      const BOOK_META = {
+        imprint: 'The Company Brain Series',
+        title: 'AI For Business Leaders',
+        subtitle: 'A Practical Guide to AI Strategy, Operations, and Governance',
+        author: 'Vinay Pasricha'
+      };
+
+      // Page dimensions
+      function getDims() {
+        const isMobile = window.innerWidth <= 768;
+        const stageW = window.innerWidth - (isMobile ? 20 : 160);
+        const stageH = window.innerHeight - 140;
+        // Maintain 5:7 portrait page ratio
+        const maxPageH = Math.min(stageH, 820);
+        const idealPageH = Math.min(maxPageH, isMobile ? stageH : 800);
+        let pageH = idealPageH;
+        let pageW = Math.round(pageH * (5/7));
+        // For spread (two pages), width is 2*pageW. If that exceeds stage width, shrink.
+        if (!isMobile) {
+          const spreadW = pageW * 2;
+          if (spreadW > stageW) {
+            pageW = Math.floor(stageW / 2);
+            pageH = Math.round(pageW * (7/5));
+          }
+        } else {
+          if (pageW > stageW) { pageW = stageW; pageH = Math.round(pageW * (7/5)); }
+        }
+        return { pageW, pageH, isMobile };
+      }
+
+      // Escape HTML
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
+      }
+
+      // Paginate chapters into fixed-height pages
+      function paginate(chapters, pageW, pageH) {
+        const measure = document.createElement('div');
+        measure.className = 'page-measure';
+        // Match real page styling for accurate measurement
+        measure.style.width = pageW + 'px';
+        document.body.appendChild(measure);
+
+        const pages = [];
+
+        for (let ci = 0; ci < chapters.length; ci++) {
+          const ch = chapters[ci];
+          const headerHTML = `
+            <div class="ch-header">
+              <div class="ch-num">${esc(ch.num)}</div>
+              <h2 class="ch-title">${esc(ch.title)}</h2>
+            </div>
+          `;
+
+          let currentBody = headerHTML;
+          let isFirstPageOfChapter = true;
+
+          const paras = ch.content.slice();
+          let i = 0;
+
+          while (i < paras.length) {
+            const nextP = `<p>${esc(paras[i])}</p>`;
+            const trial = currentBody + nextP;
+            measure.innerHTML = `<div class="page-content" style="width:${pageW}px;height:${pageH}px;">${trial}</div>`;
+            const inner = measure.firstChild;
+
+            // Check if content overflows
+            if (inner.scrollHeight > inner.clientHeight && currentBody !== headerHTML && currentBody !== '') {
+              // Overflows — commit current page, start fresh
+              pages.push({ type: 'text', chapter: ch.title, body: currentBody, isChapterStart: isFirstPageOfChapter });
+              currentBody = '';
+              isFirstPageOfChapter = false;
+            } else {
+              currentBody = trial;
+              i++;
+            }
+          }
+
+          // Flush remaining content
+          if (currentBody.trim()) {
+            pages.push({ type: 'text', chapter: ch.title, body: currentBody, isChapterStart: isFirstPageOfChapter });
+          }
+        }
+
+        measure.remove();
+        return pages;
+      }
+
+      function buildCoverPage() {
+        return `
+          <div class="cover-inner">
+            <div class="imprint">${esc(BOOK_META.imprint)}</div>
+            <div class="ornament">◆</div>
+            <h1 class="book-title">${esc(BOOK_META.title)}</h1>
+            <div class="ornament">◆</div>
+            <div class="subtitle">${esc(BOOK_META.subtitle)}</div>
+            <div class="author">${esc(BOOK_META.author)}</div>
+          </div>
+        `;
+      }
+
+      function buildTOCPage(chapters, chapterStartPages) {
+        const items = chapters.map((ch, i) => {
+          const page = chapterStartPages[i] != null ? (chapterStartPages[i] + 1) : '';
+          return `
+            <li data-chapter="${i}">
+              <span class="toc-num">${esc(ch.num)}</span>
+              <span class="toc-title">${esc(ch.title)}</span>
+              <span class="toc-page">${page}</span>
+            </li>
+          `;
+        }).join('');
+        return `
+          <div class="toc-inner">
+            <h2>Contents</h2>
+            <ul class="toc-list">${items}</ul>
+          </div>
+        `;
+      }
+
+      let pageFlip = null;
+
+      async function build() {
+        const stage = document.getElementById('book');
+        stage.innerHTML = '';
+
+        const { pageW, pageH, isMobile } = getDims();
+        const textPages = paginate(CHAPTERS, pageW, pageH);
+
+        // Compute chapter-start page numbers (1-indexed reading position)
+        // We'll place cover, TOC, then text pages. So text page 0 maps to global page 2 (after cover+toc).
+        const COVER_PAGES = 1;
+        const TOC_PAGES = 1;
+        const chapterStartPages = [];
+        let seenChapters = new Set();
+        textPages.forEach((p, idx) => {
+          if (p.isChapterStart) {
+            const chIndex = CHAPTERS.findIndex(c => c.title === p.chapter);
+            if (chIndex >= 0 && !seenChapters.has(chIndex)) {
+              seenChapters.add(chIndex);
+              chapterStartPages[chIndex] = COVER_PAGES + TOC_PAGES + idx;
+            }
+          }
+        });
+
+        const allPages = [];
+        // Page 1: Cover
+        allPages.push({ kind: 'cover', html: buildCoverPage(), label: '' });
+        // Page 2: TOC
+        allPages.push({ kind: 'toc', html: buildTOCPage(CHAPTERS, chapterStartPages), label: '' });
+        // Pages 3+: text pages
+        textPages.forEach((p, idx) => {
+          allPages.push({
+            kind: 'text',
+            html: `<div class="page-content">${p.body}</div>`,
+            chapter: p.chapter,
+            isChapterStart: p.isChapterStart
+          });
+        });
+
+        // Build DOM
+        allPages.forEach((pg, idx) => {
+          const el = document.createElement('div');
+          el.className = 'page' + (pg.kind === 'cover' ? ' cover' : '');
+          el.style.width = pageW + 'px';
+          el.style.height = pageH + 'px';
+
+          let inner = pg.html;
+          if (pg.kind === 'text') {
+            const runningHead = pg.chapter ? `<div class="running-head">${esc(pg.chapter)}</div>` : '';
+            inner = runningHead + inner + `<div class="page-num">${idx + 1}</div>`;
+          }
+          el.innerHTML = inner;
+          stage.appendChild(el);
+        });
+
+        // Init StPageFlip
+        if (pageFlip) {
+          try { pageFlip.destroy(); } catch(e){}
+          pageFlip = null;
+        }
+        pageFlip = new St.PageFlip(stage, {
+          width: pageW,
+          height: pageH,
+          size: 'fixed',
+          minWidth: 200,
+          maxWidth: 1200,
+          minHeight: 280,
+          maxHeight: 1680,
+          maxShadowOpacity: 0.5,
+          showCover: true,
+          mobileScrollSupport: false,
+          usePortrait: isMobile,
+          autoSize: false,
+          drawShadow: true,
+          flippingTime: 700
+        });
+        pageFlip.loadFromHTML(document.querySelectorAll('#book .page'));
+
+        // Update indicator
+        const indicator = document.getElementById('page-indicator');
+        const total = pageFlip.getPageCount();
+        function updateIndicator() {
+          const curr = pageFlip.getCurrentPageIndex() + 1;
+          indicator.textContent = `${curr} / ${total}`;
+        }
+        updateIndicator();
+        pageFlip.on('flip', updateIndicator);
+
+        // Hook TOC clicks
+        document.querySelectorAll('.toc-list li').forEach(li => {
+          li.addEventListener('click', () => {
+            const chIdx = parseInt(li.dataset.chapter, 10);
+            const page = chapterStartPages[chIdx];
+            if (page != null) pageFlip.turnToPage(page);
+          });
+        });
+
+        // Hide loading
+        document.getElementById('loading').classList.add('hidden');
+      }
+
+      // Nav buttons
+      document.getElementById('prev-btn').addEventListener('click', () => pageFlip && pageFlip.flipPrev());
+      document.getElementById('next-btn').addEventListener('click', () => pageFlip && pageFlip.flipNext());
+
+      // Keyboard
+      document.addEventListener('keydown', (e) => {
+        if (!pageFlip) return;
+        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); pageFlip.flipNext(); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); pageFlip.flipPrev(); }
+      });
+
+      // TOC button — jump to TOC page
+      document.getElementById('toc-btn').addEventListener('click', () => {
+        if (pageFlip) pageFlip.turnToPage(1);
+      });
+
+      // Fullscreen
+      document.getElementById('fs-btn').addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen?.().then(() => document.body.classList.add('fs'));
+        } else {
+          document.exitFullscreen?.().then(() => document.body.classList.remove('fs'));
+        }
+      });
+
+      // Resize handler — rebuild on significant size changes
+      let resizeTimer;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          const currIdx = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
+          build().then(() => {
+            if (pageFlip && currIdx > 0) pageFlip.turnToPage(currIdx);
+          });
+        }, 300);
+      });
+
+      // Initial build
+      if (CHAPTERS.length === 0) {
+        document.getElementById('loading').textContent = 'No content found.';
+      } else {
+        // Defer slightly so layout settles
+        requestAnimationFrame(() => requestAnimationFrame(build));
+      }
+    })();
+  </script>
+</body>
+</html>
