@@ -194,41 +194,52 @@
     .page.left .running-head { left: 55px; }
     .page.right .running-head { right: 55px; }
 
-    /* Cover page */
+    /* Cover page — uses the actual book cover image */
     .page.cover {
-      background: linear-gradient(135deg, #2c2416 0%, #4a3a22 100%);
-      color: #f5efe1;
+      background: #1a1208;
       background-image: none;
+      padding: 0;
+      overflow: hidden;
     }
-    .cover-inner {
-      padding: 80px 50px;
-      height: 100%;
-      width: 100%;
+    .page.cover .cover-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Back of cover (inside-cover) */
+    .page.cover-back {
+      background: #1a1208;
+      background-image:
+        radial-gradient(ellipse at center, rgba(201,162,74,0.08) 0%, transparent 70%);
+      color: #d4c9a8;
+    }
+    .cover-back-inner {
+      padding: 60px 50px;
+      height: 100%; width: 100%;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       text-align: center;
-      color: #f5efe1;
     }
-    .cover-inner .imprint {
+    .cover-back-inner .imprint {
       font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-      color: #c9a24a; margin-bottom: 40px; font-weight: 600;
+      color: #c9a24a; margin-bottom: 28px; font-weight: 600;
     }
-    .cover-inner .book-title {
-      font-size: 36px; line-height: 1.15; margin: 0 0 24px; font-weight: 700;
-      letter-spacing: -0.5px;
+    .cover-back-inner .ornament {
+      font-size: 18px; color: #c9a24a; margin: 14px 0;
     }
-    @media (max-width: 768px) { .cover-inner .book-title { font-size: 28px; } }
-    .cover-inner .ornament {
-      font-size: 22px; color: #c9a24a; margin: 20px 0;
+    .cover-back-inner .subtitle {
+      font-size: 14px; font-style: italic; color: #d4c9a8;
+      max-width: 320px; line-height: 1.6; margin-bottom: 36px;
     }
-    .cover-inner .subtitle {
-      font-size: 15px; font-style: italic; color: #d4c9a8;
-      max-width: 340px; line-height: 1.5;
+    .cover-back-inner .author-block {
+      margin-top: 24px;
     }
-    .cover-inner .author {
-      margin-top: auto;
-      font-size: 13px; letter-spacing: 3px; text-transform: uppercase;
-      color: #c9a24a; font-weight: 600;
+    .cover-back-inner .by-label {
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      color: #8b7a52; margin-bottom: 6px;
+    }
+    .cover-back-inner .author {
+      font-size: 16px; color: #d4c9a8; font-style: italic;
     }
 
     /* TOC page */
@@ -443,14 +454,19 @@
       }
 
       function buildCoverPage() {
+        return `<img class="cover-img" src="../assets/images/book-cover-hd.jpg" alt="${esc(BOOK_META.title)} — book cover" />`;
+      }
+
+      function buildCoverBackPage() {
         return `
-          <div class="cover-inner">
+          <div class="cover-back-inner">
             <div class="imprint">${esc(BOOK_META.imprint)}</div>
             <div class="ornament">◆</div>
-            <h1 class="book-title">${esc(BOOK_META.title)}</h1>
-            <div class="ornament">◆</div>
             <div class="subtitle">${esc(BOOK_META.subtitle)}</div>
-            <div class="author">${esc(BOOK_META.author)}</div>
+            <div class="author-block">
+              <div class="by-label">Written by</div>
+              <div class="author">${esc(BOOK_META.author)}</div>
+            </div>
           </div>
         `;
       }
@@ -483,10 +499,9 @@
         const { pageW, pageH, isMobile } = getDims();
         const textPages = paginate(CHAPTERS, pageW, pageH);
 
-        // Compute chapter-start page numbers (1-indexed reading position)
-        // We'll place cover, TOC, then text pages. So text page 0 maps to global page 2 (after cover+toc).
-        const COVER_PAGES = 1;
-        const TOC_PAGES = 1;
+        // Compute chapter-start page numbers (0-indexed for pageFlip.turnToPage)
+        // Layout: cover (0), inside-cover (1), TOC (2), text pages start at 3
+        const PRE_PAGES = 3;
         const chapterStartPages = [];
         let seenChapters = new Set();
         textPages.forEach((p, idx) => {
@@ -494,18 +509,20 @@
             const chIndex = CHAPTERS.findIndex(c => c.title === p.chapter);
             if (chIndex >= 0 && !seenChapters.has(chIndex)) {
               seenChapters.add(chIndex);
-              chapterStartPages[chIndex] = COVER_PAGES + TOC_PAGES + idx;
+              chapterStartPages[chIndex] = PRE_PAGES + idx;
             }
           }
         });
 
         const allPages = [];
-        // Page 1: Cover
-        allPages.push({ kind: 'cover', html: buildCoverPage(), label: '' });
-        // Page 2: TOC
-        allPages.push({ kind: 'toc', html: buildTOCPage(CHAPTERS, chapterStartPages), label: '' });
-        // Pages 3+: text pages
-        textPages.forEach((p, idx) => {
+        // Page 1: Cover (front)
+        allPages.push({ kind: 'cover', html: buildCoverPage() });
+        // Page 2: Inside front cover (subtitle, author)
+        allPages.push({ kind: 'cover-back', html: buildCoverBackPage() });
+        // Page 3: TOC
+        allPages.push({ kind: 'toc', html: buildTOCPage(CHAPTERS, chapterStartPages) });
+        // Pages 4+: text pages
+        textPages.forEach((p) => {
           allPages.push({
             kind: 'text',
             html: `<div class="page-content">${p.body}</div>`,
@@ -517,7 +534,10 @@
         // Build DOM
         allPages.forEach((pg, idx) => {
           const el = document.createElement('div');
-          el.className = 'page' + (pg.kind === 'cover' ? ' cover' : '');
+          let cls = 'page';
+          if (pg.kind === 'cover') cls += ' cover';
+          if (pg.kind === 'cover-back') cls += ' cover-back';
+          el.className = cls;
           el.style.width = pageW + 'px';
           el.style.height = pageH + 'px';
 
@@ -543,13 +563,19 @@
           maxWidth: 1200,
           minHeight: 280,
           maxHeight: 1680,
-          maxShadowOpacity: 0.5,
+          maxShadowOpacity: 0.85,
           showCover: true,
           mobileScrollSupport: false,
           usePortrait: isMobile,
           autoSize: false,
           drawShadow: true,
-          flippingTime: 700
+          flippingTime: 1100,
+          startZIndex: 0,
+          swipeDistance: 30,
+          clickEventForward: true,
+          useMouseEvents: true,
+          showPageCorners: true,
+          disableFlipByClick: false
         });
         pageFlip.loadFromHTML(document.querySelectorAll('#book .page'));
 
