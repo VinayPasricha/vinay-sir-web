@@ -1484,7 +1484,7 @@
         // how many TOC pages there are. Solve by computing twice.
         const stubStartPages = CHAPTERS.map(() => 0);
         const stubTocPages = paginateTOC(CHAPTERS, stubStartPages, pageW, pageH);
-        const PRE_PAGES_INITIAL = 3 + stubTocPages.length; // outer-back + cover + cover-back + toc count
+        const PRE_PAGES_INITIAL = 2 + stubTocPages.length; // cover + cover-back + toc count
 
         chapterStartPages = [];
         pagedContent.forEach((p, idx) => {
@@ -1500,7 +1500,7 @@
         const tocPages = paginateTOC(CHAPTERS, chapterStartPages, pageW, pageH);
         // If TOC page count changed after recompute, recompute starts once more
         if (tocPages.length !== stubTocPages.length) {
-          const PRE_PAGES_FINAL = 3 + tocPages.length;
+          const PRE_PAGES_FINAL = 2 + tocPages.length;
           chapterStartPages = [];
           pagedContent.forEach((p, idx) => {
             if (p.type === 'divider') {
@@ -1512,13 +1512,12 @@
           });
         }
 
-        coverPageIndex = 1; // front cover sits on the right of the opening spread
-        tocPageIndex = 3; // first TOC page
+        coverPageIndex = 0;
+        tocPageIndex = 2; // first TOC page
 
         // Assemble final page list
-        // Opening spread: outer-back (left) | front-cover (right) — both halves of the wraparound
+        // Book opens to front cover alone (showCover:true). Back cover sits at the very end.
         const allPages = [];
-        allPages.push({ kind: 'outer-back', html: buildOuterBackPage() });
         allPages.push({ kind: 'cover', html: buildCoverPage() });
         allPages.push({ kind: 'cover-back', html: buildCoverBackPage() });
         tocPages.forEach(html => allPages.push({ kind: 'toc', html }));
@@ -1545,8 +1544,15 @@
           }
         });
 
+        // Pad to an even page count so the back cover lands as a recto (right-side)
+        // — keeps the last spread looking like a closed book's back panel.
+        if (allPages.length % 2 === 1) {
+          allPages.push({ kind: 'blank', html: '' });
+        }
+        allPages.push({ kind: 'outer-back', html: buildOuterBackPage() });
+
         // Build DOM with data-pos for verso/recto/single
-        // With showCover:false: pages open as a spread from idx 0 (verso) + idx 1 (recto).
+        // With showCover:true: page 0 = recto alone, pages 1+2 = verso+recto pair, etc.
         pageMeta = [];
         chapterAtPage = [];
         allPages.forEach((pg, idx) => {
@@ -1562,7 +1568,8 @@
 
           let pos;
           if (isMobile) pos = 'single';
-          else pos = (idx % 2 === 0) ? 'verso' : 'recto';
+          else if (idx === 0) pos = 'recto';
+          else pos = (idx % 2 === 1) ? 'verso' : 'recto';
           el.setAttribute('data-pos', pos);
 
           let inner = pg.html;
@@ -1593,7 +1600,7 @@
           minWidth: 200, maxWidth: 1200,
           minHeight: 280, maxHeight: 1680,
           maxShadowOpacity: 0.6,
-          showCover: false,
+          showCover: true,
           mobileScrollSupport: false,
           usePortrait: isMobile,
           autoSize: false,
