@@ -103,8 +103,16 @@
       .stage { padding: 56px 8px 86px; }
     }
 
+    /* Shadow is on the book stage wrapper so it doesn't create a stacking context
+       on the element that holds the flipping pages (which breaks their transforms). */
+    .book-shadow {
+      position: relative;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
+      border-radius: 2px;
+    }
+    /* Clip anything that escapes the book box during flip animation. */
     #book {
-      filter: drop-shadow(0 30px 60px rgba(0,0,0,0.5)) drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+      position: relative;
     }
 
     /* Each page styling — StPageFlip renders each .page as a flipbook leaf */
@@ -392,7 +400,9 @@
   </div>
 
   <div class="stage">
-    <div id="book"></div>
+    <div class="book-shadow">
+      <div id="book"></div>
+    </div>
   </div>
 
   <div class="controls">
@@ -622,18 +632,16 @@
           maxWidth: 1200,
           minHeight: 280,
           maxHeight: 1680,
-          maxShadowOpacity: 0.85,
+          maxShadowOpacity: 0.6,
           showCover: true,
           mobileScrollSupport: false,
           usePortrait: isMobile,
           autoSize: false,
           drawShadow: true,
-          flippingTime: 1100,
-          startZIndex: 0,
-          swipeDistance: 30,
-          clickEventForward: true,
+          flippingTime: 900,
           useMouseEvents: true,
-          showPageCorners: true,
+          swipeDistance: 30,
+          showPageCorners: false,
           disableFlipByClick: false
         });
         pageFlip.loadFromHTML(document.querySelectorAll('#book .page'));
