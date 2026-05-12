@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Google Analytics 4 -->
+  <script defer src="../js/analytics.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Read: The SIV Method — Vinay Pasricha</title>
+  <meta name="description" content="Read The SIV Method in full — Socratic Iterative Vinay. A brutal framework for understanding reality before execution through multi-lens thinking and disciplined inquiry.">
+  <link rel="canonical" href="https://vinaypasricha.com/pages/siv-method-read.html">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="shortcut icon" href="/favicon.png">
+  <!-- Open Graph -->
+  <meta property="og:title" content="Read: The SIV Method — Vinay Pasricha">
+  <meta property="og:description" content="Read The SIV Method online for free. Socratic Iterative Vinay — a discipline for examining reality before acting on it. 14 chapters + 3 appendices.">
+  <meta property="og:type" content="book">
+  <meta property="og:url" content="https://vinaypasricha.com/pages/siv-method-read.html">
+  <meta property="og:image" content="https://vinaypasricha.com/assets/images/SIV_Method_eBook_Cover.jpg">
+  <meta property="og:site_name" content="Vinay Pasricha">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Read: The SIV Method — Vinay Pasricha">
+  <meta name="twitter:description" content="Read The SIV Method online for free. A discipline for examining reality before acting on it.">
+  <meta name="twitter:image" content="https://vinaypasricha.com/assets/images/SIV_Method_eBook_Cover.jpg">
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Book",
+    "name": "The SIV Method",
+    "author": { "@type": "Person", "name": "Vinay Pasricha", "url": "https://vinaypasricha.com" },
+    "description": "Socratic Iterative Vinay — a discipline for examining reality before acting on it. 14 chapters + 3 appendices.",
+    "url": "https://vinaypasricha.com/pages/siv-method-read.html",
+    "image": "https://vinaypasricha.com/assets/images/SIV_Method_eBook_Cover.jpg",
+    "inLanguage": "en"
+  }
+  </script>
+  <style>
+    html, body { margin: 0; padding: 0; background: #FAF7F2; font-family: Georgia, serif; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+    button { font-family: inherit; }
+    a { -webkit-tap-highlight-color: transparent; }
+    .siv-site-link {
+      position: fixed; top: 16px; left: 40px; z-index: 300;
+      font-family: Georgia, serif; font-size: 13px;
+      color: #8B6914; text-decoration: none; font-weight: 600;
+      letter-spacing: 0.3px; padding: 6px 10px;
+      border-radius: 2px; transition: all .25s ease;
+    }
+    .siv-site-link:hover { background: rgba(139,105,20,0.08); }
+    #siv-loading {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: #FAF7F2; z-index: 999; color: #8B6914; font-size: 14px; letter-spacing: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div id="siv-loading">Loading the method&hellip;</div>
+  <a href="siv-method-book.html" class="siv-site-link" id="back-to-site" style="display:none;">&larr; Back to Book Page</a>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react">
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    const CHAPTERS = [
+      {
+        num: 'PREFACE',
+        title: 'Preface',
+        time: '7 min',
+        content: [
+          "Most failure does not begin in action. It begins in misunderstanding.",
+          "People act too soon because they think they understand. They decide too early because uncertainty irritates them. They label reality before they have seen enough of it, then mistake conviction for truth, speed for clarity, and familiarity for understanding. Then they call the result judgement.",
+          "This is not mainly a moral defect. It is a structural limitation.",
+          "The human mind is not built to hold many frames of reference at once with rigour. It evolved for survival, not for comprehensive perception. It simplifies, compresses, protects, and closes. It wants a workable story before reality has finished disclosing itself. In ordinary life that may be efficient. In serious work it is often catastrophic.",
+          "In medicine, a young doctor sees a patient with chest pain and thinks: heart attack. The mind settles on a frame because it is the most alarming, most present, most familiar from recent cases. The tests that would challenge this frame do not get ordered. Or they do get ordered, but are read through the lens that has already been adopted. The ambiguous EKG is forced into confirmation. The patient is admitted to coronary care. Days later, the true cause — gastroesophageal reflux, a muscular strain, anxiety — emerges. But by then the mind of the entire care team has been captured by the first narrative. The harm is not death. It is years of the patient's life lived under the shadow of a diagnosis that was borrowed, not earned.",
+          "In relationships, a partner becomes withdrawn. The receiving partner thinks: infidelity. The mind seizes on the explanation that is most emotionally available, most consistent with past anxieties. The withdrawn partner is interrogated, not inquired into. Their actual reasons — depression, stress at work, shame about a financial mistake, a diagnosis they haven't disclosed — remain unspoken because the frame has already closed. By the time the real cause is finally spoken aloud, months of damage have been done.",
+          "In work, a leader sees a promising direction and mistakes early evidence for durable reality. The plan gathers support, resources collect around it, and doubt becomes expensive. A year later it becomes clear that the opportunity was narrower, the timing was wrong, or the assumptions were thin. The confidence was real. The understanding was not.",
+          "In each case, the failure is not due to stupidity or negligence. It is due to a normal human tendency: the mind closes around an interpretation because closed interpretations allow action, and action feels like progress. Uncertainty is intrinsically uncomfortable. The pressure to resolve uncertainty — to have a story, a plan, a definitive answer — is immense. Most of us yield to it before we have actually examined enough of reality to justify yielding.",
+          "This book proposes a different relationship to that pressure. It proposes that understanding and action are not the same thing, and should not be collapsed into one another. It proposes that there is a kind of work — hard, disciplined, sustained work — that happens in the space between the moment you first think you understand something and the moment you actually do. It proposes that this work is not a luxury or a side effect of action. It is a prerequisite to action that deserves to succeed.",
+          "SIV stands for Socratic Iterative Vinay. It is a method for examining an important reality through multiple dynamically generated lenses, applying disciplined pressure to every claim, and converging toward one integrated understanding strong enough to support action.",
+          "Its core proposition is simple and severe: before power is applied, reality must be examined hard enough to deserve action.",
+          "This book is the first formal statement of that proposition. It is not a philosophy. It is not a productivity system. It is not a therapeutic method or a mindfulness practice. It is a method for people who work — who make decisions, lead others, build things, treat systems, shape outcomes — and who are tired of paying the cost of shallow interpretation.",
+          "The cost is visible and invisible both. The visible cost is the outcome that fails. The invisible cost is slower and more insidious: it is the trust that corrodes when decisions keep failing, the confidence that hollows when you realise you have been wrong about something you were certain about.",
+          "What SIV offers is not certainty. No method can offer that. What it offers is a structured path from premature conviction to earned understanding. It offers a discipline for people who want to act, but want to act on something more substantial than the first plausible story their mind produces.",
+          "It is not intended as the last word. It is intended as the opening move."
+        ]
+      },
+      {
+        num: '01',
+        title: 'The First Distortion',
+        time: '6 min',
+        content: [
+          "The second failure always comes first.",
+          "The first serious mistake is almost never the one you notice. It happens earlier, quieter, deeper inside the frame. It happens in the moment you decide you understand something before you actually do. It happens when a feeling of clarity arrives before the work of clarity has been completed. That feeling is the most dangerous product of the untrained mind. It is the sensation of understanding without the substance of it.",
+          "The first distortion is not ignorance. It is the sensation of understanding without the substance of it.",
+          "A woman discovers a lump in her breast. She is thirty-four. She has no family history. She tells herself it is probably a cyst — not because she has evidence, but because the alternative is terrifying, and terror is expensive, and she is in the middle of a difficult quarter at work. She waits three months. When she finally sees a doctor, the lump has grown. It is not a cyst. The treatment that would have been straightforward in month one is now aggressive and uncertain in month four.",
+          "She did not fail at execution. She failed at seeing. She looked at reality and decided what it was before she had examined it carefully enough to know.",
+          "This is the first distortion. Not ignorance. Not stupidity. Not carelessness. Something more structural: the human tendency to close interpretation before reality has finished disclosing itself.",
+          "The distortion operates through a peculiar mental move. The woman did not simply ignore the lump. She interpreted it. She assigned it a category, a timeline, a meaning. That assignment felt like understanding because it had the shape of understanding. She had a theory. The theory was coherent. It fit some facts. But it had never been tested against the full range of what she actually knew.",
+          "A man stays in a relationship for two years past the point where it should have ended. Not because he is weak. Because he has built an interpretation — she is difficult but loyal, the fights are temporary, the good outweighs the bad — and that interpretation has become load-bearing. His identity leans on it. His plans depend on it. He became what might be called a sophisticated interpreter of his own delusion — brilliant at explaining why the evidence fit the story, incapable of asking whether the story fit the evidence.",
+          "A high-performing executive becomes convinced that one more promotion will solve the heaviness he feels each morning. He tells himself the problem is recognition. So he works harder, campaigns internally, and finally gets the title. For a few months he feels relief. Then the heaviness returns. The problem was never status. It was exhaustion, a marriage gone cold, and a life built around external approval.",
+          "These three stories share a structure. In each case, the person was not passive. They were active, confident, and committed. Their problem was not that they did nothing. Their problem was that they acted on an understanding that had never been earned.",
+          "The first distortion is always the same: the reduction of reality into something prematurely manageable. A complex field is compressed into a simple story. A multi-dimensional situation is flattened into one or two variables. The compression feels like clarity. It is not. It is the mind's first defence against the discomfort of not knowing.",
+          "The confidence is always the problem, because confidence feels identical whether it is earned or premature. The brain does not distinguish between the two. It does not tag interpretations with their source or their completeness. The feeling is the same whether you have spent an afternoon thinking or six months of rigorous investigation. This is why the first distortion is so dangerous: it is neurologically indistinguishable from genuine understanding.",
+          "This is the first thing SIV addresses. Not bad thinking. Not laziness. Not dishonesty. The structural gap between the feeling of understanding and the fact of it. That gap is where the real cost lives — in relationships, in health, in money, in career, in every domain where people confuse the speed of their interpretation with its quality.",
+          "The discipline is not to stop interpreting. That is impossible. Interpretation is how the mind works. The discipline is to stop treating the first satisfying interpretation as the last one. It is to develop the capacity to hold an interpretation lightly, to test it, to invite contradiction, to ask what you would need to see to change your mind, and to remain genuinely curious about the answer.",
+          "The second failure always comes first."
+        ]
+      },
+      {
+        num: '02',
+        title: 'The Mind Wants Relief',
+        time: '5 min',
+        content: [
+          "The mind wants relief. SIV demands reality.",
+          "The human mind does not primarily seek truth. It seeks resolution.",
+          "This is not a controversial statement in neuroscience, but it is a devastating one in practice. It means that the organ you are using to understand reality is structurally biased toward ending inquiry rather than completing it. It wants the discomfort of not-knowing to stop. It wants an answer — not necessarily the right answer, but an answer that will let it move on.",
+          "Watch this in real time. A man goes to the doctor with persistent fatigue. The doctor runs standard blood work. Everything comes back normal. The man feels relieved. He tells himself it must be stress, or sleep, or age. He stops investigating. The fatigue continues for another year. Eventually a different doctor orders a more specific panel and discovers a thyroid condition that was invisible on the first set of tests. The condition was worsening the entire time he thought he had ruled it out.",
+          "The first doctor was not negligent. But the man's mind did something subtle and dangerous: it treated the absence of a clear answer as the presence of a benign one. The mind saw no diagnosis and converted it to no problem. The relief was real. The understanding was not. And the relief itself became the barrier to further inquiry.",
+          "This is the fundamental mechanism: the mind treats the cessation of discomfort as the arrival of truth.",
+          "A woman has a fight with her partner. The pattern is familiar: she raises a concern, he becomes defensive, she escalates, he withdraws. Afterward, there is a period of cold distance, then a gradual thaw, then a return to normalcy. She interprets the return to normalcy as resolution. But what actually happened? Nothing was resolved. The pattern was enacted, exhaustion set in, and both parties retreated to a tolerable equilibrium. The underlying dynamic was never examined.",
+          "The pattern scales. A team has a strategic disagreement about which market to enter. They debate for two hours. Eventually, the most senior person in the room offers a framing that sounds reasonable, and the room agrees. People leave feeling aligned. But the alignment is not the product of genuine convergence. It is the product of fatigue, hierarchy, and the mind's desire to stop holding contradictions.",
+          "The mind wants relief more than reality. This is not a personality trait. It is architecture.",
+          "The brain did not evolve to contemplate reality in all its dimensions. It evolved to survive. In survival conditions, speed mattered more than completeness. Binary distinctions were useful: safe or dangerous, friend or enemy, move or freeze. That machinery still lives inside us, even when we are dealing with medical symptoms, intimate relationships, career crossroads, or strategic decisions that will unfold over years.",
+          "The result is predictable. We overvalue what is visible, recent, vivid, emotional, and narratively satisfying. We undervalue what is structural, slow-moving, distributed, and hidden. We attach identity to interpretation. We defend a view not because it is true but because it has become part of us.",
+          "Intelligence does not save you from this. It often makes it worse. A clever person with a wrong frame can generate elegant reasoning that sounds like understanding and is actually sophisticated avoidance. Intelligence can increase the quality of the narrative without increasing its contact with reality. The smartest person in the room can be the one most skilled at constructing a story that lets everyone go home early.",
+          "SIV is built to interrupt that process. Not by making you smarter. By giving you a structure that forces inquiry past the point where the mind would naturally stop. It is a system for more rigour — for asking the questions that relief wants you to leave unasked, for holding the tension that comfort wants you to resolve, for examining the frame even after the frame has started to feel true.",
+          "Because the mind will always want relief. And relief, in matters that deserve rigour, is almost never the same thing as truth.",
+          "The mind wants relief. SIV demands reality."
+        ]
+      },
+      {
+        num: '03',
+        title: 'Premature Closure',
+        time: '5 min',
+        content: [
+          "The plausible answer is the most dangerous enemy of the true one.",
+          "There is a moment in every serious inquiry where the mind wants to declare victory and move on. That moment almost always arrives too soon.",
+          "Premature closure is not impatience. It is the structural tendency of human cognition to convert partial understanding into complete understanding, and then to act on the converted product as though no gap existed. One moment you are thinking about a problem. The next moment you have an answer. The gap between the two is invisible to the person making it.",
+          "A man in his late thirties has been experiencing chest pain for two weeks. He decides the pain is reflux-related and adjusts his diet. The pain persists but he does not return to the doctor because his interpretation has closed the inquiry. He has an answer. The answer is wrong. Six weeks later, he is in an emergency room with a cardiac event that might have been prevented if the inquiry had stayed open.",
+          "He did not ignore the symptom. He interpreted it. The interpretation was plausible. It was wrong. And it closed the door on further investigation at exactly the point where further investigation was most needed.",
+          "This is the particular danger of premature closure: it is not experienced as premature. It is experienced as complete. The person feels like they have finished thinking when they have actually stopped thinking.",
+          "Premature closure operates identically in emotional life. A woman discovers that her partner has been exchanging messages with an ex. He apologises. She accepts this. The inquiry closes. But what closed? Not the underlying question — why did he feel the need to maintain a private emotional channel outside the relationship? What closed was her willingness to tolerate the discomfort of not having a clean answer. His apology functioned not as truth but as relief.",
+          "The apology was real. The resolution was real. The understanding was not. What actually happened was a mutual agreement to stop asking. And the underlying dynamic — whatever emotional absence or unmet need had driven him to seek connection elsewhere — remained unaddressed and unexamined.",
+          "The cost of this kind of closure is rarely paid immediately. It is paid later, in the accumulation of similar moments, in the slow erosion of genuine knowing each other.",
+          "The pattern is everywhere. In career decisions, where a person accepts a job because the salary is right without examining whether the role aligns with anything they actually want to build. In medical decisions, where a diagnosis is accepted because it explains the most obvious symptom without accounting for the less visible ones. In financial decisions, where an investment thesis is adopted because it is narratively compelling without being stress-tested against contradictory evidence.",
+          "In every case, the structure is the same. Partial information produces a plausible interpretation. The plausible interpretation produces emotional relief. The emotional relief is experienced as cognitive completion.",
+          "There is a particular danger in premature closure that deserves its own attention: it is harder to reopen an inquiry than to keep one open. Once the mind has assigned a conclusion, that conclusion becomes part of the cognitive furniture. New evidence that contradicts it must compete against the existing interpretation, and the existing interpretation has the advantage of incumbency.",
+          "This is why SIV insists on a specific discipline: depth must be chosen deliberately, and inquiry must not close until the chosen depth has been reached. Left to its own devices, the mind will always declare sufficiency too soon.",
+          "Premature closure is not a mistake you make once and learn from. It is a default setting. It requires active, structural resistance.",
+          "False clarity is often just emotional relief wearing the mask of thought."
+        ]
+      },
+      {
+        num: '04',
+        title: 'Borrowed Certainty',
+        time: '5 min',
+        content: [
+          "Certainty you did not earn is certainty you do not own.",
+          "Most of what people call their opinions are not their own. They are borrowed from the environment — from authority, from culture, from consensus, from the last persuasive thing they heard — and installed so smoothly that the borrowing is invisible. This matters because borrowed certainty feels indistinguishable from earned certainty. The brain does not tag beliefs with their origin. The man who believes his diet is healthy because a documentary told him so experiences the same confidence as the man who believes his diet is healthy because he tracked biomarkers for six months. The feeling is identical. The foundation is not.",
+          "The mechanism is neurological. Memory does not encode source. When a belief settles into long-term storage, the pathway by which it arrived is often discarded. A false belief that has been well-integrated into the system feels as certain as a true one that has been similarly integrated.",
+          "Consider the person who becomes vegan after watching a documentary. Within days or weeks, they have constructed a new identity around veganism. They speak with certainty about the ethics of eating animal products. But they now hold strong convictions about three technically complex domains — food ethics, environmental impact, and nutritional science — without having examined any of them independently.",
+          "A woman in her late twenties is convinced she should freeze her eggs. She has read articles. She has heard friends discuss it. She has absorbed a cultural narrative. She is preparing to spend fifteen thousand dollars on a procedure she has never examined from first principles. She has not asked whether the urgency she feels is biological or cultural — whether it is her body speaking or a market speaking through her, using her fear as a vector.",
+          "Borrowed certainty is everywhere. A man believes he should buy property because his parents told him renting is throwing money away. He has never run the numbers for his specific situation. The belief is inherited, not examined. But it carries the weight of certainty because it has been reinforced by every conversation he has had about money since he was a teenager.",
+          "A young woman is certain her relationship is healthy because her partner has never raised his voice, never been unfaithful, never done anything she can point to as wrong. She has defined health by the absence of dramatic failure. A relationship can be non-destructive and still be diminishing. It can be faithful and still be emotionally abandoning. It can be nice and still be numb.",
+          "A team is certain their product strategy is sound because the board approved it. The board approved it because the CEO presented it with conviction. The CEO because the head of strategy built a compelling case. No one was dishonest. Everyone was confident. The certainty was real. It was also circular.",
+          "SIV addresses this by insisting on a specific test: for any claim that is guiding action, can you reconstruct the path by which you arrived at it? Not the path by which you heard it. The path by which you examined it. Can you name the lenses through which you looked? Can you articulate what would have to be true for this belief to be false?",
+          "If the answer is no — if the certainty was adopted rather than built — then the certainty is not yours, and using it to guide serious decisions is the cognitive equivalent of navigating by someone else's map without checking whether it matches the terrain.",
+          "Certainty you did not earn is certainty you do not own.",
+          "The reconstruction test is uncomfortable. It reveals how little of what we believe we have actually examined. But this discomfort is the point. The mind that remains comfortable with its own certainty is a mind that has not yet scrutinised its foundations.",
+          "A belief you cannot reconstruct is a belief you do not own."
+        ]
+      },
+      {
+        num: '05',
+        title: 'Emotion Is Not Understanding',
+        time: '5 min',
+        content: [
+          "Feeling deeply is not the same as seeing clearly.",
+          "Emotion is information. It is not interpretation. The failure to distinguish between the two is one of the most expensive cognitive errors in human life.",
+          "Information is raw data about a state of affairs. Interpretation is a story about what that data means. Emotion provides both simultaneously. It arrives as a unified package: feeling plus meaning. The person experiencing the emotion has no way to separate the two components. The feeling and the interpretation feel like they are the same thing. But they are not.",
+          "A man discovers that his wife has been confiding in a male colleague about problems in their marriage. He feels betrayed. Within hours, the feeling has become a conclusion: she has crossed a boundary. The conclusion becomes a narrative: she has been emotionally unfaithful. The narrative becomes an action: he confronts her with accusation rather than inquiry, the conversation becomes a fight, and the fight damages the relationship in ways that will take months to repair.",
+          "But what actually happened? A feeling arrived. The feeling came with a built-in interpretation: you have been wronged. He did not consciously adopt this interpretation. It arrived with the feeling, already assembled. Questions that might have been asked were never asked: Is it possible that her confiding in someone else is not a violation but a signal that something in the relationship is not providing what she needs?",
+          "This is the mechanism. Emotion arrives with a built-in interpretation. Anger says I have been wronged. Fear says I am in danger. Shame says I am defective. Each emotion carries a cognitive payload — a ready-made story about what is happening and what it means. Unless something interrupts the acceptance, the emotion's interpretation becomes the person's understanding of reality.",
+          "The problem is not that emotions are wrong. They are sometimes right. The problem is that they are always confident and never qualified. Anger does not say I might have been wronged, pending further investigation. Emotion delivers certainty, and the mind, which craves certainty, accepts delivery without checking the contents.",
+          "Emotion delivers certainty, and the mind, which craves certainty, accepts delivery without checking the contents.",
+          "A woman has been exercising hard for three months. Then she steps on the scale and sees that she has gained two pounds since last week. The emotion — frustration, discouragement, a flash of self-contempt — arrives instantly. The emotion carries an interpretation: you are failing. But the scale reading at this resolution carries almost no actionable information about her actual progress.",
+          "This is not weakness. This is architecture. The brain processes emotional information faster than analytical information. Emotion evolved to handle threats to survival. The architecture that makes this possible works well for survival threats. It works catastrophically poorly for the complex decisions that characterise modern life.",
+          "In the gap between emotion and analysis, most people have already formed a conclusion, and the analysis — when it arrives — is pressed into service defending the emotional verdict rather than examining it. This is called motivated reasoning, and it is more powerful than people realise.",
+          "SIV's Socratic engine is designed specifically for this gap. Its purpose is to insert pressure between emotion and interpretation — to ask, before the feeling becomes a conclusion, whether the feeling is actually reporting accurately on what is happening.",
+          "This does not mean suppressing emotion. Suppression is its own distortion. A person who suppresses their emotional signals becomes disconnected from valuable information. The goal is to treat emotion as a signal that deserves examination rather than as a verdict that demands compliance.",
+          "Feeling deeply is not the same as seeing clearly. One must not be mistaken for the other."
+        ]
+      },
+      {
+        num: '06',
+        title: 'The Problem of Lenses',
+        time: '5 min',
+        content: [
+          "A weak lens decorates thought. A strong lens rearranges it.",
+          "No important reality can be properly understood from a single angle.",
+          "This is the central doctrine of SIV, and it sounds obvious until you watch how people actually behave under pressure. When a decision is needed, when something hurts, when the stakes are real, the overwhelming tendency is to find one angle that works and then stop looking. The mind has a strong preference for the simplest story that accounts for the phenomenon. Once that story is found, the mind treats the discovery of the story as the end of inquiry rather than the beginning of it.",
+          "A man in his mid-forties is unhappy at work. He has been in the same role for six years. He is competent but bored. He describes the problem to himself as a career problem. He updates his resume. He talks to recruiters. He is working on the career problem. But he is examining one lens. The reality operates on several.",
+          "Through a different lens — identity — the question changes entirely. He built his sense of self around professional achievement in his twenties and thirties. Now that achievement feels routine. The career dissatisfaction may not be about the career. It may be about a self-concept that has exhausted its usefulness, that needs to be demolished and rebuilt. A new job will not address this.",
+          "Through another lens — marriage — the picture shifts again. His wife has been increasingly successful in her own career. His malaise at work may be partially a displacement: it is easier to feel dissatisfied with a job than to feel displaced in a marriage. The dissatisfaction is not about the job. It is about his position in his marriage, and he is trying to solve it by changing jobs.",
+          "Through another lens — body — another layer appears. He has gained weight. He sleeps badly. The dissatisfaction he attributes to his career may be substantially physiological. A body under metabolic stress generates a diffuse unhappiness that the mind then assigns to whatever seems most explanable.",
+          "Each lens reveals something the others conceal. No single lens is wrong. Each sees something true. But each lens also sees what is lit by its particular angle and misses everything in shadow.",
+          "This is the problem of lenses: the mind naturally selects one and treats it as the whole picture. It does this because holding multiple frames simultaneously is cognitively expensive. It requires sustained effort, tolerance for contradiction, and the willingness to abandon a satisfying interpretation in favour of a more complicated but more accurate one.",
+          "A Vinay Lens — the unit of analysis in SIV — is a formally named, self-explanatory angle of inquiry generated specifically for the issue at hand. It is not a topic. It is not a category. It is a way of seeing that changes what becomes visible.",
+          "Every Vinay Lens has four essential properties. It is formal — it must be named, because what is unnamed remains loose. It is self-explanatory — the name must reveal the angle directly. A lens named \"The Employment Question\" is too vague. A lens named \"The Adequacy of Professional Identity as a Source of Self-Worth\" names the actual angle being examined. It is case-generated — it must arise from the specific issue. And it is directional — it must change the angle from which the issue is seen, not merely label an area.",
+          "SIV does not generate all lenses at once. It works one lens at a time, because later lenses must be able to respond to what earlier ones exposed. Inquiry must breathe. The method must learn while it moves.",
+          "A weak lens decorates thought. It adds complexity without changing understanding. A strong lens rearranges what the person can see. It illuminates what was previously in shadow. It creates the possibility of understanding something that was previously opaque."
+        ]
+      },
+      {
+        num: '07',
+        title: 'Iteration Against Illusion',
+        time: '5 min',
+        content: [
+          "The purpose of iteration is not delay. It is earned clarity.",
+          "One of the most dangerous habits in serious thinking is the urge to know too soon.",
+          "The mind wants a summary. The team wants direction. The partner wants an answer. Everyone feels safer once a conclusion appears. The discomfort of sustained uncertainty is so unpleasant that people will accept an inferior conclusion just to make it stop.",
+          "This is not weakness. It is neurological fact. The brain treats uncertainty as a threat. An unresolved question generates the same stress signals as an unresolved conflict. We are built to resolve, to decide, to move forward. This is useful when speed matters. It becomes dangerous when depth matters more than speed.",
+          "Early conclusions function as traps. They freeze inquiry before reality has had time to disclose itself. The economist Daniel Kahneman calls this anchoring: the first number you hear becomes the gravitational centre around which all subsequent estimates orbit. The same principle operates with conclusions. An early answer becomes the default. Everything else is treated as revision rather than as a legitimate alternative.",
+          "Consider a woman trying to decide whether to end a ten-year friendship that has become draining. On first examination — through the lens of emotional cost — the answer seems clear: the friendship takes more than it gives, and she should move on. This is a plausible conclusion. It is also dangerously premature.",
+          "A second lens — loyalty and history — complicates the picture substantially. The friend was there during the worst period of the woman's life, not as a bystander but as someone who showed up in ways that made the difference between managing and not managing. The debt is real. Discounting it because the present is difficult feels like a betrayal of something she values in herself.",
+          "A third lens — her own patterns — complicates it further. She has a history of withdrawing from people when relationships become uncomfortable. Is her current thinking a healthy boundary, or is it a pattern of avoidance that she is rationalising as self-care?",
+          "A fourth lens — the friend's circumstances — adds another dimension. The friend has been going through a divorce. The draining behaviour may be temporary rather than structural. Ending the friendship now may be abandoning someone at their worst moment.",
+          "A fifth lens — what the friendship actually is versus what it used to be — suggests that the choice is not binary. Perhaps the friendship cannot be what it was. Perhaps it needs to become something different: less frequent, more bounded, a thing that exists in specific containers rather than as an open-ended claim on time and energy.",
+          "After five lenses, the picture is substantially different from where it started. The simple conclusion — walk away — has been replaced by a more complex understanding. The decision may ultimately be to end the friendship. But it will be made from a stronger foundation.",
+          "This is what iteration does. It does not guarantee a different answer. It guarantees a more examined answer. And the difference between an unexamined answer and an examined one is the difference between a guess and a judgement.",
+          "SIV builds iteration into its structure by requiring the user to specify depth — the number of lenses to be applied. But once depth is chosen, SIV remains responsible for judging adequacy. The method does not permit the comforting fiction that the inquiry is complete merely because the count has been reached.",
+          "Complete understanding is impossible. But impossible completeness is not an excuse for premature sufficiency. The purpose of iteration is not delay. Endless examination is another form of evasion. It is earned clarity."
+        ]
+      },
+      {
+        num: '08',
+        title: 'Pressure Before Commitment',
+        time: '4 min',
+        content: [
+          "If a claim cannot survive pressure, it has no right to guide action.",
+          "Many methods ask questions. Very few deserve the word Socratic.",
+          "In diluted usage, Socratic means merely inquisitive. In SIV, it means adversarial in the service of truth. It means contradiction. Pressure. Stress-testing. Dismantling weak assumptions. Refusal to treat coherence as evidence of truth. Exposure of vague language, emotional certainty, self-serving narrative, and borrowed concepts that have never been earned through lived experience or rigorous thought.",
+          "This is necessary because without pressure, inquiry becomes performance. The person asking the questions becomes a research assistant to the person answering them, helping them build a more compelling narrative rather than testing whether the narrative maps onto reality. Niceness becomes complicity.",
+          "A claim that cannot survive pressure has no right to guide action.",
+          "A statement can be fluently articulated and still be profoundly wrong. A narrative can be emotionally powerful and still be false. An interpretation can be elegant and still conceal reality. Confidence is not evidence. Coherence is not truth.",
+          "Consider the man in his fifties who tells himself he has forgiven his father. He says this with conviction. He means it entirely. He is not lying. The problem is that it is not true. He has constructed an interpretation of his childhood that allows him to function. This narrative has never been placed under Socratic pressure.",
+          "Under questioning, the narrative begins to fracture. If he has truly forgiven his father, why does he flinch when his wife criticises his parenting? Why does he change the subject when his father comes up? Why does he have a version of the conversation he wishes they had had, a version he rehearses alone in his car? Under honest questioning, the forgiveness narrative reveals itself as not forgiveness but management — a framework for containing pain without resolving it.",
+          "Now consider the same principle applied to a business context. A company has been telling itself that its customer retention problem is a product quality issue. Under Socratic pressure, the interpretation fractures. Why are the customers who leave not citing product quality in their exit surveys? They are citing cost and fit. The company is trying to solve a sales problem by improving the product.",
+          "The Socratic engine does not care about comfort. It cares about contact with reality.",
+          "There is a deeper reason why pressure matters. The mind protects itself. It protects identity, continuity, pride, belonging, and emotional safety. When an idea threatens those things, the mind rarely surrenders cleanly. It rationalises. It narrows. It re-labels. Any method that does not contest this becomes its accomplice.",
+          "This is why SIV begins with a warning: this system is designed only for those willing to think honestly, examine their own assumptions critically, and confront their biases and blind spots. If you are unwilling, exit now. Better no conclusion than counterfeit depth.",
+          "Pressure is not punishment. It is not aggression. It is the price of contact with reality. It is the cost of thinking that is serious enough to matter."
+        ]
+      },
+      {
+        num: '09',
+        title: 'From Personal Error to Organisational Error',
+        time: '4 min',
+        content: [
+          "Every organisation is a conspiracy of unexamined frames.",
+          "Everything that makes SIV necessary for individuals makes it doubly necessary for organisations.",
+          "An organisation is a group of people misreading reality together, coordinated by incentive structures that reward certain interpretations and punish others. The misreadings are not random. They are systematic, predictable, and often invisible to the people inside them because everyone inside sees the same evidence from the same angle.",
+          "A technology company starts losing market share. The CEO blames marketing. Marketing blames product. Product blames engineering. Engineering blames shifting requirements. No one is lying. Everyone can see a real problem from where they sit. But each frame is also protecting a role, narrowing reality to what that role can safely name. The organisation now has several partial truths and no integrated understanding.",
+          "This is the organisational blind spot: the space where reality cannot be seen because the structure of the organisation itself prevents anyone from looking. Hierarchies suppress upward truth-telling. Incentive structures reward narrative alignment with leadership's existing interpretation. Meeting culture favours consensus over dissent.",
+          "The result is an organisation that moves fast, speaks confidently, executes efficiently, and is often profoundly wrong about the reality it is operating in.",
+          "Now observe the same structure in a hospital. A patient is admitted with symptoms that cross departmental boundaries. The cardiologist sees a heart problem. The endocrinologist sees a metabolic problem. The psychiatrist sees an anxiety disorder. The integrated picture — the one that might reveal all three as downstream effects of a single autoimmune process — is no one's responsibility. The patient suffers because the organisation is optimised for fragmentation.",
+          "Now observe the same structure in a family. A teenager is struggling — grades dropping, mood darkening, social withdrawal. The father sees a discipline problem. The mother sees an emotional problem. The school sees an academic problem. But the integrated question — what is actually happening to this child at the level where all three symptoms connect — is asked by no one.",
+          "SIV applied to organisations requires one additional discipline: the willingness to examine the frame that the organisation itself provides. The assumptions that shape what questions get asked, what data gets collected, what interpretations get rewarded — these are invisible not because they are hidden but because they are ambient. They are the air people breathe.",
+          "The first step of SIV in any organisational context is to name the organisational frame as a lens and to subject it to the same Socratic pressure as any other claim. What evidence would we have if this were not true? What data would we not be collecting that might contradict our core hypothesis?",
+          "An institution that cannot examine its own frame is blind to the shape of its own blindness. It can see problems everywhere except the structural problem that is generating all the other problems."
+        ]
+      },
+      {
+        num: '10',
+        title: 'From Leadership Failure to Societal Failure',
+        time: '4 min',
+        content: [
+          "Civilisations decline when they lose the ability to see clearly.",
+          "The same structure of misreading that destroys personal health, collapses relationships, and misguides organisations operates at the level of societies, nations, and civilisations.",
+          "A nation goes to war on intelligence that was never properly stress-tested. The intelligence reports were treated as conclusions rather than hypotheses. Dissenting interpretations were suppressed, not because they were wrong, but because they were inconvenient. The confidence was real. The understanding was not. Hundreds of thousands of people paid the price.",
+          "This is not an anomaly. This is the standard pattern of large-scale decision failure. The decisions that shape wars, economic policies, public health responses, and social institutions are made by the same human minds that misread lumps as cysts. The scale changes. The architecture of the error does not.",
+          "When certainty becomes distributed across an institution, it hardens further. Once ten people have agreed on an interpretation, disagreement becomes disloyalty. Once a thousand people have structured their institutions around a narrative, questioning that narrative becomes institutional treason.",
+          "In a fast-moving public-health crisis, leaders often reach for the nearest familiar frame: this is local, this is temporary, this is manageable. Because it arrives early, later evidence is forced to orbit around it rather than challenge it. By the time the frame breaks, time has already converted error into harm.",
+          "A similar error appears in how societies frame addiction. If addiction is read only as moral failure, policy becomes punishment. If it is examined through neuroscience, trauma, economics, community structure, and public health, a different reality appears. The single-frame view persists because the simpler story is morally satisfying and easier to govern through.",
+          "Once a society adopts a frame at scale, the institutions built on that frame become resistant to correction. Admitting that the frame was wrong requires admitting that all the institutions built on it were making decisions in error. The original error becomes a doctrine that must be defended.",
+          "SIV's implications at this level are specific: the habits of mind that SIV trains at the personal level — multiple lenses, Socratic pressure, resistance to premature closure — are exactly the habits that must operate at scale if collective decisions are to improve.",
+          "A civilisation's capacity for good decisions is directly proportional to its capacity for honest inquiry. When that capacity degrades — when consensus replaces examination, when authority replaces argument — the civilisation does not merely make worse decisions. It loses the ability to recognise that its decisions are getting worse.",
+          "Collective wisdom is not the sum of individual confidence. It is the product of individual discipline. The personal work of understanding, done by many people, accumulates into the institutional capacity for sane decision-making. This is how civilisations improve."
+        ]
+      },
+      {
+        num: '11',
+        title: 'The SIV Method Proper',
+        time: '6 min',
+        content: [
+          "Understand before power is applied.",
+          "It is time to state the method formally.",
+          "SIV stands for Socratic Iterative Vinay. It is a structured method for examining any important reality through multiple dynamically generated frames of reference, applying Socratic pressure to every claim, and converging toward one integrated understanding strong enough to support action.",
+          "The core proposition: Before power is applied, reality must be examined hard enough to deserve action.",
+          "Before power is applied, reality must be examined hard enough to deserve action.",
+          "SIV occupies a precise place in serious work: after casual thought, before applied force. It is not execution. Execution belongs to a separate discipline — VIP, Vinay's Improving Process. The separation is deliberate. When understanding and execution are collapsed into one another, haste replaces clarity. Most bad execution is misunderstanding accelerated.",
+          "HOW SIV WORKS",
+          "First, the issue is framed in two sentences. Not a paragraph. Not a story. Two sentences that state what is being examined and why it matters. If you cannot state the issue in two sentences, you do not yet know what you are examining.",
+          "An example: My teenage daughter has withdrawn from family social interaction, which has intensified during the past six weeks. Understanding the specific causes of this withdrawal matters because the response depends on correctly identifying what is driving it.",
+          "Second, lenses are generated fresh from the issue. No fixed set of lenses is applied by default. Each issue demands its own angles. The lenses must be formally named, self-explanatory, case-generated, and directional.",
+          "Third, lenses are explored one at a time. Each lens is given enough space to reveal what it can reveal. Later lenses must be able to respond to what earlier ones exposed. Early findings constrain later possibilities.",
+          "Fourth, every claim is subjected to Socratic pressure. Coherence is not evidence. Emotion is not argument. Certainty is not truth. The Socratic engine tests every interpretation against contradiction, structural analysis, and falsification pressure.",
+          "Fifth, lenses are weighted qualitatively. Not all perspectives are equal. Some carry more explanatory weight than others. The weighting must be argued for, not assumed, and must come late in the inquiry, after pressure has done its work.",
+          "Sixth, the inquiry converges. Plurality is not the product. The product is one best integrated understanding — the strongest picture that can currently be defended. Convergence is not summary. It is reassembly.",
+          "Seventh, SIV produces both a confidence statement and an uncertainty statement. The confidence statement names what has become reasonably clear. The uncertainty statement names what remains obscure.",
+          "Eighth, the understanding is handed off to execution — to VIP — as a prepared transfer, not a vague impression.",
+          "ON THE ROLE OF AI",
+          "SIV was designed to work with AI as an instrument of amplified understanding.",
+          "Human beings can think deeply, but they do not naturally think broadly and stably enough for many modern problems. The mind tires. It compresses. It drops variables. It retreats toward the first compelling story because carrying multiple frames for too long becomes expensive.",
+          "SIV does not use AI as an answer machine. It uses AI as a lens engine: a way of generating more angles, applying more pressure, and sustaining more iterations than the unassisted mind can comfortably manage alone. The human remains responsible for judgement.",
+          "WHAT SIV IS NOT",
+          "It is not brainstorming. Brainstorming generates without pressure. SIV generates under pressure.",
+          "It is not a decision tree. Decision trees assume a known structure. SIV generates the structure from the issue itself.",
+          "It is not a debate format. Debate has winners and losers. SIV has only one goal: contact with reality. There are no positions to defend, only interpretations to test.",
+          "It is not therapy. Therapy treats the person. SIV treats the interpretation.",
+          "It is not a philosophy hobby. SIV exists for work. It is a method for people who need to act and want to act on ground that has been properly examined.",
+          "SIV exists to do one thing well: understand before power is applied."
+        ]
+      },
+      {
+        num: '12',
+        title: 'Understanding Before Force',
+        time: '4 min',
+        content: [
+          "In a world that runs on premature certainty, the discipline of seeing may be enough.",
+          "The SIV method begins as a personal discipline, but its implications reach further than any individual life.",
+          "Any system that improves understanding changes the quality of action that follows. To see more clearly is not a marginal advantage. It is one of the deepest advantages possible. In a world of complexity, the ability to understand what is actually happening before you act on it is a superpower that very few people reliably possess.",
+          "The cost of misreading reality is visible everywhere. In the body that was not examined until the disease was advanced. In the relationship that was not questioned until it was unsalvageable. In the career built on borrowed ambition rather than genuine understanding. In the company that executed brilliantly on a thesis that was never stress-tested. In the policy that sounded compelling and produced suffering.",
+          "In each case, the structure was the same: a fragment of reality was mistaken for the whole, and then force — energy, money, time, emotion, institutional power — was applied to the fragment as though it were truth. The force was real. The understanding was inadequate.",
+          "SIV does not promise wisdom. No method can. What it promises is a structure for reducing the gap between interpretation and reality — for making that gap smaller, more visible, and more amenable to correction before action hardens around a shallow frame.",
+          "The discipline is simple in statement and hard in practice.",
+          "Examine before you commit. Resist the natural drive toward closure. Tolerate uncertainty long enough for understanding to actually deepen. Decisiveness without understanding is merely speed. And speed in the wrong direction is worse than standing still.",
+          "Apply multiple lenses, not one. A single lens will always show you something true, but it will not show you the whole. One lens is also often sufficient for catastrophic error.",
+          "Subject every interpretation to pressure. Not criticism. Not rejection. Pressure. The pressure of the Socratic method: What do you mean by that? How do you know? What would falsify that? What contradicts that? A claim that cannot survive pressure is a claim that is not yet ready to guide action.",
+          "Weight what you find by how much reality it actually contains. Not all perspectives are equally important. The weighting is not arbitrary. It comes from looking at how much each lens actually explains, how well it accounts for the evidence.",
+          "Converge toward one integrated picture that earns the right to guide action. Not a collection of equal perspectives. An integrated understanding — a picture that shows how different factors connect, what is primary and what is secondary, what is driver and what is symptom.",
+          "Name what you are confident about. Name what you are not. This separation is critical. It creates permission for revision when new information emerges.",
+          "And only then — only after the understanding has been tested, weighted, and integrated — allow yourself to act.",
+          "It will not make you omniscient. No discipline can. But this discipline will make you harder to fool — especially by yourself. You will be less likely to mistake conviction for truth. You will be less likely to apply force to a misunderstood problem and then wonder why the result was worse than the original condition.",
+          "And in a world that runs on premature certainty, on borrowed interpretations, on force applied without adequate understanding, that may be enough. It may be the deepest advantage possible."
+        ]
+      },
+      {
+        num: '13',
+        title: 'The Cost of Seeing',
+        time: '8 min',
+        content: [
+          "Clarity is not free. It is purchased with comfort you will never recover.",
+          "No one tells you this when you begin. No one warns you that the discipline of seeing clearly will cost you things you did not expect to lose.",
+          "The previous chapters have argued that reality must be examined before power is applied. They have described the mechanisms by which the mind closes prematurely, the ways borrowed certainty masquerades as earned understanding, and the structural tendency of emotion to replace analysis. The method has been stated. The doctrine has been laid out. What remains is an honest account of what happens when you actually begin to live this way.",
+          "Because the cost is real. And if this book does not name it, it is not being honest about what it is asking of its reader.",
+          "The first cost is speed. The world rewards people who decide quickly, who project certainty, who move while others are still thinking. The person practising SIV will appear slower. In meetings, they will be the one asking a question when everyone else is ready to move on. In relationships, they will be the one who pauses before responding when the other person wants an answer now. In their own life, they will feel the friction of resisting the mind's natural drive toward closure while everyone around them seems to have already closed.",
+          "This is not a trivial cost. Speed is socially rewarded. Decisiveness is culturally admired. The person who says \"I need to think about this more carefully\" is rarely celebrated. They are tolerated, sometimes respected in retrospect, but in the moment they are experienced as an obstacle. The cost of being the person who sees more slowly but more accurately is that you will often be alone in the room with your uncertainty while everyone else has already moved on to execution.",
+          "The second cost is comfort. Once you begin to see the mechanisms described in this book — premature closure, borrowed certainty, emotion masquerading as understanding — you cannot unsee them. You will notice them in yourself, which is painful. You will notice them in people you love, which is worse. You will watch someone you care about build their life on an interpretation that has never been examined, and you will feel the weight of knowing that saying so will not help, because the person is not ready to hear it, and because the act of pointing it out will be experienced as aggression rather than care.",
+          "A man who has practised this discipline for two years describes it this way: the hardest part is not examining his own assumptions. That becomes a habit. The hardest part is sitting across from his wife at dinner while she describes a conflict at work through a single lens — her colleague is undermining her — and knowing that the reality is almost certainly more complex, that the colleague may be responding to something she cannot see from where she sits, and that the anger she feels, while valid as a signal, has already hardened into a verdict. He loves her. He wants to help. But helping, in the way SIV has taught him to understand that word, would require her to tolerate discomfort she has not consented to, and so he listens, and holds what he sees, and says nothing. The seeing is a kind of solitude.",
+          "The third cost is identity. Before you begin this work, you have beliefs. You have positions. You have a self-concept built on the assumption that your interpretations are roughly accurate. SIV dismantles this. Not violently. Methodically. One lens at a time, it exposes the scaffolding on which your identity rests and asks whether the scaffolding is load-bearing or decorative. The answer is often uncomfortable. The career you chose may have been chosen for borrowed reasons. The relationship you are in may be sustained by a narrative that has never been tested. The political positions you hold may be inherited furniture, never examined, never earned.",
+          "A woman in her early forties applied SIV to her marriage — not as an exercise, but because something felt wrong and she could not name it. Through multiple lenses, she discovered that what she had been calling love was closer to dependency, that what she had been calling partnership was closer to management, and that the version of herself she had built inside the marriage was a diminished version designed to keep the peace. The understanding was accurate. It was also devastating. She did not leave her husband. But the marriage she returned to was no longer the marriage she had believed she was in. The old comfort was gone. What replaced it was something harder and truer, but the transition cost her a year of grief for a life she had thought was real.",
+          "The fourth cost is the temptation to abandon the discipline. There will be moments — many of them — when the old way of operating looks attractive. When someone in your life makes a quick decision based on a single frame and it works out fine. When a colleague trusts their gut and lands the deal. When the world seems to reward exactly the kind of premature closure that SIV warns against. In those moments, the discipline will feel like a tax on living. You will wonder whether seeing more clearly is worth the slowness, the isolation, the weight of holding what you see.",
+          "The answer is not always obvious. The world does reward shallow certainty in the short term. It rewards confident leaders, decisive partners, people who know what they think without apparent hesitation. The payoff of SIV is not immediate. It is cumulative. It appears in the decisions that do not fail. In the relationships that deepen instead of corroding. In the health that is maintained because the signal was examined rather than dismissed. In the career that is built on genuine understanding rather than borrowed ambition. The payoff is measured not in what you gain but in what you do not lose.",
+          "There is a fifth cost, and it is perhaps the most difficult to articulate. It is the loss of a certain kind of innocence. Before you understand how the mind distorts, you can believe in your own interpretations without reservation. You can feel righteous in your anger, secure in your convictions, confident in your judgements. After SIV, you cannot. You will always carry a quiet suspicion that your first reading of any situation is incomplete. You will always feel the pull of the question you have not yet asked. You will never again experience the clean satisfaction of simple certainty, because you will know — from the inside, from having done the work — how often simple certainty is the mind's way of protecting itself from a reality it is not yet ready to face.",
+          "This is the paradox at the heart of the discipline. The more clearly you see, the less comfortable the seeing becomes. The reward is not comfort. It is contact. Contact with reality as it actually is, rather than as the mind would prefer it to be. And that contact, while rarely comfortable, is the only foundation strong enough to support a life that does not periodically collapse under the weight of its own illusions.",
+          "There are people who will read this chapter and decide the cost is too high. That is an honest response, and it deserves respect. Not everyone needs this discipline. Not every situation warrants it. There are domains of life where a quick interpretation is perfectly adequate, where the stakes are low enough that premature closure costs nothing of consequence. SIV was never intended for everything. It was intended for the things that matter enough to deserve honest examination.",
+          "But for those who stay — for those who accept the cost and continue the work — something else happens. Over time, the weight becomes familiar. The solitude becomes less lonely, because you begin to find others who carry it too. The discomfort of sustained inquiry becomes less a burden and more a signal that you are engaged with something real. The loss of simple certainty is replaced by something quieter and more durable: a confidence that is not in your conclusions, but in your process. A trust not in what you think, but in how you arrived at it.",
+          "And that, in the end, is what SIV offers. Not the comfort of knowing. The dignity of having looked.",
+          "The cost of seeing is real. But the cost of not seeing is higher, and you only discover how high when it is too late to look."
+        ]
+      },
+      {
+        num: '14',
+        title: 'The Discipline of Beginning Again',
+        time: '8 min',
+        content: [
+          "The method does not end. It begins again, each time with slightly less illusion.",
+          "There is a moment that every serious practitioner of this method eventually reaches. It is not the moment of mastery. It is the moment when you realise that mastery is not the point.",
+          "You have learned to see the first distortion. You have felt the pull of premature closure and resisted it. You have generated lenses, applied Socratic pressure, held contradictions in suspension long enough for something honest to emerge. You have done the work. And then, in the next situation — the next relationship, the next decision, the next crisis — you discover that none of what you learned transfers automatically. The mind does not stay trained. It reverts. The discipline of seeing is not a skill you acquire once. It is a practice you begin again every morning.",
+          "This is the part that no framework can prepare you for. Every method, including this one, carries an implicit promise: that if you understand the principles deeply enough, they will become permanent. That understanding will accumulate like capital, compounding over time until the effort of examination becomes effortless. It does not work that way. The mind's default setting — closure, simplification, borrowed certainty — is not a bug to be fixed. It is the architecture itself. You are not correcting a malfunction. You are working against the grain of how human cognition is built.",
+          "Every experienced doctor knows this. The tenth year of practice does not make diagnosis automatic. It makes the temptation of automatic diagnosis more dangerous, because confidence has accumulated faster than humility. Every seasoned leader knows it. The twentieth year of decision-making does not eliminate premature certainty. It makes premature certainty feel like earned wisdom. The pattern is universal: the better you become at something, the more convincingly your mind impersonates understanding.",
+          "The better you become at something, the more convincingly your mind impersonates understanding.",
+          "This is why the final chapter of a book about seeing must be about beginning again. Not because the earlier chapters were insufficient, but because sufficiency is the wrong frame. SIV is not a body of knowledge to be completed. It is a posture to be maintained. And postures require daily renewal.",
+          "Consider what happens in practice. You spend three weeks applying disciplined multi-lens examination to a strategic decision. You generate nine frames of reference. You stress-test each one. You hold the tension between competing interpretations until something integrated emerges. You act from that understanding, and the outcome is better than it would have been. You are satisfied. And then, two days later, your partner says something that triggers an old pattern, and within ninety seconds you have closed on an interpretation, assigned motive, and responded from a single frame. No lenses. No Socratic pressure. No iteration. The mind simply did what it does when the emotional stakes are high and the time pressure feels urgent.",
+          "This is not failure. This is the human condition. The question is not whether the mind will revert. It will. The question is what you do when you notice that it has.",
+          "The discipline of beginning again has three components, and none of them are glamorous.",
+          "The first is recognition. You must learn to notice when you have stopped seeing. This sounds obvious, but it is the hardest part. The mind does not announce its closures. It does not send a notification when it has settled on a premature interpretation. The closure feels like clarity. The single frame feels like understanding. You must develop a kind of peripheral awareness — a background signal that fires not when you are confused, but precisely when you feel most certain. Certainty, in the SIV framework, is not a destination. It is a trigger for re-examination.",
+          "The second is willingness. Even when you recognise that the mind has closed, there is a cost to reopening it. You must be willing to abandon the comfort of the interpretation you have already constructed. You must tolerate the discomfort of returning to ambiguity after you had already resolved it. This is harder than it sounds, because the mind experiences reopening as regression. It feels like you are going backwards. You are not. You are going deeper. But the feeling of regression is real, and it must be endured rather than argued away.",
+          "The third is gentleness. This may seem like an odd word in a book that has described its framework as brutal. But brutality in examination and gentleness toward the self are not contradictions. They are complements. If you punish yourself every time the mind reverts to its default, you will create an adversarial relationship with your own cognition. You will begin to fear your own thinking. The discipline becomes surveillance rather than inquiry, and surveillance produces rigidity, not clarity. The practitioner who begins again with gentleness is more durable than the one who begins again with self-recrimination.",
+          "Brutality in examination and gentleness toward the self are not contradictions. They are complements.",
+          "There is a deeper reason why beginning again matters, and it concerns the nature of reality itself. Reality is not static. The situation you examined last month is not the same situation today. The relationship you understood in January has shifted by April. The organisation you mapped in the first quarter has reorganised itself, formally or informally, by the third. Even if your understanding was perfect at the time — which it was not — it would still require renewal, because the thing being understood has changed.",
+          "This is the fundamental asymmetry that SIV confronts. Understanding is expensive. It requires effort, time, discomfort, and the willingness to hold complexity. But understanding is also perishable. It decays. Not because you forgot something, but because reality moved while your interpretation stayed still. The discipline of beginning again is not just about correcting the mind's tendency to close. It is about keeping pace with a reality that never stops changing.",
+          "A man examines his marriage with genuine rigour. He identifies the patterns, names the dynamics, sees his own contributions to the friction. He reaches a real understanding — hard-won, uncomfortable, honest. And then he acts from that understanding for the next three years without re-examining it. By the end of those three years, his understanding is a museum piece. Accurate once, irrelevant now. His partner has changed. He has changed. The dynamic has evolved. But his interpretation is frozen, and he is making decisions from a map that no longer matches the territory.",
+          "I want to be honest about my own relationship with this discipline. I do not practise it perfectly. I do not practise it consistently. There are days when I close on the first interpretation and act from it without examination. There are weeks when the pressure of building, leading, and simply living makes the work of multi-lens inquiry feel like an unaffordable luxury. There are relationships where my emotional investment makes genuine Socratic pressure almost impossible.",
+          "I say this not to undermine the method, but to honour it. A method that requires perfection is not a method. It is an aspiration. SIV is designed for imperfect practitioners operating under real constraints. Its value is not that it makes you see perfectly. Its value is that it gives you something to return to when you realise you have stopped seeing at all.",
+          "The most important sentence in this book may not be any of the principles or frameworks. It may be this: you will fail at this, and the failure is part of the practice.",
+          "Every contemplative tradition understands this. The meditator does not succeed by never losing focus. The meditator succeeds by noticing the loss and returning. The musician does not succeed by never playing a wrong note. The musician succeeds by hearing the wrong note and correcting without stopping. The discipline is not in the perfection. It is in the return.",
+          "SIV works the same way. You will close prematurely. You will borrow certainty. You will act from a single lens when the situation required nine. And then, if you have internalised even a fraction of what this book describes, you will notice. Not immediately. Not always gracefully. But you will notice. And in that noticing, you have already begun again.",
+          "There is one more thing I want to say, and it is about the relationship between this method and the people who matter to you.",
+          "The deepest application of SIV is not in strategy rooms or diagnostic frameworks. It is in the quiet moments when someone you care about says something that you think you understand, and you choose — deliberately, against the grain of your own cognition — to ask one more question before you respond. It is in the discipline of treating the people closest to you as realities that deserve the same rigorous examination you would give to a business decision or a medical diagnosis.",
+          "This is where most of us fail most consistently. We apply our sharpest thinking to professional problems and our laziest thinking to personal ones. We generate multiple lenses for a market analysis and operate from a single frame in our most important relationships. The mind does this because professional problems feel like puzzles to be solved, while personal relationships feel like territories already mapped. But they are not mapped. They are living, changing, evolving realities, and they deserve better than the mind's default setting.",
+          "If this book changes nothing else in how you operate, let it change this: the next time someone you love says something that triggers a familiar interpretation, pause. Not for long. Not dramatically. Just long enough to ask yourself whether your first reading is your only reading. Just long enough to generate one additional lens. Just long enough to wonder whether the story you are telling yourself about this person might be — even slightly — incomplete.",
+          "That pause is the entire method in a single gesture. Everything else is elaboration.",
+          "The method does not end with this book. It ends when you stop being willing to begin again. And if you are reading this sentence, you have not stopped yet."
+        ]
+      },
+      {
+        num: 'APPENDIX I',
+        title: 'The Canonical SIV Statement',
+        time: '1 min',
+        content: [
+          "SIV — Socratic Iterative Vinay — is a multi-lens, Socratic, iterative method for examining any important reality before action.",
+          "It uses dynamically generated lenses, disciplined pressure, and structured convergence to move from premature conviction toward earned understanding.",
+          "Its purpose is not to replace judgement but to strengthen it. SIV prepares understanding for execution through VIP; it does not confuse inquiry with action."
+        ]
+      },
+      {
+        num: 'APPENDIX II',
+        title: 'The Fixed SIV Warning',
+        time: '1 min',
+        content: [
+          "This system is designed only for those willing to think honestly, examine their own assumptions critically, and confront their biases and blind spots. If you are unwilling to do that, exit now."
+        ]
+      },
+      {
+        num: 'APPENDIX III',
+        title: 'Compact Doctrine',
+        time: '2 min',
+        content: [
+          "1. Frame the issue in two sentences.",
+          "2. Generate lenses fresh from the issue.",
+          "3. Give each lens a formal, self-explanatory name.",
+          "4. Explore lenses one by one.",
+          "5. Challenge every assumption rigorously.",
+          "6. Prefer surprising lenses often enough to disrupt complacency.",
+          "7. Weigh lenses qualitatively first, numerically only when useful.",
+          "8. Converge toward one best integrated understanding.",
+          "9. End with confidence, uncertainty, and readiness for VIP.",
+          "10. Never mistake inquiry for execution."
+        ]
+      }
+    ];
+
+    const ColorScheme = {
+      background: '#FAF7F2',
+      card: '#FFFFFF',
+      text: '#2C2416',
+      textMedium: '#5C4A32',
+      textLight: '#9C8B72',
+      textFaint: '#C4B59E',
+      accent: '#8B6914',
+      accentLight: '#B8942A',
+      accentSoft: '#F0E5C7',
+      lines: 'rgba(139,105,20,0.12)'
+    };
+
+    const fonts = {
+      serif: '"Georgia", serif',
+      system: 'system-ui, -apple-system, sans-serif'
+    };
+
+    const StyleInjector = () => {
+      useEffect(() => {
+        if (document.getElementById('siv-styles')) return;
+        const style = document.createElement('style');
+        style.id = 'siv-styles';
+        style.textContent = `
+          @keyframes sivFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes sivSlideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+          }
+        `;
+        document.head.appendChild(style);
+        return () => { const el = document.getElementById('siv-styles'); if (el) el.remove(); };
+      }, []);
+      return null;
+    };
+
+    const NetworkBackground = () => {
+      const canvasRef = useRef(null);
+      const nodesRef = useRef([]);
+      const animationRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        if (nodesRef.current.length === 0) {
+          for (let i = 0; i < 25; i++) {
+            nodesRef.current.push({
+              x: Math.random() * canvas.width,
+              y: Math.random() * canvas.height,
+              vx: (Math.random() - 0.5) * 0.3,
+              vy: (Math.random() - 0.5) * 0.3,
+              radius: Math.random() * 2 + 1
+            });
+          }
+        }
+
+        const animate = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = ColorScheme.lines;
+          nodesRef.current.forEach(node => {
+            node.x += node.vx;
+            node.y += node.vy;
+            if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+            if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+            ctx.fill();
+          });
+          for (let i = 0; i < nodesRef.current.length; i++) {
+            for (let j = i + 1; j < nodesRef.current.length; j++) {
+              const dx = nodesRef.current[i].x - nodesRef.current[j].x;
+              const dy = nodesRef.current[i].y - nodesRef.current[j].y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+              if (dist < 150) {
+                ctx.strokeStyle = `rgba(139,105,20,${0.1 * (1 - dist / 150)})`;
+                ctx.beginPath();
+                ctx.moveTo(nodesRef.current[i].x, nodesRef.current[i].y);
+                ctx.lineTo(nodesRef.current[j].x, nodesRef.current[j].y);
+                ctx.stroke();
+              }
+            }
+          }
+          animationRef.current = requestAnimationFrame(animate);
+        };
+
+        animate();
+        const handleResize = () => {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+          window.removeEventListener('resize', handleResize);
+          cancelAnimationFrame(animationRef.current);
+        };
+      }, []);
+
+      return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, zIndex: 0, opacity: 0.5, pointerEvents: 'none' }} />;
+    };
+
+    const FadeInSection = ({ children }) => {
+      const [isVisible, setIsVisible] = useState(false);
+      const ref = useRef(null);
+      useEffect(() => {
+        const observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setIsVisible(true);
+              observer.unobserve(entry.target);
+            }
+          },
+          { threshold: 0.1 }
+        );
+        if (ref.current) observer.observe(ref.current);
+        return () => observer.disconnect();
+      }, []);
+      return (
+        <div
+          ref={ref}
+          style={{
+            opacity: isVisible ? 1 : 0,
+            transform: `translateY(${isVisible ? 0 : 20}px)`,
+            transition: 'all 0.8s ease-out'
+          }}
+        >
+          {children}
+        </div>
+      );
+    };
+
+    const LensDiagram = () => {
+      return (
+        <svg viewBox="0 0 400 400" style={{ width: '100%', maxWidth: '320px', margin: '0 auto', display: 'block' }}>
+          <defs>
+            <marker id="lensArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+              <polygon points="0 0, 10 5, 0 10" fill={ColorScheme.accent} />
+            </marker>
+          </defs>
+          <circle cx="80" cy="200" r="38" fill={ColorScheme.accent} />
+          <text x="80" y="195" textAnchor="middle" fontSize="11" fill={ColorScheme.card} fontWeight="700" fontFamily={fonts.serif}>ISSUE</text>
+          <text x="80" y="210" textAnchor="middle" fontSize="9" fill={ColorScheme.card} fontFamily={fonts.serif}>(2 sentences)</text>
+
+          <circle cx="220" cy="80" r="28" fill={ColorScheme.accentSoft} stroke={ColorScheme.accent} strokeWidth="2" />
+          <text x="220" y="84" textAnchor="middle" fontSize="11" fill={ColorScheme.text} fontWeight="600" fontFamily={fonts.serif}>Lens 1</text>
+          <circle cx="240" cy="200" r="28" fill={ColorScheme.accentSoft} stroke={ColorScheme.accent} strokeWidth="2" />
+          <text x="240" y="204" textAnchor="middle" fontSize="11" fill={ColorScheme.text} fontWeight="600" fontFamily={fonts.serif}>Lens 2</text>
+          <circle cx="220" cy="320" r="28" fill={ColorScheme.accentSoft} stroke={ColorScheme.accent} strokeWidth="2" />
+          <text x="220" y="324" textAnchor="middle" fontSize="11" fill={ColorScheme.text} fontWeight="600" fontFamily={fonts.serif}>Lens N</text>
+
+          <line x1="115" y1="180" x2="195" y2="100" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#lensArrow)" />
+          <line x1="120" y1="200" x2="210" y2="200" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#lensArrow)" />
+          <line x1="115" y1="220" x2="195" y2="300" stroke={ColorScheme.accent} strokeWidth="1.5" markerEnd="url(#lensArrow)" />
+
+          <line x1="248" y1="80" x2="320" y2="170" stroke={ColorScheme.accent} strokeWidth="1.5" strokeDasharray="4 3" />
+          <line x1="270" y1="200" x2="320" y2="200" stroke={ColorScheme.accent} strokeWidth="1.5" strokeDasharray="4 3" />
+          <line x1="248" y1="320" x2="320" y2="230" stroke={ColorScheme.accent} strokeWidth="1.5" strokeDasharray="4 3" />
+
+          <rect x="320" y="170" width="70" height="60" fill={ColorScheme.accent} rx="4" />
+          <text x="355" y="195" textAnchor="middle" fontSize="11" fill={ColorScheme.card} fontWeight="700" fontFamily={fonts.serif}>EARNED</text>
+          <text x="355" y="210" textAnchor="middle" fontSize="11" fill={ColorScheme.card} fontWeight="700" fontFamily={fonts.serif}>UNDER-</text>
+          <text x="355" y="225" textAnchor="middle" fontSize="11" fill={ColorScheme.card} fontWeight="700" fontFamily={fonts.serif}>STANDING</text>
+        </svg>
+      );
+    };
+
+    const FlowFormula = () => {
+      const block = (label, sub, dark = false) => (
+        <div style={{
+          padding: '20px 28px',
+          backgroundColor: dark ? ColorScheme.accent : ColorScheme.accentSoft,
+          borderRadius: '4px',
+          textAlign: 'center',
+          flex: '0 1 auto',
+          minWidth: '180px'
+        }}>
+          <div style={{ fontSize: '11px', color: dark ? ColorScheme.card : ColorScheme.text, fontFamily: fonts.system, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+            {label}
+          </div>
+          <div style={{ fontSize: '15px', fontWeight: '600', color: dark ? ColorScheme.card : ColorScheme.text, fontFamily: fonts.serif, marginTop: '4px' }}>
+            {sub}
+          </div>
+        </div>
+      );
+      const op = (s) => <div style={{ fontSize: '24px', color: ColorScheme.accent, fontFamily: fonts.serif }}>{s}</div>;
+      return (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', padding: '40px 20px' }}>
+          {block('Multiple', 'Lenses')}
+          {op('+')}
+          {block('Socratic', 'Pressure')}
+          {op('+')}
+          {block('Iterative', 'Convergence')}
+          {op('=')}
+          {block('Earned', 'Understanding', true)}
+        </div>
+      );
+    };
+
+    const HomePage = ({ onStartReading }) => {
+      return (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <section style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '40px 20px',
+            textAlign: 'center'
+          }}>
+            <FadeInSection>
+              <div style={{ fontSize: '13px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '3px', textTransform: 'uppercase', marginBottom: '20px', fontWeight: '600' }}>
+                The Book
+              </div>
+              <h1 style={{ fontSize: '64px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.text, margin: '0 0 16px 0', lineHeight: '1.1', letterSpacing: '-1px' }}>
+                The SIV Method
+              </h1>
+              <div style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px',
+                margin: '0 0 28px 0'
+              }}>
+                <div style={{ width: '50px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                <div style={{ fontSize: '20px', color: ColorScheme.accent, fontFamily: fonts.serif }}>◆</div>
+                <div style={{ width: '50px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+              </div>
+              <h2 style={{ fontSize: '24px', fontFamily: fonts.serif, fontWeight: '400', color: ColorScheme.accent, margin: '0 0 40px 0', fontStyle: 'italic' }}>
+                A Brutal Framework for Understanding Reality Before Execution
+              </h2>
+              <p style={{ fontSize: '18px', fontFamily: fonts.serif, color: ColorScheme.textMedium, margin: '0 0 16px 0', maxWidth: '620px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.6' }}>
+                Socratic. Iterative. Vinay.
+              </p>
+              <p style={{ fontSize: '16px', fontFamily: fonts.serif, color: ColorScheme.textLight, margin: '0 0 50px 0', maxWidth: '620px', marginLeft: 'auto', marginRight: 'auto', lineHeight: '1.7' }}>
+                A method for examining any important reality through multiple dynamically generated lenses, applying disciplined pressure to every claim, and converging toward one integrated understanding strong enough to support action.
+              </p>
+              <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button onClick={() => onStartReading(0)} style={{
+                  padding: '14px 40px', backgroundColor: ColorScheme.accent, color: ColorScheme.card,
+                  border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '16px',
+                  fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentLight; }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accent; }}
+                >
+                  Read the Book
+                </button>
+                <button style={{
+                  padding: '14px 40px', backgroundColor: 'transparent', color: ColorScheme.accent,
+                  border: `2px solid ${ColorScheme.accent}`, borderRadius: '2px',
+                  fontFamily: fonts.serif, fontSize: '16px', fontWeight: '600', cursor: 'pointer',
+                  transition: 'all 0.3s ease', letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = 'transparent'; }}
+                onClick={() => document.getElementById('chapters-section').scrollIntoView({ behavior: 'smooth' })}
+                >
+                  Browse Chapters
+                </button>
+              </div>
+              <div style={{ marginTop: '60px', fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.textLight, fontStyle: 'italic' }}>
+                For those who prefer reality to comfort.
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>
+                  The Premise
+                </div>
+                <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '30px', textAlign: 'center' }}>
+                  Most failure begins in misunderstanding
+                </h2>
+                <p style={{ fontSize: '18px', fontFamily: fonts.serif, color: ColorScheme.textMedium, lineHeight: '1.85', textAlign: 'left' }}>
+                  People act too soon because they think they understand. They decide too early because uncertainty irritates them. They label reality before they have seen enough of it, then mistake conviction for truth, speed for clarity, and familiarity for understanding. Then they call the result judgement.
+                </p>
+                <p style={{ fontSize: '18px', fontFamily: fonts.serif, color: ColorScheme.textMedium, lineHeight: '1.85', textAlign: 'left', marginTop: '20px' }}>
+                  This is not mainly a moral defect. It is a structural limitation. SIV is a method for making that gap visible earlier — before the cost of acting on it becomes undeniable.
+                </p>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '20px', fontWeight: '600' }}>
+                  Core Proposition
+                </div>
+                <blockquote style={{
+                  fontSize: '32px', fontFamily: fonts.serif, fontWeight: '600',
+                  color: ColorScheme.text, lineHeight: '1.4', margin: '0 auto', maxWidth: '780px',
+                  fontStyle: 'italic', borderLeft: 'none', padding: 0
+                }}>
+                  "Before power is applied, reality must be examined hard enough to deserve action."
+                </blockquote>
+                <div style={{ marginTop: '24px', fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.textLight, letterSpacing: '1px' }}>
+                  — The SIV Method
+                </div>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>
+                The Engine
+              </div>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '20px', textAlign: 'center' }}>
+                How SIV Works
+              </h2>
+              <FlowFormula />
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '60px', textAlign: 'center' }}>
+                Three Doctrines
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '40px', maxWidth: '1000px', margin: '0 auto' }}>
+                {[
+                  { title: 'Multi-Lens Inquiry', text: 'No important reality can be understood from a single angle. Each lens reveals what the others conceal.' },
+                  { title: 'Socratic Pressure', text: 'Confidence is not evidence. Coherence is not truth. Every claim must survive contradiction.' },
+                  { title: 'Earned Convergence', text: 'The product is one integrated understanding — not plurality, not summary, but reassembly.' }
+                ].map((claim, i) => (
+                  <div key={i} style={{
+                    padding: '40px', backgroundColor: ColorScheme.background,
+                    borderLeft: `4px solid ${ColorScheme.accent}`, borderRadius: '2px'
+                  }}>
+                    <h3 style={{ fontSize: '18px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.accent, marginTop: 0, marginBottom: '12px', letterSpacing: '0.3px' }}>
+                      {claim.title}
+                    </h3>
+                    <p style={{ fontSize: '16px', fontFamily: fonts.serif, color: ColorScheme.text, lineHeight: '1.7', margin: 0 }}>
+                      {claim.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '40px', textAlign: 'center' }}>
+                The Vinay Lens
+              </h2>
+              <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+                <LensDiagram />
+              </div>
+              <p style={{ fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.textLight, textAlign: 'center', marginTop: '40px', maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto', fontStyle: 'italic' }}>
+                Issue → Multiple lenses (formal, self-explanatory, case-generated, directional) → Socratic pressure → Earned understanding
+              </p>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '60px', textAlign: 'center' }}>
+                The Distortions
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+                {[
+                  'The First Distortion',
+                  'The Mind Wants Relief',
+                  'Premature Closure',
+                  'Borrowed Certainty',
+                  'Emotion as Verdict',
+                  'The Single-Lens Trap'
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    padding: '24px', backgroundColor: ColorScheme.accentSoft,
+                    borderRadius: '2px', textAlign: 'center', fontSize: '15px',
+                    fontFamily: fonts.serif, color: ColorScheme.text, fontWeight: '600'
+                  }}>
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section id="chapters-section" style={{ padding: '80px 40px', backgroundColor: ColorScheme.background }}>
+            <FadeInSection>
+              <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', textAlign: 'center', marginBottom: '20px', fontWeight: '600' }}>
+                Contents
+              </div>
+              <h2 style={{ fontSize: '36px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '60px', textAlign: 'center' }}>
+                Chapter Map
+              </h2>
+              <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+                {CHAPTERS.map((ch, i) => (
+                  <button
+                    key={i}
+                    onClick={() => onStartReading(i)}
+                    style={{
+                      padding: '20px', backgroundColor: ColorScheme.card,
+                      border: `1px solid ${ColorScheme.lines}`, borderRadius: '2px',
+                      cursor: 'pointer', textAlign: 'left', transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = ColorScheme.accentSoft;
+                      e.currentTarget.style.borderColor = ColorScheme.accent;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = ColorScheme.card;
+                      e.currentTarget.style.borderColor = ColorScheme.lines;
+                    }}
+                  >
+                    <div style={{ fontSize: '11px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '6px', fontWeight: '700' }}>
+                      {ch.num}
+                    </div>
+                    <div style={{ fontSize: '16px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text, marginBottom: '8px', lineHeight: '1.3' }}>
+                      {ch.title}
+                    </div>
+                    <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.textLight }}>
+                      {ch.time}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '80px 40px', backgroundColor: ColorScheme.card }}>
+            <FadeInSection>
+              <div style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
+                <p style={{ fontSize: '20px', fontFamily: fonts.serif, color: ColorScheme.text, lineHeight: '1.8', marginBottom: '40px', fontStyle: 'italic' }}>
+                  This system is designed only for those willing to think honestly, examine their own assumptions critically, and confront their biases and blind spots. If you are unwilling, exit now.
+                </p>
+                <button onClick={() => onStartReading(0)} style={{
+                  padding: '14px 40px', backgroundColor: ColorScheme.accent, color: ColorScheme.card,
+                  border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '16px',
+                  fontWeight: '600', cursor: 'pointer', transition: 'all 0.3s ease', letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => { e.target.style.backgroundColor = ColorScheme.accentLight; }}
+                onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accent; }}
+                >
+                  Begin Reading
+                </button>
+              </div>
+            </FadeInSection>
+          </section>
+
+          <section style={{ padding: '40px 20px', backgroundColor: ColorScheme.accent, textAlign: 'center', borderTop: `1px solid ${ColorScheme.lines}` }}>
+            <p style={{ fontSize: '14px', fontFamily: fonts.serif, color: ColorScheme.card, margin: '0 0 8px 0' }}>
+              The SIV Method · Socratic Iterative Vinay
+            </p>
+            <p style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.card, opacity: 0.8, margin: 0 }}>
+              By Vinay Pasricha · First edition, 2026
+            </p>
+          </section>
+        </div>
+      );
+    };
+
+    const ReaderPage = ({ onBack, initialChapter = 0 }) => {
+      const [currentChapterIndex, setCurrentChapterIndex] = useState(initialChapter);
+      const [currentPage, setCurrentPage] = useState(0);
+      const [showChapterMenu, setShowChapterMenu] = useState(false);
+
+      const chapter = CHAPTERS[currentChapterIndex];
+      const paragraphs = chapter.content;
+
+      useEffect(() => {
+        if (window.trackEvent) {
+          window.trackEvent('chapter_started', {
+            book: 'siv_method',
+            chapter_num: chapter.num,
+            chapter_title: chapter.title,
+            chapter_index: currentChapterIndex
+          });
+        }
+      }, [currentChapterIndex]);
+
+      const PARA_PER_PAGE = 4;
+      const totalPages = Math.max(1, Math.ceil(paragraphs.length / PARA_PER_PAGE));
+      const startPara = currentPage * PARA_PER_PAGE;
+      const endPara = Math.min(startPara + PARA_PER_PAGE, paragraphs.length);
+      const currentParagraphs = paragraphs.slice(startPara, endPara);
+
+      const goToNext = () => {
+        if (currentPage < totalPages - 1) {
+          setCurrentPage(currentPage + 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (currentChapterIndex < CHAPTERS.length - 1) {
+          setCurrentChapterIndex(currentChapterIndex + 1);
+          setCurrentPage(0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      const goToPrev = () => {
+        if (currentPage > 0) {
+          setCurrentPage(currentPage - 1);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (currentChapterIndex > 0) {
+          const prev = CHAPTERS[currentChapterIndex - 1];
+          setCurrentChapterIndex(currentChapterIndex - 1);
+          setCurrentPage(Math.max(0, Math.ceil(prev.content.length / PARA_PER_PAGE) - 1));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      };
+
+      const handleKeydown = useCallback((e) => {
+        if (e.key === 'ArrowRight') goToNext();
+        if (e.key === 'ArrowLeft') goToPrev();
+      }, [currentPage, currentChapterIndex]);
+
+      useEffect(() => {
+        window.addEventListener('keydown', handleKeydown);
+        return () => window.removeEventListener('keydown', handleKeydown);
+      }, [handleKeydown]);
+
+      const totalParas = CHAPTERS.reduce((sum, ch) => sum + ch.content.length, 0);
+      const parasBeforeCurrentChapter = CHAPTERS.slice(0, currentChapterIndex).reduce((sum, ch) => sum + ch.content.length, 0);
+      const parasRead = parasBeforeCurrentChapter + Math.min((currentPage + 1) * PARA_PER_PAGE, paragraphs.length);
+      const progress = (parasRead / totalParas) * 100;
+
+      return (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0,
+            backgroundColor: ColorScheme.card, borderBottom: `1px solid ${ColorScheme.lines}`,
+            padding: '16px 20px', display: 'flex', justifyContent: 'space-between',
+            alignItems: 'center', zIndex: 100
+          }}>
+            <button onClick={onBack} style={{
+              background: 'none', border: 'none', color: ColorScheme.accent,
+              fontFamily: fonts.serif, fontSize: '14px', cursor: 'pointer', fontWeight: '600'
+            }}>
+              ← Home
+            </button>
+            <div style={{ textAlign: 'center', flex: 1, padding: '0 12px' }}>
+              <div style={{ fontSize: '11px', fontFamily: fonts.system, color: ColorScheme.textLight, textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600' }}>
+                {chapter.num}
+              </div>
+              <div style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text }}>
+                {chapter.title}
+              </div>
+            </div>
+            <div style={{ position: 'relative' }}>
+              <button onClick={() => setShowChapterMenu(!showChapterMenu)} style={{
+                background: 'none', border: 'none', color: ColorScheme.accent,
+                fontFamily: fonts.serif, fontSize: '14px', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '4px', fontWeight: '600'
+              }}>
+                Chapters ▾
+              </button>
+              {showChapterMenu && (
+                <div style={{
+                  position: 'absolute', top: '100%', right: 0,
+                  backgroundColor: ColorScheme.card, border: `1px solid ${ColorScheme.lines}`,
+                  borderRadius: '2px', maxHeight: '400px', overflowY: 'auto',
+                  zIndex: 200, minWidth: '280px', marginTop: '8px',
+                  boxShadow: '0 8px 24px rgba(44,36,22,0.12)'
+                }}>
+                  {CHAPTERS.map((ch, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        setCurrentChapterIndex(i);
+                        setCurrentPage(0);
+                        setShowChapterMenu(false);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      style={{
+                        width: '100%', padding: '12px 16px', textAlign: 'left',
+                        border: 'none',
+                        background: i === currentChapterIndex ? ColorScheme.accentSoft : 'transparent',
+                        cursor: 'pointer', borderBottom: `1px solid ${ColorScheme.lines}`,
+                        fontFamily: fonts.serif, fontSize: '13px', color: ColorScheme.text,
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => { if (i !== currentChapterIndex) e.target.style.backgroundColor = ColorScheme.background; }}
+                      onMouseLeave={(e) => { if (i !== currentChapterIndex) e.target.style.backgroundColor = 'transparent'; }}
+                    >
+                      <div style={{ fontSize: '10px', color: ColorScheme.accent, marginBottom: '3px', letterSpacing: '0.8px', fontWeight: '700' }}>
+                        {ch.num}
+                      </div>
+                      <div style={{ fontWeight: '600', lineHeight: '1.3' }}>
+                        {ch.title}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div style={{
+            position: 'fixed', top: '70px', left: 0, right: 0, height: '2px',
+            backgroundColor: ColorScheme.lines, zIndex: 99
+          }}>
+            <div style={{
+              height: '100%', backgroundColor: ColorScheme.accent,
+              width: `${progress}%`, transition: 'width 0.3s ease'
+            }} />
+          </div>
+
+          <div style={{
+            maxWidth: '700px', margin: '0 auto',
+            padding: '100px 40px 40px 40px', minHeight: '100vh'
+          }}>
+            {currentPage === 0 && (
+              <div style={{ marginBottom: '60px' }}>
+                <div style={{ fontSize: '12px', fontFamily: fonts.system, color: ColorScheme.accent, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '16px', fontWeight: '700' }}>
+                  {chapter.num}
+                </div>
+                <h1 style={{
+                  fontSize: '44px', fontFamily: fonts.serif, fontWeight: '700',
+                  color: ColorScheme.text, margin: 0, lineHeight: '1.2', letterSpacing: '-0.5px'
+                }}>
+                  {chapter.title}
+                </h1>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '12px',
+                  margin: '24px 0 0 0'
+                }}>
+                  <div style={{ width: '40px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                  <div style={{ fontSize: '14px', color: ColorScheme.accent, fontFamily: fonts.serif }}>◆</div>
+                  <div style={{ width: '40px', height: '1px', background: ColorScheme.accent, opacity: 0.5 }} />
+                </div>
+                <div style={{ fontSize: '13px', fontFamily: fonts.system, color: ColorScheme.textLight, marginTop: '20px', letterSpacing: '0.5px' }}>
+                  {chapter.time} read
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: '60px' }}>
+              {currentParagraphs.map((para, i) => {
+                const isFirstParaOfChapter = currentPage === 0 && i === 0;
+                const isPullQuote = para.length < 110 && para.length > 10 && !para.endsWith(':') && !/^\d+\./.test(para);
+                const isHeading = /^[A-Z][A-Z\s]+$/.test(para.trim()) && para.length < 50;
+                const firstLetter = isFirstParaOfChapter && !isPullQuote && !isHeading ? para.charAt(0) : null;
+                const restOfPara = isFirstParaOfChapter && !isPullQuote && !isHeading ? para.slice(1) : para;
+
+                if (isHeading) {
+                  return (
+                    <h3
+                      key={i}
+                      style={{
+                        fontSize: '14px', fontFamily: fonts.system, fontWeight: '700',
+                        color: ColorScheme.accent, letterSpacing: '2px',
+                        margin: '40px 0 20px 0', textTransform: 'uppercase',
+                        animation: `sivFadeIn 0.5s ease ${i * 0.1}s both`
+                      }}
+                    >
+                      {para}
+                    </h3>
+                  );
+                }
+
+                if (isPullQuote) {
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        borderLeft: `4px solid ${ColorScheme.accent}`,
+                        padding: '16px 0 16px 24px',
+                        margin: '32px 0',
+                        backgroundColor: ColorScheme.accentSoft,
+                        paddingRight: '20px',
+                        borderRadius: '0 2px 2px 0',
+                        animation: `sivFadeIn 0.5s ease ${i * 0.15}s both`
+                      }}
+                    >
+                      <p style={{
+                        fontSize: '20px', fontFamily: fonts.serif, fontWeight: '600',
+                        color: ColorScheme.text, lineHeight: '1.5', margin: 0, fontStyle: 'italic'
+                      }}>
+                        {para}
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <p
+                    key={i}
+                    style={{
+                      fontSize: '17px', fontFamily: fonts.serif, color: ColorScheme.text,
+                      lineHeight: '1.85', margin: 0, paddingBottom: '24px',
+                      animation: `sivFadeIn 0.5s ease ${i * 0.15}s both`
+                    }}
+                  >
+                    {isFirstParaOfChapter && firstLetter && (
+                      <span style={{
+                        float: 'left', fontSize: '64px', lineHeight: '50px',
+                        fontWeight: '700', color: ColorScheme.accent, fontFamily: fonts.serif,
+                        marginRight: '8px', marginTop: '6px'
+                      }}>
+                        {firstLetter}
+                      </span>
+                    )}
+                    {isFirstParaOfChapter && firstLetter ? restOfPara : para}
+                  </p>
+                );
+              })}
+            </div>
+
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              padding: '30px 0', borderTop: `1px solid ${ColorScheme.lines}`, gap: '16px', flexWrap: 'wrap'
+            }}>
+              <button onClick={goToPrev} disabled={currentChapterIndex === 0 && currentPage === 0} style={{
+                padding: '10px 20px', backgroundColor: ColorScheme.accentSoft, color: ColorScheme.text,
+                border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '14px',
+                cursor: currentChapterIndex === 0 && currentPage === 0 ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                opacity: currentChapterIndex === 0 && currentPage === 0 ? 0.3 : 1,
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => { if (!(currentChapterIndex === 0 && currentPage === 0)) { e.target.style.backgroundColor = ColorScheme.accent; e.target.style.color = ColorScheme.card; } }}
+              onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; e.target.style.color = ColorScheme.text; }}
+              >
+                ← Previous
+              </button>
+
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                {Array.from({ length: totalPages }).map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => { setCurrentPage(i); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    style={{
+                      width: '8px', height: '8px', borderRadius: '50%',
+                      backgroundColor: i === currentPage ? ColorScheme.accent : ColorScheme.lines,
+                      border: 'none', cursor: 'pointer', transition: 'all 0.3s ease', padding: 0
+                    }}
+                  />
+                ))}
+              </div>
+
+              <button onClick={goToNext} disabled={currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1} style={{
+                padding: '10px 20px', backgroundColor: ColorScheme.accentSoft, color: ColorScheme.text,
+                border: 'none', borderRadius: '2px', fontFamily: fonts.serif, fontSize: '14px',
+                cursor: currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1 ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', gap: '8px',
+                opacity: currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1 ? 0.3 : 1,
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => { if (!(currentChapterIndex === CHAPTERS.length - 1 && currentPage === totalPages - 1)) { e.target.style.backgroundColor = ColorScheme.accent; e.target.style.color = ColorScheme.card; } }}
+              onMouseLeave={(e) => { e.target.style.backgroundColor = ColorScheme.accentSoft; e.target.style.color = ColorScheme.text; }}
+              >
+                Next →
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const TopNav = ({ mode, onNavigate }) => {
+      if (mode !== 'home') return null;
+      return (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0,
+          backgroundColor: ColorScheme.card, borderBottom: `1px solid ${ColorScheme.lines}`,
+          padding: '16px 40px', display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', zIndex: 50
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <a href="siv-method-book.html" style={{
+              color: ColorScheme.textMedium, textDecoration: 'none',
+              fontFamily: fonts.serif, fontSize: '13px', fontWeight: '500',
+              marginRight: '6px'
+            }}>← Site</a>
+            <div style={{
+              width: '32px', height: '32px', borderRadius: '50%',
+              background: `linear-gradient(135deg, ${ColorScheme.accentLight}, ${ColorScheme.accent})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              <span style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '700', color: ColorScheme.card, letterSpacing: '-0.5px' }}>SIV</span>
+            </div>
+            <div style={{ fontSize: '14px', fontFamily: fonts.serif, fontWeight: '600', color: ColorScheme.text }}>
+              The SIV Method
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '30px', fontSize: '14px', fontFamily: fonts.serif }}>
+            <button onClick={() => onNavigate('home')} style={{
+              background: 'none', border: 'none', color: ColorScheme.text,
+              cursor: 'pointer', fontWeight: '500', transition: 'color 0.3s ease'
+            }}
+            onMouseEnter={(e) => { e.target.style.color = ColorScheme.accent; }}
+            onMouseLeave={(e) => { e.target.style.color = ColorScheme.text; }}
+            >
+              Home
+            </button>
+            <button onClick={() => onNavigate('read')} style={{
+              background: 'none', border: 'none', color: ColorScheme.accent,
+              cursor: 'pointer', fontWeight: '600'
+            }}>
+              Read
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    function SivApp() {
+      const [mode, setMode] = useState('home');
+      const [startChapter, setStartChapter] = useState(0);
+
+      const handleStartReading = (chapterIndex) => {
+        setStartChapter(typeof chapterIndex === 'number' ? chapterIndex : 0);
+        setMode('read');
+      };
+
+      useEffect(() => {
+        const loader = document.getElementById('siv-loading');
+        if (loader) loader.remove();
+        const link = document.getElementById('back-to-site');
+        if (link) link.style.display = mode === 'read' ? 'block' : 'none';
+      }, [mode]);
+
+      return (
+        <div style={{
+          backgroundColor: ColorScheme.background, color: ColorScheme.text,
+          fontFamily: fonts.serif, minHeight: '100vh'
+        }}>
+          <StyleInjector />
+          <NetworkBackground />
+          <TopNav mode={mode} onNavigate={setMode} />
+          {mode === 'home' ? (
+            <HomePage onStartReading={handleStartReading} />
+          ) : (
+            <ReaderPage onBack={() => setMode('home')} initialChapter={startChapter} />
+          )}
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<SivApp />);
+  </script>
+</body>
+</html>
