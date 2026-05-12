@@ -792,18 +792,22 @@
     .page[data-pos="recto"] .running-head { right: 52px; }
     .page[data-pos="single"] .running-head { left: 50%; transform: translateX(-50%); }
 
-    /* Cover page — uses the actual book cover image */
-    .page.cover {
+    /* Cover pages — share the wraparound image, sliced into back (left half) + front (right half) */
+    .page.cover, .page.outer-back {
       background: #1a1208;
       background-image: none;
       padding: 0;
       overflow: hidden;
     }
-    .page.cover .cover-img {
+    .page.cover .cover-img-wrap,
+    .page.outer-back .cover-img-wrap {
       width: 100%; height: 100%;
-      object-fit: cover;
+      background-size: 200% 100%;
+      background-repeat: no-repeat;
       display: block;
     }
+    .page.outer-back .cover-img-wrap { background-position: left center; }
+    .page.cover .cover-img-wrap { background-position: right center; }
     /* Back of cover (inside-cover) */
     .page.cover-back {
       background: #1a1208;
@@ -1188,15 +1192,69 @@
   </article>
 
   <script src="book-read-content.js"></script>
+  <script src="siv-method-content.js"></script>
+  <script src="execution-doctrine-content.js"></script>
   <script>
     (function () {
-      const CHAPTERS = window.AI_BOOK_CHAPTERS || [];
-      const BOOK_META = {
-        imprint: 'The Company Brain Series',
-        title: 'AI For Business Leaders',
-        subtitle: 'A Practical Guide to AI Strategy, Operations, and Governance',
-        author: 'Vinay Pasricha'
+      const BOOKS = {
+        ai: {
+          chapters: window.AI_BOOK_CHAPTERS || [],
+          meta: {
+            imprint: 'The Company Brain Series',
+            title: 'AI For Business Leaders',
+            subtitle: 'A Practical Guide to AI Strategy, Operations, and Governance',
+            author: 'Vinay Pasricha',
+            cover: '../assets/images/ai-for-business-leaders-cover-wrap.jpg'
+          },
+          docTitle: 'Read: AI For Business Leaders — Vinay Pasricha',
+          metaDescription: 'Read AI For Business Leaders as a flipbook. By Vinay Pasricha.',
+          backHref: 'book.html'
+        },
+        siv: {
+          chapters: window.SIV_BOOK_CHAPTERS || [],
+          meta: {
+            imprint: 'The SIV Method',
+            title: 'The SIV Method',
+            subtitle: 'Socratic Iterative Vinay — a discipline for examining reality before acting on it',
+            author: 'Vinay Pasricha',
+            cover: '../assets/images/siv-method-cover-wrap.jpg'
+          },
+          docTitle: 'Read: The SIV Method — Vinay Pasricha',
+          metaDescription: 'Read The SIV Method as a flipbook. By Vinay Pasricha.',
+          backHref: 'siv-method-book.html'
+        },
+        execution: {
+          chapters: window.EXEC_BOOK_CHAPTERS || [],
+          meta: {
+            imprint: 'The Execution Doctrine',
+            title: 'Execution Doctrine',
+            subtitle: 'A field manual for turning intention into built reality',
+            author: 'Vinay Pasricha',
+            cover: '../assets/images/execution-doctrine-cover-wrap.jpg'
+          },
+          docTitle: 'Read: Execution Doctrine — Vinay Pasricha',
+          metaDescription: 'Read Execution Doctrine as a flipbook. By Vinay Pasricha.',
+          backHref: 'execution-doctrine-book.html'
+        }
       };
+
+      const params = new URLSearchParams(window.location.search);
+      const requested = (params.get('book') || 'ai').toLowerCase();
+      const active = BOOKS[requested] ? requested : 'ai';
+      const BOOK = BOOKS[active];
+      const CHAPTERS = BOOK.chapters;
+      const BOOK_META = BOOK.meta;
+
+      // Apply per-book head + chrome
+      document.title = BOOK.docTitle;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', BOOK.metaDescription);
+      const toolbarTitleEl = document.getElementById('toolbar-title');
+      if (toolbarTitleEl) toolbarTitleEl.textContent = BOOK_META.title;
+      const seoH1 = document.querySelector('#seo-content h1');
+      if (seoH1) seoH1.textContent = `${BOOK_META.title} by ${BOOK_META.author}`;
+      const backLink = document.querySelector('.back-link');
+      if (backLink) backLink.setAttribute('href', BOOK.backHref);
 
       // ---- Utilities ----
       function esc(s) {
@@ -1349,7 +1407,11 @@
       }
 
       function buildCoverPage() {
-        return `<img class="cover-img" src="../assets/images/book-cover-hd.jpg" alt="${esc(BOOK_META.title)} — book cover" loading="eager" decoding="sync" />`;
+        return `<div class="cover-img-wrap" role="img" aria-label="${esc(BOOK_META.title)} — front cover" style="background-image:url('${esc(BOOK_META.cover)}');"></div>`;
+      }
+
+      function buildOuterBackPage() {
+        return `<div class="cover-img-wrap" role="img" aria-label="${esc(BOOK_META.title)} — back cover" style="background-image:url('${esc(BOOK_META.cover)}');"></div>`;
       }
 
       function buildCoverBackPage() {
@@ -1422,7 +1484,7 @@
         // how many TOC pages there are. Solve by computing twice.
         const stubStartPages = CHAPTERS.map(() => 0);
         const stubTocPages = paginateTOC(CHAPTERS, stubStartPages, pageW, pageH);
-        const PRE_PAGES_INITIAL = 2 + stubTocPages.length; // cover + cover-back + toc count
+        const PRE_PAGES_INITIAL = 3 + stubTocPages.length; // outer-back + cover + cover-back + toc count
 
         chapterStartPages = [];
         pagedContent.forEach((p, idx) => {
@@ -1438,7 +1500,7 @@
         const tocPages = paginateTOC(CHAPTERS, chapterStartPages, pageW, pageH);
         // If TOC page count changed after recompute, recompute starts once more
         if (tocPages.length !== stubTocPages.length) {
-          const PRE_PAGES_FINAL = 2 + tocPages.length;
+          const PRE_PAGES_FINAL = 3 + tocPages.length;
           chapterStartPages = [];
           pagedContent.forEach((p, idx) => {
             if (p.type === 'divider') {
@@ -1450,11 +1512,13 @@
           });
         }
 
-        coverPageIndex = 0;
-        tocPageIndex = 2; // first TOC page
+        coverPageIndex = 1; // front cover sits on the right of the opening spread
+        tocPageIndex = 3; // first TOC page
 
         // Assemble final page list
+        // Opening spread: outer-back (left) | front-cover (right) — both halves of the wraparound
         const allPages = [];
+        allPages.push({ kind: 'outer-back', html: buildOuterBackPage() });
         allPages.push({ kind: 'cover', html: buildCoverPage() });
         allPages.push({ kind: 'cover-back', html: buildCoverBackPage() });
         tocPages.forEach(html => allPages.push({ kind: 'toc', html }));
@@ -1482,12 +1546,13 @@
         });
 
         // Build DOM with data-pos for verso/recto/single
-        // With showCover:true: page 0 = recto alone, pages 1+2 = verso+recto pair, etc.
+        // With showCover:false: pages open as a spread from idx 0 (verso) + idx 1 (recto).
         pageMeta = [];
         chapterAtPage = [];
         allPages.forEach((pg, idx) => {
           const el = document.createElement('div');
           let cls = 'page';
+          if (pg.kind === 'outer-back') cls += ' outer-back';
           if (pg.kind === 'cover') cls += ' cover';
           if (pg.kind === 'cover-back') cls += ' cover-back';
           if (pg.kind === 'divider') cls += ' ch-divider';
@@ -1497,8 +1562,7 @@
 
           let pos;
           if (isMobile) pos = 'single';
-          else if (idx === 0) pos = 'recto';
-          else pos = (idx % 2 === 1) ? 'verso' : 'recto';
+          else pos = (idx % 2 === 0) ? 'verso' : 'recto';
           el.setAttribute('data-pos', pos);
 
           let inner = pg.html;
@@ -1529,7 +1593,7 @@
           minWidth: 200, maxWidth: 1200,
           minHeight: 280, maxHeight: 1680,
           maxShadowOpacity: 0.6,
-          showCover: true,
+          showCover: false,
           mobileScrollSupport: false,
           usePortrait: isMobile,
           autoSize: false,
