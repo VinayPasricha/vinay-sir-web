@@ -792,22 +792,19 @@
     .page[data-pos="recto"] .running-head { right: 52px; }
     .page[data-pos="single"] .running-head { left: 50%; transform: translateX(-50%); }
 
-    /* Cover pages — share the wraparound image, sliced into back (left half) + front (right half) */
+    /* Cover pages — front cover on open, back cover at end */
     .page.cover, .page.outer-back {
       background: #1a1208;
       background-image: none;
       padding: 0;
       overflow: hidden;
     }
-    .page.cover .cover-img-wrap,
-    .page.outer-back .cover-img-wrap {
+    .page.cover .cover-img,
+    .page.outer-back .cover-img {
       width: 100%; height: 100%;
-      background-size: 200% 100%;
-      background-repeat: no-repeat;
+      object-fit: cover;
       display: block;
     }
-    .page.outer-back .cover-img-wrap { background-position: left center; }
-    .page.cover .cover-img-wrap { background-position: right center; }
     /* Back of cover (inside-cover) */
     .page.cover-back {
       background: #1a1208;
@@ -1204,7 +1201,8 @@
             title: 'AI For Business Leaders',
             subtitle: 'A Practical Guide to AI Strategy, Operations, and Governance',
             author: 'Vinay Pasricha',
-            cover: '../assets/images/ai-for-business-leaders-cover-wrap.jpg'
+            coverFront: '../assets/images/ai-for-business-leaders-cover-front.jpg',
+            coverBack: '../assets/images/ai-for-business-leaders-cover-back.jpg'
           },
           docTitle: 'Read: AI For Business Leaders — Vinay Pasricha',
           metaDescription: 'Read AI For Business Leaders as a flipbook. By Vinay Pasricha.',
@@ -1217,7 +1215,8 @@
             title: 'The SIV Method',
             subtitle: 'Socratic Iterative Vinay — a discipline for examining reality before acting on it',
             author: 'Vinay Pasricha',
-            cover: '../assets/images/siv-method-cover-wrap.jpg'
+            coverFront: '../assets/images/siv-method-cover-front.jpg',
+            coverBack: '../assets/images/siv-method-cover-back.jpg'
           },
           docTitle: 'Read: The SIV Method — Vinay Pasricha',
           metaDescription: 'Read The SIV Method as a flipbook. By Vinay Pasricha.',
@@ -1230,7 +1229,8 @@
             title: 'Execution Doctrine',
             subtitle: 'A field manual for turning intention into built reality',
             author: 'Vinay Pasricha',
-            cover: '../assets/images/execution-doctrine-cover-wrap.jpg'
+            coverFront: '../assets/images/execution-doctrine-cover-front.jpg',
+            coverBack: '../assets/images/execution-doctrine-cover-back.jpg'
           },
           docTitle: 'Read: Execution Doctrine — Vinay Pasricha',
           metaDescription: 'Read Execution Doctrine as a flipbook. By Vinay Pasricha.',
@@ -1407,11 +1407,11 @@
       }
 
       function buildCoverPage() {
-        return `<div class="cover-img-wrap" role="img" aria-label="${esc(BOOK_META.title)} — front cover" style="background-image:url('${esc(BOOK_META.cover)}');"></div>`;
+        return `<img class="cover-img" src="${esc(BOOK_META.coverFront)}" alt="${esc(BOOK_META.title)} — front cover" loading="eager" decoding="sync" />`;
       }
 
       function buildOuterBackPage() {
-        return `<div class="cover-img-wrap" role="img" aria-label="${esc(BOOK_META.title)} — back cover" style="background-image:url('${esc(BOOK_META.cover)}');"></div>`;
+        return `<img class="cover-img" src="${esc(BOOK_META.coverBack)}" alt="${esc(BOOK_META.title)} — back cover" loading="lazy" decoding="async" />`;
       }
 
       function buildCoverBackPage() {
