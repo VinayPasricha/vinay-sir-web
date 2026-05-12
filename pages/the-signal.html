@@ -574,7 +574,7 @@
 
     function App() {
       const [identity, setIdentity] = useState(() => loadIdentity());
-      const [messages, setMessages] = useState(() => loadSession());
+      const [messages, setMessages] = useState([]);
       const [input, setInput] = useState('');
       const [pending, setPending] = useState(false);
       const [error, setError] = useState(null);
@@ -599,9 +599,6 @@
           if (window.trackEvent) window.trackEvent('signal_session_started');
         }
       }, [identity]);
-
-      // Persist
-      useEffect(() => { saveSession(messages); }, [messages]);
 
       // Auto-scroll on every change. Use window.scrollTo with overshoot so we land
       // past the fixed composer; rAF + double-tick to wait for layout to settle.
