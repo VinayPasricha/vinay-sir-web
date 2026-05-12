@@ -97,10 +97,10 @@
       position: fixed; inset: 0;
       display: flex; align-items: center; justify-content: center;
       z-index: 1;
-      padding: 60px 80px 80px;
+      padding: 70px 80px 96px;
     }
     @media (max-width: 768px) {
-      .stage { padding: 50px 10px 80px; }
+      .stage { padding: 56px 8px 86px; }
     }
 
     #book {
@@ -126,47 +126,66 @@
     }
 
     .page-content {
-      padding: 60px 55px 70px;
+      padding: 56px 52px 64px;
       height: 100%;
       width: 100%;
-      display: flex; flex-direction: column;
-      font-size: 14.5px;
-      line-height: 1.75;
+      display: block;
+      font-size: 15.5px;
+      line-height: 1.65;
       color: var(--ink);
     }
     @media (max-width: 768px) {
-      .page-content { padding: 40px 32px 56px; font-size: 14px; line-height: 1.7; }
+      .page-content { padding: 42px 30px 56px; font-size: 14.5px; line-height: 1.6; }
     }
 
     .page-content p {
-      margin: 0 0 14px;
-      text-align: justify;
+      margin: 0 0 12px;
+      text-align: left;
+      -webkit-hyphens: auto;
       hyphens: auto;
+      orphans: 2;
+      widows: 2;
     }
+    .page-content p:first-child { text-indent: 0; }
+    .page-content p + p { text-indent: 1.4em; }
 
-    .ch-header {
-      margin-bottom: 28px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid rgba(139, 105, 20, 0.25);
+    /* Chapter title page — full page with just chapter number + title centered */
+    .page.ch-divider .ch-divider-inner {
+      padding: 80px 50px;
+      height: 100%; width: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
     }
-    .ch-num {
-      font-size: 11px;
-      letter-spacing: 3px;
+    .ch-divider-inner .ch-num {
+      font-size: 12px;
+      letter-spacing: 5px;
       text-transform: uppercase;
       color: var(--accent);
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-weight: 700;
+      margin-bottom: 36px;
     }
-    .ch-title {
-      font-size: 24px;
-      line-height: 1.2;
+    .ch-divider-inner .ornament-top,
+    .ch-divider-inner .ornament-bottom {
+      width: 60px; height: 1px;
+      background: var(--accent);
+      opacity: 0.5;
+      margin: 0 auto;
+    }
+    .ch-divider-inner .ornament-top { margin-bottom: 28px; }
+    .ch-divider-inner .ornament-bottom { margin-top: 28px; }
+    .ch-divider-inner .ch-title {
+      font-size: 32px;
+      line-height: 1.25;
       margin: 0;
       font-weight: 700;
       color: var(--ink);
       font-style: italic;
+      max-width: 80%;
     }
     @media (max-width: 768px) {
-      .ch-title { font-size: 20px; }
+      .ch-divider-inner .ch-title { font-size: 24px; }
+      .page.ch-divider .ch-divider-inner { padding: 60px 30px; }
     }
 
     /* Page number footer */
@@ -243,26 +262,52 @@
     }
 
     /* TOC page */
-    .toc-inner { padding: 60px 55px; height: 100%; width: 100%; }
+    .toc-inner { padding: 60px 52px; height: 100%; width: 100%; overflow: hidden; }
     .toc-inner h2 {
-      font-size: 22px; font-weight: 700; margin: 0 0 28px;
-      letter-spacing: 1px; text-transform: uppercase; color: var(--accent);
+      font-size: 24px; font-weight: 700; margin: 0 0 8px;
+      letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+      text-align: center;
+    }
+    .toc-inner .toc-rule {
+      width: 50px; height: 1px; background: var(--accent); opacity: 0.5;
+      margin: 0 auto 28px;
     }
     .toc-list { list-style: none; padding: 0; margin: 0; }
     .toc-list li {
-      padding: 10px 0;
-      border-bottom: 1px dotted rgba(139, 105, 20, 0.25);
-      font-size: 13px;
-      display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+      padding: 8px 0;
+      font-size: 13.5px;
+      line-height: 1.4;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: baseline;
+      gap: 8px;
       cursor: pointer;
       transition: color 0.2s;
+      color: var(--ink-soft);
     }
     .toc-list li:hover { color: var(--accent); }
-    .toc-list .toc-title { flex: 1; }
-    .toc-list .toc-page { color: var(--ink-faint); font-size: 12px; }
+    .toc-list .toc-title-wrap {
+      display: flex; align-items: baseline; gap: 10px;
+      overflow: hidden;
+    }
+    .toc-list .toc-title-text {
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      font-style: italic;
+    }
+    .toc-list .toc-dots {
+      flex: 1;
+      border-bottom: 1px dotted rgba(139, 105, 20, 0.35);
+      transform: translateY(-3px);
+      min-width: 12px;
+    }
+    .toc-list .toc-page {
+      color: var(--ink-faint); font-size: 12px; font-variant-numeric: tabular-nums;
+      min-width: 24px; text-align: right;
+    }
     .toc-list .toc-num {
-      color: var(--accent); font-size: 11px; letter-spacing: 1px;
-      font-weight: 600; margin-right: 12px; min-width: 60px;
+      color: var(--accent); font-size: 10px; letter-spacing: 1.5px;
+      font-weight: 700; min-width: 36px;
+      text-transform: uppercase;
     }
 
     /* Bottom controls */
@@ -400,28 +445,24 @@
           .replace(/'/g, '&#039;');
       }
 
-      // Paginate chapters into fixed-height pages
+      // Paginate chapters into fixed-height pages.
+      // Each chapter starts with a dedicated divider page (just title), then body pages.
       function paginate(chapters, pageW, pageH) {
         const measure = document.createElement('div');
         measure.className = 'page-measure';
-        // Match real page styling for accurate measurement
         measure.style.width = pageW + 'px';
         document.body.appendChild(measure);
 
-        const pages = [];
+        const result = [];
 
         for (let ci = 0; ci < chapters.length; ci++) {
           const ch = chapters[ci];
-          const headerHTML = `
-            <div class="ch-header">
-              <div class="ch-num">${esc(ch.num)}</div>
-              <h2 class="ch-title">${esc(ch.title)}</h2>
-            </div>
-          `;
 
-          let currentBody = headerHTML;
-          let isFirstPageOfChapter = true;
+          // 1. Chapter divider page
+          result.push({ type: 'divider', chapter: ch.title, num: ch.num, title: ch.title });
 
+          // 2. Body pages — content starts fresh, no inline header (it's on the divider)
+          let currentBody = '';
           const paras = ch.content.slice();
           let i = 0;
 
@@ -431,26 +472,24 @@
             measure.innerHTML = `<div class="page-content" style="width:${pageW}px;height:${pageH}px;">${trial}</div>`;
             const inner = measure.firstChild;
 
-            // Check if content overflows
-            if (inner.scrollHeight > inner.clientHeight && currentBody !== headerHTML && currentBody !== '') {
-              // Overflows — commit current page, start fresh
-              pages.push({ type: 'text', chapter: ch.title, body: currentBody, isChapterStart: isFirstPageOfChapter });
+            // 4px tolerance to avoid edge-case overflow due to subpixel rendering
+            const overflows = inner.scrollHeight > inner.clientHeight + 4;
+
+            if (overflows && currentBody !== '') {
+              result.push({ type: 'text', chapter: ch.title, body: currentBody });
               currentBody = '';
-              isFirstPageOfChapter = false;
             } else {
               currentBody = trial;
               i++;
             }
           }
-
-          // Flush remaining content
           if (currentBody.trim()) {
-            pages.push({ type: 'text', chapter: ch.title, body: currentBody, isChapterStart: isFirstPageOfChapter });
+            result.push({ type: 'text', chapter: ch.title, body: currentBody });
           }
         }
 
         measure.remove();
-        return pages;
+        return result;
       }
 
       function buildCoverPage() {
@@ -472,12 +511,22 @@
       }
 
       function buildTOCPage(chapters, chapterStartPages) {
+        // Use a short chapter label: "Note", "1", "2", ... so layout is clean
+        function shortNum(num) {
+          const m = String(num).match(/(\d+)/);
+          if (m) return m[1].padStart(2, '0');
+          // Non-chapter labels (e.g. "PREFACE", "NOTE TO THE READER") get a dash
+          return '—';
+        }
         const items = chapters.map((ch, i) => {
           const page = chapterStartPages[i] != null ? (chapterStartPages[i] + 1) : '';
           return `
             <li data-chapter="${i}">
-              <span class="toc-num">${esc(ch.num)}</span>
-              <span class="toc-title">${esc(ch.title)}</span>
+              <span class="toc-num">${esc(shortNum(ch.num))}</span>
+              <span class="toc-title-wrap">
+                <span class="toc-title-text">${esc(ch.title)}</span>
+                <span class="toc-dots"></span>
+              </span>
               <span class="toc-page">${page}</span>
             </li>
           `;
@@ -485,6 +534,7 @@
         return `
           <div class="toc-inner">
             <h2>Contents</h2>
+            <div class="toc-rule"></div>
             <ul class="toc-list">${items}</ul>
           </div>
         `;
@@ -497,38 +547,46 @@
         stage.innerHTML = '';
 
         const { pageW, pageH, isMobile } = getDims();
-        const textPages = paginate(CHAPTERS, pageW, pageH);
+        const pagedContent = paginate(CHAPTERS, pageW, pageH);
 
         // Compute chapter-start page numbers (0-indexed for pageFlip.turnToPage)
-        // Layout: cover (0), inside-cover (1), TOC (2), text pages start at 3
+        // Layout: cover (0), inside-cover (1), TOC (2), then paged content starts at 3.
+        // Each chapter's first page is its divider.
         const PRE_PAGES = 3;
         const chapterStartPages = [];
-        let seenChapters = new Set();
-        textPages.forEach((p, idx) => {
-          if (p.isChapterStart) {
-            const chIndex = CHAPTERS.findIndex(c => c.title === p.chapter);
-            if (chIndex >= 0 && !seenChapters.has(chIndex)) {
-              seenChapters.add(chIndex);
+        pagedContent.forEach((p, idx) => {
+          if (p.type === 'divider') {
+            const chIndex = CHAPTERS.findIndex(c => c.title === p.title);
+            if (chIndex >= 0 && chapterStartPages[chIndex] == null) {
               chapterStartPages[chIndex] = PRE_PAGES + idx;
             }
           }
         });
 
         const allPages = [];
-        // Page 1: Cover (front)
         allPages.push({ kind: 'cover', html: buildCoverPage() });
-        // Page 2: Inside front cover (subtitle, author)
         allPages.push({ kind: 'cover-back', html: buildCoverBackPage() });
-        // Page 3: TOC
         allPages.push({ kind: 'toc', html: buildTOCPage(CHAPTERS, chapterStartPages) });
-        // Pages 4+: text pages
-        textPages.forEach((p) => {
-          allPages.push({
-            kind: 'text',
-            html: `<div class="page-content">${p.body}</div>`,
-            chapter: p.chapter,
-            isChapterStart: p.isChapterStart
-          });
+
+        pagedContent.forEach((p) => {
+          if (p.type === 'divider') {
+            allPages.push({
+              kind: 'divider',
+              chapter: p.chapter,
+              html: `<div class="ch-divider-inner">
+                <div class="ch-num">${esc(p.num)}</div>
+                <div class="ornament-top"></div>
+                <h2 class="ch-title">${esc(p.title)}</h2>
+                <div class="ornament-bottom"></div>
+              </div>`
+            });
+          } else {
+            allPages.push({
+              kind: 'text',
+              chapter: p.chapter,
+              html: `<div class="page-content">${p.body}</div>`
+            });
+          }
         });
 
         // Build DOM
@@ -537,6 +595,7 @@
           let cls = 'page';
           if (pg.kind === 'cover') cls += ' cover';
           if (pg.kind === 'cover-back') cls += ' cover-back';
+          if (pg.kind === 'divider') cls += ' ch-divider';
           el.className = cls;
           el.style.width = pageW + 'px';
           el.style.height = pageH + 'px';
