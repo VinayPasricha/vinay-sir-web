@@ -40,43 +40,614 @@
     /* Subtle vignette background */
     body::before {
       content: ''; position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.5) 100%);
+      background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.28) 100%);
       pointer-events: none; z-index: 0;
     }
 
-    /* Top bar */
+    /* Focus outlines for keyboard users */
+    :focus-visible {
+      outline: 2px solid #c9a24a;
+      outline-offset: 2px;
+      border-radius: 3px;
+    }
+    button:focus-visible, a:focus-visible {
+      outline-offset: 3px;
+    }
+    /* Hide outlines for mouse users */
+    :focus:not(:focus-visible) { outline: none; }
+
+    /* ============================================================
+       Heavy top toolbar (FlipHTML5-style: grouped icon buttons)
+       ============================================================ */
     .topbar {
       position: fixed; top: 0; left: 0; right: 0;
-      padding: 14px 24px;
-      display: flex; align-items: center; justify-content: space-between;
-      z-index: 10;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);
-      pointer-events: none;
+      padding: 0 14px;
+      height: 52px;
+      display: flex; align-items: center;
+      gap: 4px;
+      z-index: 20;
+      background: linear-gradient(to bottom, rgba(20,16,11,0.95), rgba(20,16,11,0.85));
+      border-bottom: 1px solid rgba(201,162,74,0.15);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
-    .topbar a, .topbar button {
-      pointer-events: auto;
+    .toolbar-group { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+    .toolbar-sep {
+      width: 1px; height: 22px;
+      background: rgba(201,162,74,0.18);
+      margin: 0 6px;
+      flex-shrink: 0;
     }
-    .back-link {
-      color: #d4c9a8;
-      text-decoration: none;
-      font-size: 13px;
-      letter-spacing: 0.5px;
-      padding: 8px 12px;
-      border-radius: 2px;
-      transition: background 0.2s;
-    }
-    .back-link:hover { background: rgba(255,255,255,0.08); }
-
-    .book-title-bar {
+    .toolbar-title {
+      flex: 1 1 auto;
+      text-align: center;
       color: #c9b88a;
-      font-size: 14px;
+      font-size: 13px;
       letter-spacing: 2px;
       text-transform: uppercase;
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      padding: 0 12px;
     }
 
-    .toolbar {
+    .btn-icon {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #c9b88a;
+      width: 36px; height: 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 15px;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      padding: 0;
+      position: relative;
+    }
+    .btn-icon:hover {
+      background: rgba(201,162,74,0.12);
+      color: #f0d98a;
+    }
+    .btn-icon.active {
+      background: rgba(201,162,74,0.2);
+      color: #f0d98a;
+      border-color: rgba(201,162,74,0.4);
+    }
+    .btn-icon .btn-label {
+      position: absolute;
+      bottom: -26px;
+      left: 50%; transform: translateX(-50%);
+      background: rgba(20,16,11,0.95);
+      color: #c9b88a;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      border: 1px solid rgba(201,162,74,0.2);
+    }
+    .btn-icon:hover .btn-label { opacity: 1; }
+
+    .back-link {
+      color: #c9b88a;
+      text-decoration: none;
+      padding: 0;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px;
+      border-radius: 4px;
+      font-size: 15px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .back-link:hover { background: rgba(201,162,74,0.12); color: #f0d98a; }
+
+    /* Mobile toolbar — hide secondary buttons behind an overflow menu */
+    .topbar .mobile-more { display: none; }
+    .topbar .mobile-more-menu {
+      display: none;
+      position: absolute; top: 52px; right: 12px;
+      background: rgba(20,16,11,0.97);
+      border: 1px solid rgba(201,162,74,0.2);
+      border-radius: 6px;
+      padding: 6px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      flex-direction: column;
+      gap: 2px;
+      min-width: 160px;
+    }
+    .topbar .mobile-more-menu.visible { display: flex; }
+    .mobile-more-menu .btn-icon {
+      width: auto; height: 36px;
+      padding: 0 12px;
+      justify-content: flex-start;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .mobile-more-menu .btn-icon::after {
+      content: attr(data-name);
+      margin-left: 4px;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    .mobile-more-menu .btn-icon .btn-label { display: none; }
+
+    @media (max-width: 720px) {
+      .topbar { padding: 0 8px; height: 48px; }
+      .toolbar-title { font-size: 11px; letter-spacing: 1.2px; padding: 0 6px; }
+      .toolbar-sep { margin: 0 2px; }
+      .btn-icon, .back-link { width: 34px; height: 34px; font-size: 14px; }
+      .topbar .desktop-only { display: none !important; }
+      .topbar .mobile-more { display: inline-flex; }
+    }
+
+    /* ============================================================
+       Bottom scrubber bar
+       ============================================================ */
+    .scrubber {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      padding: 12px 20px 14px;
+      z-index: 15;
+      background: linear-gradient(to top, rgba(20,16,11,0.92), rgba(20,16,11,0.6));
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: flex; align-items: center;
+      gap: 14px;
+      border-top: 1px solid rgba(201,162,74,0.12);
+    }
+    .scrubber .nav-btn {
+      background: rgba(201,162,74,0.08);
+      border: 1px solid rgba(201,162,74,0.25);
+      color: #c9b88a;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .scrubber .nav-btn:hover { background: rgba(201,162,74,0.18); }
+    .scrubber .nav-btn:active { transform: scale(0.94); }
+    .scrubber .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+    .page-input-wrap {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #c9b88a;
+      font-size: 12px;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+    .page-input {
+      width: 48px;
+      background: rgba(201,162,74,0.08);
+      border: 1px solid rgba(201,162,74,0.25);
+      color: #f0d98a;
+      padding: 4px 6px;
+      border-radius: 3px;
+      text-align: center;
+      font-family: Georgia, serif;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .page-input:focus {
+      outline: none;
+      border-color: rgba(201,162,74,0.6);
+    }
+    .page-total { color: #8b7a52; }
+
+    /* Range slider — track + thumb */
+    .scrubber-slider {
+      flex: 1 1 auto;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      height: 36px;
+      cursor: pointer;
+      min-width: 0;
+    }
+    .scrubber-slider::-webkit-slider-runnable-track {
+      height: 4px;
+      background: linear-gradient(to right,
+        rgba(201,162,74,0.6) 0%,
+        rgba(201,162,74,0.6) var(--progress, 0%),
+        rgba(201,162,74,0.15) var(--progress, 0%),
+        rgba(201,162,74,0.15) 100%);
+      border-radius: 2px;
+    }
+    .scrubber-slider::-moz-range-track {
+      height: 4px;
+      background: rgba(201,162,74,0.15);
+      border-radius: 2px;
+    }
+    .scrubber-slider::-moz-range-progress {
+      height: 4px;
+      background: rgba(201,162,74,0.6);
+      border-radius: 2px;
+    }
+    .scrubber-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px; height: 14px;
+      background: #c9a24a;
+      border-radius: 50%;
+      margin-top: -5px;
+      box-shadow: 0 0 0 3px rgba(201,162,74,0.2);
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .scrubber-slider::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    .scrubber-slider::-moz-range-thumb {
+      width: 14px; height: 14px;
+      background: #c9a24a;
+      border: none;
+      border-radius: 50%;
+      box-shadow: 0 0 0 3px rgba(201,162,74,0.2);
+      cursor: pointer;
+    }
+
+    @media (max-width: 720px) {
+      .scrubber { padding: 8px 10px 10px; gap: 8px; }
+      .scrubber .nav-btn { width: 32px; height: 32px; font-size: 13px; }
+      .page-input { width: 40px; font-size: 11px; }
+      .page-input-wrap { font-size: 11px; gap: 4px; }
+    }
+
+    /* ============================================================
+       Left side panel (TOC / Thumbnails / Search / Bookmarks tabs)
+       ============================================================ */
+    .side-panel {
+      position: fixed; top: 52px; bottom: 64px; left: 0;
+      width: 340px;
+      max-width: 88vw;
+      background: rgba(20,16,11,0.96);
+      border-right: 1px solid rgba(201,162,74,0.18);
+      z-index: 18;
+      transform: translateX(-100%);
+      transition: transform 0.28s ease;
+      display: flex; flex-direction: column;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .side-panel.open { transform: translateX(0); }
+    .side-panel-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(201,162,74,0.15);
+      padding: 4px 6px 0;
+      gap: 2px;
+    }
+    .side-panel-tab {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #8b7a52;
+      padding: 12px 4px;
+      cursor: pointer;
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 600;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .side-panel-tab:hover { color: #c9b88a; }
+    .side-panel-tab.active {
+      color: #f0d98a;
+      border-bottom-color: #c9a24a;
+    }
+    .side-panel-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 16px;
+      color: #d4c9a8;
+    }
+    .side-panel-body::-webkit-scrollbar { width: 8px; }
+    .side-panel-body::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+    .side-panel-body::-webkit-scrollbar-thumb { background: rgba(201,162,74,0.3); border-radius: 4px; }
+
+    .side-panel-pane { display: none; }
+    .side-panel-pane.active { display: block; }
+
+    @media (max-width: 720px) {
+      .side-panel { top: 48px; bottom: 56px; width: 100%; max-width: 100%; }
+    }
+
+    /* Panel: TOC list (reuses .toc-list styling but for dark panel) */
+    .panel-toc-list { list-style: none; padding: 0; margin: 0; }
+    .panel-toc-list li {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 10px 6px;
+      font-size: 13px;
+      color: #c9b88a;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(201,162,74,0.08);
+      transition: background 0.15s, color 0.15s;
+      border-radius: 3px;
+    }
+    .panel-toc-list li:hover { background: rgba(201,162,74,0.08); color: #f0d98a; }
+    .panel-toc-list .pt-num { color: #c9a24a; font-size: 10px; font-weight: 700; min-width: 24px; letter-spacing: 0.5px; }
+    .panel-toc-list .pt-title { flex: 1; font-style: italic; }
+    .panel-toc-list .pt-page { color: #8b7a52; font-size: 11px; font-variant-numeric: tabular-nums; }
+
+    /* Panel: Thumbnails grid */
+    .thumbs-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .thumb {
+      cursor: pointer;
+      background: rgba(245,239,225,0.04);
+      border: 1px solid rgba(201,162,74,0.15);
+      border-radius: 3px;
+      aspect-ratio: 5 / 7;
+      overflow: hidden;
+      position: relative;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+    .thumb:hover { border-color: rgba(201,162,74,0.6); transform: translateY(-2px); }
+    .thumb.active { border-color: #c9a24a; box-shadow: 0 0 0 2px rgba(201,162,74,0.3); }
+    .thumb-preview {
+      width: 100%; height: 100%;
+      background: var(--paper);
+      color: var(--ink);
+      transform: scale(0.18);
+      transform-origin: top left;
+      width: 555%; height: 555%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .thumb-label {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      color: #c9b88a;
+      padding: 8px 6px 4px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .thumbs-loading { color: #8b7a52; font-size: 12px; text-align: center; padding: 20px; }
+
+    /* Panel: Search */
+    .search-input-wrap { margin-bottom: 14px; position: relative; }
+    .search-input {
+      width: 100%;
+      background: rgba(201,162,74,0.08);
+      border: 1px solid rgba(201,162,74,0.25);
+      color: #f0d98a;
+      padding: 10px 32px 10px 12px;
+      border-radius: 4px;
+      font-family: Georgia, serif;
+      font-size: 14px;
+    }
+    .search-input::placeholder { color: #8b7a52; }
+    .search-input:focus { outline: none; border-color: rgba(201,162,74,0.6); }
+    .search-clear {
+      position: absolute; right: 6px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: #8b7a52;
+      width: 24px; height: 24px;
+      cursor: pointer; font-size: 14px;
+      display: none; align-items: center; justify-content: center;
+    }
+    .search-clear.visible { display: flex; }
+    .search-status {
+      color: #8b7a52;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      min-height: 14px;
+    }
+    .search-results { list-style: none; padding: 0; margin: 0; }
+    .search-result {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(201,162,74,0.1);
+      margin-bottom: 8px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .search-result:hover { background: rgba(201,162,74,0.08); border-color: rgba(201,162,74,0.3); }
+    .search-result-meta {
+      display: flex; justify-content: space-between;
+      font-size: 10px;
+      letter-spacing: 1px;
+      color: #c9a24a;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .search-result-meta .sr-page { color: #8b7a52; }
+    .search-result-snippet {
+      color: #d4c9a8;
+      font-size: 12.5px;
+      line-height: 1.5;
+      font-style: italic;
+    }
+    .search-result-snippet mark {
+      background: rgba(201,162,74,0.3);
+      color: #f0d98a;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    /* Panel: Bookmarks */
+    .bookmarks-empty {
+      color: #8b7a52;
+      font-size: 12.5px;
+      text-align: center;
+      padding: 30px 10px;
+      line-height: 1.6;
+    }
+    .bookmarks-list { list-style: none; padding: 0; margin: 0; }
+    .bookmark-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(201,162,74,0.1);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .bookmark-item:hover { background: rgba(201,162,74,0.08); border-color: rgba(201,162,74,0.3); }
+    .bookmark-item-info { flex: 1; min-width: 0; }
+    .bookmark-item-page {
+      color: #c9a24a;
+      font-size: 10px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .bookmark-item-title {
+      color: #d4c9a8;
+      font-size: 13px;
+      font-style: italic;
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .bookmark-remove {
+      background: none; border: none;
+      color: #8b7a52;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 4px 8px;
+      border-radius: 3px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .bookmark-remove:hover { color: #c9a24a; background: rgba(201,162,74,0.08); }
+
+    /* ============================================================
+       Modal (Share dialog)
+       ============================================================ */
+    .modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 100;
+      display: none;
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.visible { display: flex; }
+    .modal {
+      background: #1a1611;
+      border: 1px solid rgba(201,162,74,0.3);
+      border-radius: 8px;
+      padding: 28px;
+      max-width: 460px;
+      width: 100%;
+      color: #d4c9a8;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    }
+    .modal h3 {
+      margin: 0 0 8px;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #f0d98a;
+    }
+    .modal-desc {
+      color: #8b7a52;
+      font-size: 13px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .modal-url-row {
       display: flex; gap: 8px;
+      margin-bottom: 18px;
+    }
+    .modal-url {
+      flex: 1;
+      background: rgba(201,162,74,0.08);
+      border: 1px solid rgba(201,162,74,0.25);
+      color: #f0d98a;
+      padding: 10px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+    .modal-btn {
+      background: rgba(201,162,74,0.15);
+      border: 1px solid rgba(201,162,74,0.4);
+      color: #c9a24a;
+      padding: 10px 18px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+    .modal-btn.primary { background: rgba(201,162,74,0.3); color: #f0d98a; }
+    .modal-btn:hover { background: rgba(201,162,74,0.25); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .toast {
+      position: fixed; bottom: 90px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(20,16,11,0.97);
+      border: 1px solid rgba(201,162,74,0.4);
+      color: #f0d98a;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ============================================================
+       Zoom: scale the book; pan when zoomed > 1
+       ============================================================ */
+    .stage.zoomed { cursor: grab; }
+    .stage.zoomed.panning { cursor: grabbing; }
+    .book-shadow {
+      transition: transform 0.2s ease;
+      transform-origin: center center;
+    }
+
+    /* ============================================================
+       Print stylesheet — flat layout, no UI chrome
+       ============================================================ */
+    @media print {
+      body { background: #fff; overflow: visible; height: auto; }
+      .topbar, .scrubber, .controls, .side-panel, .modal-backdrop,
+      .swipe-hint, .loading, .toast, .stf__wrapper { display: none !important; }
+      body::before { display: none; }
+      .stage { position: static; padding: 0; }
+      .book-shadow { box-shadow: none; }
+      #book { display: block !important; position: static; }
+      /* SEO content is what we print — actual semantic chapter HTML */
+      .seo-only {
+        position: static !important;
+        width: auto !important; height: auto !important;
+        padding: 40px !important; margin: 0 !important;
+        overflow: visible !important; clip: auto !important;
+        white-space: normal !important;
+        font-family: Georgia, serif;
+        color: #000;
+      }
+      .seo-only h1 { font-size: 28px; margin-bottom: 24px; }
+      .seo-only h2 { font-size: 18px; margin-top: 32px; page-break-before: always; }
+      .seo-only h2:first-of-type { page-break-before: avoid; }
+      .seo-only p { font-size: 11pt; line-height: 1.55; margin: 0 0 10px; text-align: justify; }
     }
     .tool-btn {
       background: rgba(255,255,255,0.06);
@@ -121,16 +692,11 @@
       color: var(--ink);
       overflow: hidden;
       position: relative;
+      /* Soft warm paper tone via two subtle radial gradients in opposite corners
+         — no repeating pattern, so no scanline / CRT artifact. */
       background-image:
-        repeating-linear-gradient(
-          90deg,
-          transparent 0,
-          transparent 2px,
-          rgba(139, 105, 20, 0.015) 2px,
-          rgba(139, 105, 20, 0.015) 4px
-        ),
-        radial-gradient(ellipse at top left, rgba(139, 105, 20, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at bottom right, rgba(139, 105, 20, 0.03) 0%, transparent 50%);
+        radial-gradient(ellipse at top left, rgba(139, 105, 20, 0.045) 0%, transparent 55%),
+        radial-gradient(ellipse at bottom right, rgba(139, 105, 20, 0.035) 0%, transparent 55%);
     }
 
     .page-content {
@@ -153,9 +719,11 @@
       hyphens: auto;
       orphans: 2;
       widows: 2;
+      text-indent: 1.4em;
     }
-    .page-content p:first-child { text-indent: 0; }
-    .page-content p + p { text-indent: 1.4em; }
+    /* First page of a chapter: no indent on its first paragraph (traditional book rule).
+       Continuation pages: every paragraph indents, including the first one. */
+    .page-content.first-of-chapter p:first-child { text-indent: 0; }
 
     /* Chapter title page — full page with just chapter number + title centered */
     .page.ch-divider .ch-divider-inner {
@@ -196,30 +764,33 @@
       .page.ch-divider .ch-divider-inner { padding: 60px 30px; }
     }
 
-    /* Page number footer */
+    /* Page number footer — positioned on outer margin (verso=left, recto=right) */
     .page-num {
       position: absolute;
-      bottom: 24px;
+      bottom: 22px;
       font-size: 11px;
       color: var(--ink-faint);
       letter-spacing: 1px;
+      font-variant-numeric: tabular-nums;
     }
-    .page.left .page-num { left: 55px; }
-    .page.right .page-num { right: 55px; }
-    .page:not(.left):not(.right) .page-num { left: 50%; transform: translateX(-50%); }
+    .page[data-pos="verso"] .page-num { left: 52px; }
+    .page[data-pos="recto"] .page-num { right: 52px; }
+    /* Portrait/single-page mode (mobile) — center the page number */
+    .page[data-pos="single"] .page-num { left: 50%; transform: translateX(-50%); }
 
     /* Running header (chapter name) */
     .running-head {
       position: absolute;
-      top: 24px;
+      top: 22px;
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
       color: var(--ink-faint);
       font-weight: 600;
     }
-    .page.left .running-head { left: 55px; }
-    .page.right .running-head { right: 55px; }
+    .page[data-pos="verso"] .running-head { left: 52px; }
+    .page[data-pos="recto"] .running-head { right: 52px; }
+    .page[data-pos="single"] .running-head { left: 50%; transform: translateX(-50%); }
 
     /* Cover page — uses the actual book cover image */
     .page.cover {
@@ -386,37 +957,235 @@
       visibility: hidden; pointer-events: none;
     }
 
+    /* SEO content — visually hidden but available to crawlers + screen readers */
+    .seo-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Mobile swipe hint */
+    .swipe-hint {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.75);
+      z-index: 50;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s;
+      color: #f5efe1;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .swipe-hint.visible { opacity: 1; pointer-events: auto; }
+    .swipe-hint-inner { max-width: 280px; }
+    .swipe-hint-icon {
+      font-size: 48px; margin-bottom: 20px;
+      animation: swipe-anim 1.8s ease-in-out infinite;
+    }
+    .swipe-hint-text {
+      font-family: Georgia, serif;
+      font-size: 16px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+    .swipe-hint-dismiss {
+      background: rgba(201,162,74,0.15);
+      border: 1px solid rgba(201,162,74,0.4);
+      color: #c9a24a;
+      padding: 10px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: Georgia, serif;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    @keyframes swipe-anim {
+      0%   { transform: translateX(-30px); opacity: 0.4; }
+      50%  { transform: translateX(30px); opacity: 1; }
+      100% { transform: translateX(-30px); opacity: 0.4; }
+    }
+
+    /* Loading state — show pagination progress */
+    .loading-progress {
+      margin-top: 12px;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #8b7a52;
+      min-height: 14px;
+    }
+    .loading-stack {
+      display: flex; flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .loading .loading-spinner { margin-right: 0; margin-bottom: 16px; }
+
     /* Hide topbar/controls in fullscreen */
     body.fs .topbar, body.fs .controls { opacity: 0.15; transition: opacity 0.3s; }
     body.fs .topbar:hover, body.fs .controls:hover { opacity: 1; }
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">
-    <div class="loading-spinner"></div>
-    <span>Preparing the book…</span>
-  </div>
-
-  <div class="topbar">
-    <a href="book.html" class="back-link">← Back to Book Page</a>
-    <div class="book-title-bar">AI For Business Leaders</div>
-    <div class="toolbar">
-      <button class="tool-btn" id="toc-btn" title="Table of Contents">☰</button>
-      <button class="tool-btn" id="fs-btn" title="Fullscreen">⛶</button>
+  <div class="loading" id="loading" role="status" aria-live="polite">
+    <div class="loading-stack">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <span id="loading-label">Preparing the book…</span>
+      <div class="loading-progress" id="loading-progress"></div>
     </div>
   </div>
 
-  <div class="stage">
+  <header class="topbar" role="banner">
+    <div class="toolbar-group">
+      <a href="book.html" class="back-link" aria-label="Back to book page" title="Back to book page">←</a>
+      <button class="btn-icon" id="cover-btn" aria-label="Go to cover" data-name="Cover">
+        ⌂<span class="btn-label">Cover</span>
+      </button>
+    </div>
+    <div class="toolbar-sep desktop-only"></div>
+    <div class="toolbar-group">
+      <button class="btn-icon" id="panel-toc-btn" aria-label="Table of contents" data-name="Contents">
+        ☰<span class="btn-label">Contents</span>
+      </button>
+      <button class="btn-icon desktop-only" id="panel-thumbs-btn" aria-label="Thumbnails" data-name="Thumbnails">
+        ▦<span class="btn-label">Thumbnails</span>
+      </button>
+      <button class="btn-icon desktop-only" id="panel-search-btn" aria-label="Search" data-name="Search">
+        ⌕<span class="btn-label">Search</span>
+      </button>
+      <button class="btn-icon desktop-only" id="panel-bookmarks-btn" aria-label="Bookmarks" data-name="Bookmarks">
+        ❏<span class="btn-label">Bookmarks</span>
+      </button>
+    </div>
+
+    <div class="toolbar-title" id="toolbar-title">AI For Business Leaders</div>
+
+    <div class="toolbar-group desktop-only">
+      <button class="btn-icon" id="bookmark-toggle-btn" aria-label="Bookmark this page" data-name="Bookmark page">
+        ★<span class="btn-label">Bookmark page</span>
+      </button>
+      <button class="btn-icon" id="autoflip-btn" aria-label="Auto-flip" data-name="Auto-flip">
+        ▶<span class="btn-label">Auto-flip</span>
+      </button>
+    </div>
+    <div class="toolbar-sep desktop-only"></div>
+    <div class="toolbar-group desktop-only">
+      <button class="btn-icon" id="zoom-out-btn" aria-label="Zoom out" data-name="Zoom out">
+        −<span class="btn-label">Zoom out</span>
+      </button>
+      <button class="btn-icon" id="zoom-reset-btn" aria-label="Reset zoom" data-name="Fit page" title="Reset zoom">
+        ⊡<span class="btn-label">Fit page</span>
+      </button>
+      <button class="btn-icon" id="zoom-in-btn" aria-label="Zoom in" data-name="Zoom in">
+        ＋<span class="btn-label">Zoom in</span>
+      </button>
+    </div>
+    <div class="toolbar-sep desktop-only"></div>
+    <div class="toolbar-group desktop-only">
+      <button class="btn-icon" id="share-btn" aria-label="Share" data-name="Share">
+        ⤴<span class="btn-label">Share</span>
+      </button>
+      <button class="btn-icon" id="print-btn" aria-label="Print or save as PDF" data-name="Print / PDF">
+        ⎙<span class="btn-label">Print / PDF</span>
+      </button>
+      <button class="btn-icon" id="fs-btn" aria-label="Fullscreen" data-name="Fullscreen">
+        ⛶<span class="btn-label">Fullscreen</span>
+      </button>
+    </div>
+
+    <!-- Mobile overflow button -->
+    <button class="btn-icon mobile-more" id="mobile-more-btn" aria-label="More options">⋯</button>
+    <div class="mobile-more-menu" id="mobile-more-menu" role="menu">
+      <button class="btn-icon" id="m-search" aria-label="Search" data-name="Search">⌕</button>
+      <button class="btn-icon" id="m-thumbs" aria-label="Thumbnails" data-name="Thumbnails">▦</button>
+      <button class="btn-icon" id="m-bookmarks" aria-label="Bookmarks" data-name="Bookmarks">❏</button>
+      <button class="btn-icon" id="m-bookmark-toggle" aria-label="Bookmark page" data-name="Bookmark page">★</button>
+      <button class="btn-icon" id="m-autoflip" aria-label="Auto-flip" data-name="Auto-flip">▶</button>
+      <button class="btn-icon" id="m-share" aria-label="Share" data-name="Share">⤴</button>
+      <button class="btn-icon" id="m-print" aria-label="Print" data-name="Print">⎙</button>
+      <button class="btn-icon" id="m-fs" aria-label="Fullscreen" data-name="Fullscreen">⛶</button>
+    </div>
+  </header>
+
+  <!-- Left slide-out side panel with tabbed content -->
+  <aside class="side-panel" id="side-panel" aria-label="Reader side panel" aria-hidden="true">
+    <div class="side-panel-tabs" role="tablist">
+      <button class="side-panel-tab" id="tab-toc" role="tab" aria-selected="true">Contents</button>
+      <button class="side-panel-tab" id="tab-thumbs" role="tab" aria-selected="false">Thumbs</button>
+      <button class="side-panel-tab" id="tab-search" role="tab" aria-selected="false">Search</button>
+      <button class="side-panel-tab" id="tab-bookmarks" role="tab" aria-selected="false">Saved</button>
+    </div>
+    <div class="side-panel-body">
+      <div class="side-panel-pane active" id="pane-toc" role="tabpanel"></div>
+      <div class="side-panel-pane" id="pane-thumbs" role="tabpanel">
+        <div class="thumbs-loading">Loading thumbnails…</div>
+      </div>
+      <div class="side-panel-pane" id="pane-search" role="tabpanel">
+        <div class="search-input-wrap">
+          <input type="search" class="search-input" id="search-input" placeholder="Search the book…" aria-label="Search">
+          <button class="search-clear" id="search-clear" aria-label="Clear search">×</button>
+        </div>
+        <div class="search-status" id="search-status"></div>
+        <ul class="search-results" id="search-results"></ul>
+      </div>
+      <div class="side-panel-pane" id="pane-bookmarks" role="tabpanel">
+        <ul class="bookmarks-list" id="bookmarks-list"></ul>
+        <div class="bookmarks-empty" id="bookmarks-empty">No bookmarks yet.<br>Tap the ★ in the toolbar while reading to save a page.</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="stage" role="main" aria-label="Flipbook reader">
     <div class="book-shadow">
-      <div id="book"></div>
+      <div id="book" aria-label="Book pages"></div>
+    </div>
+  </main>
+
+  <!-- Bottom scrubber bar (replaces old controls) -->
+  <nav class="scrubber" aria-label="Page navigation">
+    <button class="nav-btn" id="prev-btn" aria-label="Previous page" title="Previous page">‹</button>
+    <div class="page-input-wrap">
+      <input type="number" class="page-input" id="page-input" min="1" value="1" aria-label="Current page" />
+      <span class="page-total" id="page-total">/ 1</span>
+    </div>
+    <input type="range" class="scrubber-slider" id="scrubber-slider" min="0" max="0" value="0" aria-label="Page slider" />
+    <button class="nav-btn" id="next-btn" aria-label="Next page" title="Next page">›</button>
+  </nav>
+
+  <!-- Mobile swipe hint, shown only on first visit -->
+  <div class="swipe-hint" id="swipe-hint" role="dialog" aria-modal="false" aria-labelledby="swipe-hint-text">
+    <div class="swipe-hint-inner">
+      <div class="swipe-hint-icon" aria-hidden="true">👆</div>
+      <div class="swipe-hint-text" id="swipe-hint-text">Swipe left or right to turn pages. Tap a corner to flip.</div>
+      <button class="swipe-hint-dismiss" id="swipe-hint-dismiss">Got it</button>
     </div>
   </div>
 
-  <div class="controls">
-    <button class="nav-btn" id="prev-btn" aria-label="Previous page">‹</button>
-    <div class="page-indicator" id="page-indicator">1 / 1</div>
-    <button class="nav-btn" id="next-btn" aria-label="Next page">›</button>
+  <!-- Share modal -->
+  <div class="modal-backdrop" id="share-modal" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+    <div class="modal">
+      <h3 id="share-modal-title">Share this page</h3>
+      <p class="modal-desc">Copy the link below — it opens the book at the page you're currently viewing.</p>
+      <div class="modal-url-row">
+        <input type="text" class="modal-url" id="share-url" readonly />
+        <button class="modal-btn primary" id="share-copy-btn">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn" id="share-close-btn">Close</button>
+      </div>
+    </div>
   </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- SEO-only content: full book text, hidden visually but indexable -->
+  <article class="seo-only" id="seo-content" aria-hidden="true">
+    <h1>AI For Business Leaders by Vinay Pasricha</h1>
+  </article>
 
   <script src="book-read-content.js"></script>
   <script>
@@ -429,42 +1198,58 @@
         author: 'Vinay Pasricha'
       };
 
-      // Page dimensions
+      // ---- Utilities ----
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+      }
+      function yieldFrame() { return new Promise(r => requestAnimationFrame(r)); }
+
+      // ---- Dimensions ----
       function getDims() {
         const isMobile = window.innerWidth <= 768;
         const stageW = window.innerWidth - (isMobile ? 20 : 160);
         const stageH = window.innerHeight - 140;
-        // Maintain 5:7 portrait page ratio
-        const maxPageH = Math.min(stageH, 820);
-        const idealPageH = Math.min(maxPageH, isMobile ? stageH : 800);
+        const idealPageH = Math.min(stageH, isMobile ? stageH : 800);
         let pageH = idealPageH;
         let pageW = Math.round(pageH * (5/7));
-        // For spread (two pages), width is 2*pageW. If that exceeds stage width, shrink.
         if (!isMobile) {
           const spreadW = pageW * 2;
           if (spreadW > stageW) {
             pageW = Math.floor(stageW / 2);
             pageH = Math.round(pageW * (7/5));
           }
-        } else {
-          if (pageW > stageW) { pageW = stageW; pageH = Math.round(pageW * (7/5)); }
+        } else if (pageW > stageW) {
+          pageW = stageW;
+          pageH = Math.round(pageW * (7/5));
         }
         return { pageW, pageH, isMobile };
       }
 
-      // Escape HTML
-      function esc(s) {
-        return String(s)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;')
-          .replace(/'/g, '&#039;');
+      // ---- Sentence-level splitter for paragraphs that exceed a single page ----
+      function splitParagraphIntoChunks(text, measure, pageW, pageH) {
+        // Sentence split (English): split after . ! ? followed by whitespace
+        const parts = String(text).match(/[^.!?]+[.!?]+["')\]]*\s*|\s*$/g) || [text];
+        const sentences = parts.map(s => s.trim()).filter(Boolean);
+        const chunks = [];
+        let current = '';
+        for (const s of sentences) {
+          const trial = (current ? current + ' ' : '') + s;
+          measure.innerHTML = `<div class="page-content" style="width:${pageW}px;height:${pageH}px;"><p>${esc(trial)}</p></div>`;
+          if (measure.firstChild.scrollHeight > measure.firstChild.clientHeight + 4 && current) {
+            chunks.push(current);
+            current = s;
+          } else {
+            current = trial;
+          }
+        }
+        if (current) chunks.push(current);
+        return chunks;
       }
 
-      // Paginate chapters into fixed-height pages.
-      // Each chapter starts with a dedicated divider page (just title), then body pages.
-      function paginate(chapters, pageW, pageH) {
+      // ---- Pagination (async, chunked, with progress) ----
+      async function paginate(chapters, pageW, pageH, onProgress) {
         const measure = document.createElement('div');
         measure.className = 'page-measure';
         measure.style.width = pageW + 'px';
@@ -474,26 +1259,31 @@
 
         for (let ci = 0; ci < chapters.length; ci++) {
           const ch = chapters[ci];
-
-          // 1. Chapter divider page
           result.push({ type: 'divider', chapter: ch.title, num: ch.num, title: ch.title });
 
-          // 2. Body pages — content starts fresh, no inline header (it's on the divider)
-          let currentBody = '';
-          const paras = ch.content.slice();
-          let i = 0;
+          // Expand any single paragraph that overflows a whole page into sentence chunks.
+          const paras = [];
+          for (const p of ch.content) {
+            measure.innerHTML = `<div class="page-content" style="width:${pageW}px;height:${pageH}px;"><p>${esc(p)}</p></div>`;
+            if (measure.firstChild.scrollHeight > measure.firstChild.clientHeight + 4) {
+              splitParagraphIntoChunks(p, measure, pageW, pageH).forEach(c => paras.push(c));
+            } else {
+              paras.push(p);
+            }
+          }
 
+          let currentBody = '';
+          let pageInChapter = 0;
+          let i = 0;
           while (i < paras.length) {
             const nextP = `<p>${esc(paras[i])}</p>`;
             const trial = currentBody + nextP;
             measure.innerHTML = `<div class="page-content" style="width:${pageW}px;height:${pageH}px;">${trial}</div>`;
             const inner = measure.firstChild;
-
-            // 4px tolerance to avoid edge-case overflow due to subpixel rendering
             const overflows = inner.scrollHeight > inner.clientHeight + 4;
-
             if (overflows && currentBody !== '') {
-              result.push({ type: 'text', chapter: ch.title, body: currentBody });
+              result.push({ type: 'text', chapter: ch.title, body: currentBody, pageInChapter });
+              pageInChapter++;
               currentBody = '';
             } else {
               currentBody = trial;
@@ -501,21 +1291,69 @@
             }
           }
           if (currentBody.trim()) {
-            result.push({ type: 'text', chapter: ch.title, body: currentBody });
+            result.push({ type: 'text', chapter: ch.title, body: currentBody, pageInChapter });
           }
+
+          if (onProgress) onProgress(ci + 1, chapters.length);
+          if (ci % 2 === 1) await yieldFrame();
         }
 
         measure.remove();
         return result;
       }
 
+      // ---- TOC pagination (split TOC across multiple pages if too many chapters) ----
+      function shortNum(num) {
+        const m = String(num).match(/(\d+)/);
+        if (m) return m[1].padStart(2, '0');
+        return '—';
+      }
+
+      function paginateTOC(chapters, chapterStartPages, pageW, pageH) {
+        const measure = document.createElement('div');
+        measure.className = 'page-measure';
+        measure.style.width = pageW + 'px';
+        document.body.appendChild(measure);
+
+        function tocHTML(items, isFirst) {
+          const heading = isFirst
+            ? `<h2>Contents</h2><div class="toc-rule"></div>`
+            : `<h2 style="visibility:hidden">Contents</h2><div class="toc-rule" style="visibility:hidden"></div>`;
+          return `<div class="toc-inner">${heading}<ul class="toc-list">${items.join('')}</ul></div>`;
+        }
+
+        const liHTML = (ch, i) => {
+          const page = chapterStartPages[i] != null ? (chapterStartPages[i] + 1) : '';
+          return `<li data-chapter="${i}"><span class="toc-num">${esc(shortNum(ch.num))}</span><span class="toc-title-text">${esc(ch.title)}</span><span class="toc-dots"></span><span class="toc-page">${page}</span></li>`;
+        };
+
+        const pages = [];
+        let bucket = [];
+        let isFirst = true;
+        for (let i = 0; i < chapters.length; i++) {
+          bucket.push(liHTML(chapters[i], i));
+          measure.innerHTML = tocHTML(bucket, isFirst);
+          const inner = measure.firstChild;
+          if (inner.scrollHeight > pageH + 4 && bucket.length > 1) {
+            // Roll back last item, commit current page
+            const last = bucket.pop();
+            pages.push(tocHTML(bucket, isFirst));
+            bucket = [last];
+            isFirst = false;
+          }
+        }
+        if (bucket.length) pages.push(tocHTML(bucket, isFirst));
+
+        measure.remove();
+        return pages;
+      }
+
       function buildCoverPage() {
-        return `<img class="cover-img" src="../assets/images/book-cover-hd.jpg" alt="${esc(BOOK_META.title)} — book cover" />`;
+        return `<img class="cover-img" src="../assets/images/book-cover-hd.jpg" alt="${esc(BOOK_META.title)} — book cover" loading="eager" decoding="sync" />`;
       }
 
       function buildCoverBackPage() {
-        return `
-          <div class="cover-back-inner">
+        return `<div class="cover-back-inner">
             <div class="imprint">${esc(BOOK_META.imprint)}</div>
             <div class="ornament">◆</div>
             <div class="subtitle">${esc(BOOK_META.subtitle)}</div>
@@ -523,58 +1361,103 @@
               <div class="by-label">Written by</div>
               <div class="author">${esc(BOOK_META.author)}</div>
             </div>
-          </div>
-        `;
+          </div>`;
       }
 
-      function buildTOCPage(chapters, chapterStartPages) {
-        // Use a short chapter label: "Note", "1", "2", ... so layout is clean
-        function shortNum(num) {
-          const m = String(num).match(/(\d+)/);
-          if (m) return m[1].padStart(2, '0');
-          // Non-chapter labels (e.g. "PREFACE", "NOTE TO THE READER") get a dash
-          return '—';
-        }
-        const items = chapters.map((ch, i) => {
-          const page = chapterStartPages[i] != null ? (chapterStartPages[i] + 1) : '';
-          return `<li data-chapter="${i}"><span class="toc-num">${esc(shortNum(ch.num))}</span><span class="toc-title-text">${esc(ch.title)}</span><span class="toc-dots"></span><span class="toc-page">${page}</span></li>`;
-        }).join('');
-        return `
-          <div class="toc-inner">
-            <h2>Contents</h2>
-            <div class="toc-rule"></div>
-            <ul class="toc-list">${items}</ul>
-          </div>
-        `;
+      // ---- SEO content: render full book in hidden semantic structure ----
+      function injectSEOContent() {
+        const root = document.getElementById('seo-content');
+        if (!root) return;
+        const parts = CHAPTERS.map(ch =>
+          `<section><h2>${esc(ch.num)}: ${esc(ch.title)}</h2>${ch.content.map(p => `<p>${esc(p)}</p>`).join('')}</section>`
+        );
+        root.insertAdjacentHTML('beforeend', parts.join(''));
       }
 
+      // ---- State ----
       let pageFlip = null;
+      let chapterStartPages = [];
+      let coverPageIndex = 0;
+      let tocPageIndex = 0;
+      let totalPages = 0;
+      let pageMeta = []; // { kind, chapter, num } per page index
+      let chapterAtPage = []; // map page index -> chapter title
+      let zoomLevel = 1;
+      let panOffset = { x: 0, y: 0 };
+      let autoFlipTimer = null;
+      let bookmarks = loadBookmarks();
+      let searchIndex = []; // [{ chapter, pageIdx, text }]
+      let lastBuiltDims = { pageW: 0, pageH: 0, isMobile: null };
+      let hasBuiltOnce = false;
 
+      function loadBookmarks() {
+        try { return JSON.parse(localStorage.getItem('flipbook_bookmarks_ai') || '[]'); }
+        catch(e) { return []; }
+      }
+      function saveBookmarks() {
+        try { localStorage.setItem('flipbook_bookmarks_ai', JSON.stringify(bookmarks)); }
+        catch(e) {}
+      }
+
+      // ---- Build ----
       async function build() {
         const stage = document.getElementById('book');
+        const loadingProgress = document.getElementById('loading-progress');
+        const loadingLabel = document.getElementById('loading-label');
         stage.innerHTML = '';
 
         const { pageW, pageH, isMobile } = getDims();
-        const pagedContent = paginate(CHAPTERS, pageW, pageH);
+        lastBuiltDims = { pageW, pageH, isMobile };
 
-        // Compute chapter-start page numbers (0-indexed for pageFlip.turnToPage)
-        // Layout: cover (0), inside-cover (1), TOC (2), then paged content starts at 3.
-        // Each chapter's first page is its divider.
-        const PRE_PAGES = 3;
-        const chapterStartPages = [];
+        loadingLabel.textContent = 'Paginating chapters…';
+        const pagedContent = await paginate(CHAPTERS, pageW, pageH, (done, total) => {
+          loadingProgress.textContent = `Chapter ${done} of ${total}`;
+        });
+        loadingProgress.textContent = '';
+        loadingLabel.textContent = 'Building book…';
+        await yieldFrame();
+
+        // First pass: build TOC with placeholder page numbers (all 0)
+        // We need TOC pages to know real chapter positions; chapter positions depend on
+        // how many TOC pages there are. Solve by computing twice.
+        const stubStartPages = CHAPTERS.map(() => 0);
+        const stubTocPages = paginateTOC(CHAPTERS, stubStartPages, pageW, pageH);
+        const PRE_PAGES_INITIAL = 2 + stubTocPages.length; // cover + cover-back + toc count
+
+        chapterStartPages = [];
         pagedContent.forEach((p, idx) => {
           if (p.type === 'divider') {
             const chIndex = CHAPTERS.findIndex(c => c.title === p.title);
             if (chIndex >= 0 && chapterStartPages[chIndex] == null) {
-              chapterStartPages[chIndex] = PRE_PAGES + idx;
+              chapterStartPages[chIndex] = PRE_PAGES_INITIAL + idx;
             }
           }
         });
 
+        // Now rebuild TOC with real chapter page numbers
+        const tocPages = paginateTOC(CHAPTERS, chapterStartPages, pageW, pageH);
+        // If TOC page count changed after recompute, recompute starts once more
+        if (tocPages.length !== stubTocPages.length) {
+          const PRE_PAGES_FINAL = 2 + tocPages.length;
+          chapterStartPages = [];
+          pagedContent.forEach((p, idx) => {
+            if (p.type === 'divider') {
+              const chIndex = CHAPTERS.findIndex(c => c.title === p.title);
+              if (chIndex >= 0 && chapterStartPages[chIndex] == null) {
+                chapterStartPages[chIndex] = PRE_PAGES_FINAL + idx;
+              }
+            }
+          });
+        }
+
+        coverPageIndex = 0;
+        tocPageIndex = 2; // first TOC page
+
+        // Assemble final page list
         const allPages = [];
         allPages.push({ kind: 'cover', html: buildCoverPage() });
         allPages.push({ kind: 'cover-back', html: buildCoverBackPage() });
-        allPages.push({ kind: 'toc', html: buildTOCPage(CHAPTERS, chapterStartPages) });
+        tocPages.forEach(html => allPages.push({ kind: 'toc', html }));
 
         pagedContent.forEach((p) => {
           if (p.type === 'divider') {
@@ -592,12 +1475,16 @@
             allPages.push({
               kind: 'text',
               chapter: p.chapter,
-              html: `<div class="page-content">${p.body}</div>`
+              pageInChapter: p.pageInChapter,
+              html: `<div class="page-content${p.pageInChapter === 0 ? ' first-of-chapter' : ''}">${p.body}</div>`
             });
           }
         });
 
-        // Build DOM
+        // Build DOM with data-pos for verso/recto/single
+        // With showCover:true: page 0 = recto alone, pages 1+2 = verso+recto pair, etc.
+        pageMeta = [];
+        chapterAtPage = [];
         allPages.forEach((pg, idx) => {
           const el = document.createElement('div');
           let cls = 'page';
@@ -608,6 +1495,12 @@
           el.style.width = pageW + 'px';
           el.style.height = pageH + 'px';
 
+          let pos;
+          if (isMobile) pos = 'single';
+          else if (idx === 0) pos = 'recto';
+          else pos = (idx % 2 === 1) ? 'verso' : 'recto';
+          el.setAttribute('data-pos', pos);
+
           let inner = pg.html;
           if (pg.kind === 'text') {
             const runningHead = pg.chapter ? `<div class="running-head">${esc(pg.chapter)}</div>` : '';
@@ -615,6 +1508,9 @@
           }
           el.innerHTML = inner;
           stage.appendChild(el);
+
+          pageMeta.push({ kind: pg.kind, chapter: pg.chapter || '', html: pg.html });
+          chapterAtPage[idx] = pg.chapter || '';
         });
 
         // Init StPageFlip
@@ -622,14 +1518,16 @@
           try { pageFlip.destroy(); } catch(e){}
           pageFlip = null;
         }
+        if (typeof St === 'undefined' || !St.PageFlip) {
+          showError('Reader library failed to load. Please refresh.');
+          return;
+        }
+
         pageFlip = new St.PageFlip(stage, {
-          width: pageW,
-          height: pageH,
+          width: pageW, height: pageH,
           size: 'fixed',
-          minWidth: 200,
-          maxWidth: 1200,
-          minHeight: 280,
-          maxHeight: 1680,
+          minWidth: 200, maxWidth: 1200,
+          minHeight: 280, maxHeight: 1680,
           maxShadowOpacity: 0.6,
           showCover: true,
           mobileScrollSupport: false,
@@ -644,72 +1542,656 @@
         });
         pageFlip.loadFromHTML(document.querySelectorAll('#book .page'));
 
-        // Update indicator
-        const indicator = document.getElementById('page-indicator');
-        const total = pageFlip.getPageCount();
-        function updateIndicator() {
-          const curr = pageFlip.getCurrentPageIndex() + 1;
-          indicator.textContent = `${curr} / ${total}`;
-        }
-        updateIndicator();
-        pageFlip.on('flip', updateIndicator);
+        totalPages = pageFlip.getPageCount();
 
-        // Hook TOC clicks
-        document.querySelectorAll('.toc-list li').forEach(li => {
+        // Set up scrubber slider & page input
+        const slider = document.getElementById('scrubber-slider');
+        const pageInput = document.getElementById('page-input');
+        const pageTotal = document.getElementById('page-total');
+        slider.min = '0';
+        slider.max = String(totalPages - 1);
+        pageInput.max = String(totalPages);
+        pageTotal.textContent = `/ ${totalPages}`;
+
+        function onFlip() {
+          const curr = pageFlip.getCurrentPageIndex();
+          slider.value = String(curr);
+          slider.style.setProperty('--progress', `${(curr / Math.max(1, totalPages - 1)) * 100}%`);
+          pageInput.value = String(curr + 1);
+          updateBookmarkButtonState();
+          updateThumbActive();
+          updateHash(curr);
+        }
+        onFlip();
+        pageFlip.on('flip', onFlip);
+
+        // Build the panel-toc (in the side panel, not on a book page)
+        renderPanelTOC();
+
+        // Build search index
+        buildSearchIndex();
+
+        // Render bookmarks panel
+        renderBookmarks();
+
+        // Hook TOC clicks on actual TOC pages inside the book
+        document.querySelectorAll('#book .toc-list li').forEach(li => {
           li.addEventListener('click', () => {
             const chIdx = parseInt(li.dataset.chapter, 10);
             const page = chapterStartPages[chIdx];
-            if (page != null) pageFlip.turnToPage(page);
+            if (page != null && pageFlip) pageFlip.turnToPage(page);
           });
         });
 
-        // Hide loading
+        // Honor hash like #page=12 if present
+        applyHashToPage();
+
         document.getElementById('loading').classList.add('hidden');
+        maybeShowSwipeHint(isMobile);
       }
 
-      // Nav buttons
+      // ---- Error UI ----
+      function showError(msg) {
+        const loading = document.getElementById('loading');
+        loading.innerHTML = `<div style="text-align:center; max-width:340px; padding:0 20px;">
+          <div style="color:#c9a24a; font-size:14px; margin-bottom:16px; letter-spacing:1px;">${esc(msg)}</div>
+          <button onclick="location.reload()" style="background:rgba(201,162,74,0.15);border:1px solid rgba(201,162,74,0.4);color:#c9a24a;padding:10px 24px;border-radius:4px;cursor:pointer;font-family:Georgia,serif;font-size:13px;letter-spacing:1px;">Refresh</button>
+        </div>`;
+      }
+
+      // ---- CDN fallback detection ----
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          if (typeof St === 'undefined' || !St.PageFlip) {
+            showError('Could not load reader library (network or CDN issue). Please refresh.');
+          }
+        }, 8000);
+      });
+
+      // ---- Swipe hint (mobile, first visit only) ----
+      function maybeShowSwipeHint(isMobile) {
+        if (!isMobile) return;
+        try {
+          if (localStorage.getItem('flipbook_swipe_hint_seen') === '1') return;
+        } catch(e) {}
+        const hint = document.getElementById('swipe-hint');
+        setTimeout(() => hint.classList.add('visible'), 400);
+      }
+      document.getElementById('swipe-hint-dismiss').addEventListener('click', () => {
+        document.getElementById('swipe-hint').classList.remove('visible');
+        try { localStorage.setItem('flipbook_swipe_hint_seen', '1'); } catch(e) {}
+      });
+
+      // ============================================================
+      // Helper functions for new features
+      // ============================================================
+
+      // ---- Toast ----
+      let toastTimer = null;
+      function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('visible'), 2400);
+      }
+
+      // ---- Panel TOC ----
+      function renderPanelTOC() {
+        const pane = document.getElementById('pane-toc');
+        const items = CHAPTERS.map((ch, i) => {
+          const page = chapterStartPages[i] != null ? (chapterStartPages[i] + 1) : '';
+          return `<li data-chapter="${i}"><span class="pt-num">${esc(shortNum(ch.num))}</span><span class="pt-title">${esc(ch.title)}</span><span class="pt-page">${page}</span></li>`;
+        }).join('');
+        pane.innerHTML = `<ul class="panel-toc-list">${items}</ul>`;
+        pane.querySelectorAll('li').forEach(li => {
+          li.addEventListener('click', () => {
+            const chIdx = parseInt(li.dataset.chapter, 10);
+            const page = chapterStartPages[chIdx];
+            if (page != null && pageFlip) {
+              pageFlip.turnToPage(page);
+              if (window.innerWidth <= 720) closePanel();
+            }
+          });
+        });
+      }
+
+      // ---- Search index ----
+      function buildSearchIndex() {
+        searchIndex = [];
+        CHAPTERS.forEach((ch, ci) => {
+          ch.content.forEach((para, pi) => {
+            searchIndex.push({
+              chapter: ch.title,
+              chapterIdx: ci,
+              paraIdx: pi,
+              text: para,
+              lower: para.toLowerCase()
+            });
+          });
+        });
+      }
+
+      function doSearch(query) {
+        const results = document.getElementById('search-results');
+        const status = document.getElementById('search-status');
+        const clearBtn = document.getElementById('search-clear');
+        const q = String(query || '').trim();
+        clearBtn.classList.toggle('visible', q.length > 0);
+        if (!q) {
+          results.innerHTML = '';
+          status.textContent = '';
+          return;
+        }
+        if (q.length < 2) {
+          status.textContent = 'Type at least 2 characters';
+          results.innerHTML = '';
+          return;
+        }
+        const lower = q.toLowerCase();
+        const matches = [];
+        for (const entry of searchIndex) {
+          const idx = entry.lower.indexOf(lower);
+          if (idx >= 0) {
+            // Build snippet ~ 70 chars around match
+            const start = Math.max(0, idx - 30);
+            const end = Math.min(entry.text.length, idx + lower.length + 50);
+            let snippet = entry.text.slice(start, end);
+            if (start > 0) snippet = '… ' + snippet;
+            if (end < entry.text.length) snippet = snippet + ' …';
+            matches.push({ ...entry, snippet, matchStart: idx - start + (start > 0 ? 2 : 0), matchLen: lower.length });
+            if (matches.length >= 80) break;
+          }
+        }
+        status.textContent = matches.length === 0
+          ? 'No results'
+          : `${matches.length} result${matches.length === 1 ? '' : 's'}`;
+        results.innerHTML = matches.map((m, i) => {
+          const before = esc(m.snippet.slice(0, m.matchStart));
+          const hit = esc(m.snippet.slice(m.matchStart, m.matchStart + m.matchLen));
+          const after = esc(m.snippet.slice(m.matchStart + m.matchLen));
+          const pageNum = (chapterStartPages[m.chapterIdx] != null ? chapterStartPages[m.chapterIdx] + 1 : '');
+          return `<li class="search-result" data-chapter="${m.chapterIdx}">
+            <div class="search-result-meta">
+              <span>${esc(m.chapter)}</span>
+              <span class="sr-page">p. ${pageNum}</span>
+            </div>
+            <div class="search-result-snippet">${before}<mark>${hit}</mark>${after}</div>
+          </li>`;
+        }).join('');
+        results.querySelectorAll('.search-result').forEach(el => {
+          el.addEventListener('click', () => {
+            const chIdx = parseInt(el.dataset.chapter, 10);
+            const page = chapterStartPages[chIdx];
+            if (page != null && pageFlip) {
+              pageFlip.turnToPage(page);
+              if (window.innerWidth <= 720) closePanel();
+            }
+          });
+        });
+      }
+
+      // ---- Bookmarks ----
+      function toggleBookmark() {
+        if (!pageFlip) return;
+        const curr = pageFlip.getCurrentPageIndex();
+        const existingIdx = bookmarks.findIndex(b => b.page === curr);
+        if (existingIdx >= 0) {
+          bookmarks.splice(existingIdx, 1);
+          showToast('Bookmark removed');
+        } else {
+          const chapter = chapterAtPage[curr] || '';
+          bookmarks.push({ page: curr, chapter, savedAt: Date.now() });
+          bookmarks.sort((a, b) => a.page - b.page);
+          showToast('Bookmarked');
+        }
+        saveBookmarks();
+        updateBookmarkButtonState();
+        renderBookmarks();
+      }
+
+      function updateBookmarkButtonState() {
+        if (!pageFlip) return;
+        const curr = pageFlip.getCurrentPageIndex();
+        const isBookmarked = bookmarks.some(b => b.page === curr);
+        ['bookmark-toggle-btn', 'm-bookmark-toggle'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (btn) btn.classList.toggle('active', isBookmarked);
+        });
+      }
+
+      function renderBookmarks() {
+        const list = document.getElementById('bookmarks-list');
+        const empty = document.getElementById('bookmarks-empty');
+        if (!bookmarks.length) {
+          list.innerHTML = '';
+          empty.style.display = 'block';
+          return;
+        }
+        empty.style.display = 'none';
+        list.innerHTML = bookmarks.map((b, i) => `
+          <li class="bookmark-item" data-page="${b.page}">
+            <div class="bookmark-item-info">
+              <div class="bookmark-item-page">Page ${b.page + 1}</div>
+              <div class="bookmark-item-title">${esc(b.chapter || 'Untitled')}</div>
+            </div>
+            <button class="bookmark-remove" data-bm-remove="${i}" aria-label="Remove bookmark">×</button>
+          </li>
+        `).join('');
+        list.querySelectorAll('.bookmark-item').forEach(li => {
+          li.addEventListener('click', (e) => {
+            if (e.target.closest('.bookmark-remove')) return;
+            const p = parseInt(li.dataset.page, 10);
+            if (pageFlip) {
+              pageFlip.turnToPage(p);
+              if (window.innerWidth <= 720) closePanel();
+            }
+          });
+        });
+        list.querySelectorAll('.bookmark-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const i = parseInt(btn.dataset.bmRemove, 10);
+            bookmarks.splice(i, 1);
+            saveBookmarks();
+            renderBookmarks();
+            updateBookmarkButtonState();
+          });
+        });
+      }
+
+      // ---- Thumbnails (lazy render on first open) ----
+      let thumbsRendered = false;
+      function renderThumbnails() {
+        if (thumbsRendered) return;
+        const pane = document.getElementById('pane-thumbs');
+        const grid = document.createElement('div');
+        grid.className = 'thumbs-grid';
+        // Render each page as a scaled-down clone of the source HTML
+        for (let i = 0; i < pageMeta.length; i++) {
+          const m = pageMeta[i];
+          const thumb = document.createElement('div');
+          thumb.className = 'thumb';
+          thumb.dataset.page = String(i);
+          let previewClass = 'thumb-preview';
+          if (m.kind === 'cover') previewClass += ' cover';
+          if (m.kind === 'cover-back') previewClass += ' cover-back';
+          if (m.kind === 'divider') previewClass += ' ch-divider';
+          thumb.innerHTML = `<div class="${previewClass}">${m.html}</div><div class="thumb-label">${i + 1}</div>`;
+          thumb.addEventListener('click', () => {
+            if (pageFlip) {
+              pageFlip.turnToPage(i);
+              if (window.innerWidth <= 720) closePanel();
+            }
+          });
+          grid.appendChild(thumb);
+        }
+        pane.innerHTML = '';
+        pane.appendChild(grid);
+        thumbsRendered = true;
+        updateThumbActive();
+      }
+      function updateThumbActive() {
+        if (!thumbsRendered || !pageFlip) return;
+        const curr = pageFlip.getCurrentPageIndex();
+        document.querySelectorAll('#pane-thumbs .thumb').forEach(t => {
+          t.classList.toggle('active', parseInt(t.dataset.page, 10) === curr);
+        });
+        const active = document.querySelector('#pane-thumbs .thumb.active');
+        if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      // ---- Side panel ----
+      function openPanel(tab) {
+        const panel = document.getElementById('side-panel');
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+        if (tab) switchPanelTab(tab);
+        if (tab === 'thumbs') renderThumbnails();
+        // Highlight the toolbar button
+        document.querySelectorAll('.topbar .btn-icon').forEach(b => b.classList.remove('active'));
+        const tabBtnMap = { toc: 'panel-toc-btn', thumbs: 'panel-thumbs-btn', search: 'panel-search-btn', bookmarks: 'panel-bookmarks-btn' };
+        const btn = document.getElementById(tabBtnMap[tab]);
+        if (btn) btn.classList.add('active');
+        // Focus search input when opening search tab
+        if (tab === 'search') setTimeout(() => document.getElementById('search-input').focus(), 200);
+      }
+      function closePanel() {
+        const panel = document.getElementById('side-panel');
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+        document.querySelectorAll('.topbar .btn-icon').forEach(b => {
+          if (b.id && b.id.startsWith('panel-')) b.classList.remove('active');
+        });
+        updateBookmarkButtonState();
+      }
+      function togglePanel(tab) {
+        const panel = document.getElementById('side-panel');
+        const isOpen = panel.classList.contains('open');
+        const currentTab = panel.dataset.activeTab;
+        if (isOpen && currentTab === tab) closePanel();
+        else openPanel(tab);
+      }
+      function switchPanelTab(tab) {
+        const panel = document.getElementById('side-panel');
+        panel.dataset.activeTab = tab;
+        ['toc', 'thumbs', 'search', 'bookmarks'].forEach(t => {
+          document.getElementById(`tab-${t}`).setAttribute('aria-selected', String(t === tab));
+          document.getElementById(`tab-${t}`).classList.toggle('active', t === tab);
+          document.getElementById(`pane-${t}`).classList.toggle('active', t === tab);
+        });
+        if (tab === 'thumbs') renderThumbnails();
+      }
+
+      // ---- Zoom + pan ----
+      function applyTransform() {
+        const wrap = document.querySelector('.book-shadow');
+        if (!wrap) return;
+        wrap.style.transform = `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`;
+        const stage = document.querySelector('.stage');
+        stage.classList.toggle('zoomed', zoomLevel > 1.001);
+      }
+      function setZoom(level) {
+        zoomLevel = Math.max(1, Math.min(2.5, level));
+        if (zoomLevel === 1) panOffset = { x: 0, y: 0 };
+        applyTransform();
+      }
+      function zoomIn() { setZoom(zoomLevel + 0.25); }
+      function zoomOut() { setZoom(zoomLevel - 0.25); }
+      function resetZoom() { setZoom(1); }
+      // Drag-to-pan when zoomed
+      (function setupPan() {
+        const stage = document.querySelector('.stage');
+        let dragging = false;
+        let startX = 0, startY = 0, startPan = null;
+        stage.addEventListener('mousedown', (e) => {
+          if (zoomLevel <= 1.001) return;
+          if (e.target.closest('.btn-icon, .nav-btn, .scrubber, .topbar, .side-panel')) return;
+          dragging = true;
+          startX = e.clientX; startY = e.clientY;
+          startPan = { ...panOffset };
+          stage.classList.add('panning');
+          e.preventDefault();
+        });
+        window.addEventListener('mousemove', (e) => {
+          if (!dragging) return;
+          panOffset = { x: startPan.x + (e.clientX - startX), y: startPan.y + (e.clientY - startY) };
+          applyTransform();
+        });
+        window.addEventListener('mouseup', () => {
+          if (dragging) { dragging = false; stage.classList.remove('panning'); }
+        });
+      })();
+
+      // ---- Auto-flip ----
+      function isAutoFlipping() { return autoFlipTimer !== null; }
+      function startAutoFlip() {
+        if (autoFlipTimer) return;
+        autoFlipTimer = setInterval(() => {
+          if (!pageFlip) return;
+          const curr = pageFlip.getCurrentPageIndex();
+          if (curr >= totalPages - 1) {
+            stopAutoFlip();
+            showToast('Reached the end');
+          } else {
+            pageFlip.flipNext();
+          }
+        }, 4500);
+        updateAutoFlipBtn();
+        showToast('Auto-flip on');
+      }
+      function stopAutoFlip() {
+        if (!autoFlipTimer) return;
+        clearInterval(autoFlipTimer);
+        autoFlipTimer = null;
+        updateAutoFlipBtn();
+      }
+      function toggleAutoFlip() {
+        if (isAutoFlipping()) stopAutoFlip();
+        else startAutoFlip();
+      }
+      function updateAutoFlipBtn() {
+        ['autoflip-btn', 'm-autoflip'].forEach(id => {
+          const btn = document.getElementById(id);
+          if (!btn) return;
+          btn.classList.toggle('active', isAutoFlipping());
+          btn.textContent = isAutoFlipping() ? '⏸' : '▶';
+        });
+      }
+
+      // ---- Share / hash routing ----
+      function updateHash(pageIdx) {
+        // Skip page 0 (cover) to keep URL clean
+        if (pageIdx === 0) {
+          if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+        } else {
+          history.replaceState(null, '', `${location.pathname}${location.search}#page=${pageIdx + 1}`);
+        }
+      }
+      function applyHashToPage() {
+        const m = (location.hash || '').match(/page=(\d+)/);
+        if (m) {
+          const target = Math.max(0, Math.min(totalPages - 1, parseInt(m[1], 10) - 1));
+          if (pageFlip) pageFlip.turnToPage(target);
+        }
+      }
+      function openShareModal() {
+        const url = location.origin + location.pathname + (pageFlip && pageFlip.getCurrentPageIndex() > 0
+          ? `#page=${pageFlip.getCurrentPageIndex() + 1}` : '');
+        document.getElementById('share-url').value = url;
+        document.getElementById('share-modal').classList.add('visible');
+        setTimeout(() => document.getElementById('share-url').select(), 100);
+      }
+      function closeShareModal() {
+        document.getElementById('share-modal').classList.remove('visible');
+      }
+
+      // ---- Print ----
+      function doPrint() {
+        showToast('Use "Save as PDF" in the print dialog');
+        setTimeout(() => window.print(), 500);
+      }
+
+      // ============================================================
+      // Event handlers
+      // ============================================================
+
+      // ---- Bottom scrubber ----
+      const slider = document.getElementById('scrubber-slider');
+      const pageInput = document.getElementById('page-input');
+      slider.addEventListener('input', () => {
+        if (!pageFlip) return;
+        const target = parseInt(slider.value, 10);
+        slider.style.setProperty('--progress', `${(target / Math.max(1, totalPages - 1)) * 100}%`);
+        pageInput.value = String(target + 1);
+      });
+      slider.addEventListener('change', () => {
+        if (!pageFlip) return;
+        pageFlip.turnToPage(parseInt(slider.value, 10));
+      });
+      pageInput.addEventListener('change', () => {
+        if (!pageFlip) return;
+        let v = parseInt(pageInput.value, 10);
+        if (isNaN(v)) v = 1;
+        v = Math.max(1, Math.min(totalPages, v));
+        pageInput.value = String(v);
+        pageFlip.turnToPage(v - 1);
+      });
+      pageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') e.target.blur();
+      });
+
       document.getElementById('prev-btn').addEventListener('click', () => pageFlip && pageFlip.flipPrev());
       document.getElementById('next-btn').addEventListener('click', () => pageFlip && pageFlip.flipNext());
 
-      // Keyboard
+      // ---- Keyboard ----
       document.addEventListener('keydown', (e) => {
         if (!pageFlip) return;
-        if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); pageFlip.flipNext(); }
-        if (e.key === 'ArrowLeft') { e.preventDefault(); pageFlip.flipPrev(); }
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        // Ctrl/Cmd + = or - for zoom
+        if ((e.ctrlKey || e.metaKey) && (e.key === '=' || e.key === '+')) { e.preventDefault(); zoomIn(); return; }
+        if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); zoomOut(); return; }
+        if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); resetZoom(); return; }
+        if (e.key === 'Escape') { closePanel(); closeShareModal(); return; }
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); pageFlip.flipNext(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); pageFlip.flipPrev(); }
+        else if (e.key === 'Home') { e.preventDefault(); pageFlip.turnToPage(0); }
+        else if (e.key === 'End') { e.preventDefault(); pageFlip.turnToPage(pageFlip.getPageCount() - 1); }
       });
 
-      // TOC button — jump to TOC page
-      document.getElementById('toc-btn').addEventListener('click', () => {
-        if (pageFlip) pageFlip.turnToPage(1);
-      });
-
-      // Fullscreen
-      document.getElementById('fs-btn').addEventListener('click', () => {
+      // ---- Toolbar buttons (desktop + mobile mirror) ----
+      function on(id, ev, fn) { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); }
+      on('cover-btn', 'click', () => pageFlip && pageFlip.turnToPage(coverPageIndex));
+      on('panel-toc-btn', 'click', () => togglePanel('toc'));
+      on('panel-thumbs-btn', 'click', () => togglePanel('thumbs'));
+      on('panel-search-btn', 'click', () => togglePanel('search'));
+      on('panel-bookmarks-btn', 'click', () => togglePanel('bookmarks'));
+      on('bookmark-toggle-btn', 'click', toggleBookmark);
+      on('autoflip-btn', 'click', toggleAutoFlip);
+      on('zoom-in-btn', 'click', zoomIn);
+      on('zoom-out-btn', 'click', zoomOut);
+      on('zoom-reset-btn', 'click', resetZoom);
+      on('share-btn', 'click', openShareModal);
+      on('print-btn', 'click', doPrint);
+      on('fs-btn', 'click', () => {
         if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen?.().then(() => document.body.classList.add('fs'));
+          document.documentElement.requestFullscreen?.().then(() => document.body.classList.add('fs')).catch(()=>{});
         } else {
-          document.exitFullscreen?.().then(() => document.body.classList.remove('fs'));
+          document.exitFullscreen?.().then(() => document.body.classList.remove('fs')).catch(()=>{});
         }
       });
 
-      // Resize handler — rebuild on significant size changes
-      let resizeTimer;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          const currIdx = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
-          build().then(() => {
-            if (pageFlip && currIdx > 0) pageFlip.turnToPage(currIdx);
-          });
-        }, 300);
+      // Mobile mirror buttons (same handlers via redirect)
+      function mobileMirror(id, target) {
+        on(id, 'click', () => {
+          document.getElementById('mobile-more-menu').classList.remove('visible');
+          const el = document.getElementById(target);
+          if (el) el.click();
+        });
+      }
+      mobileMirror('m-search', 'panel-search-btn');
+      mobileMirror('m-thumbs', 'panel-thumbs-btn');
+      mobileMirror('m-bookmarks', 'panel-bookmarks-btn');
+      mobileMirror('m-bookmark-toggle', 'bookmark-toggle-btn');
+      mobileMirror('m-autoflip', 'autoflip-btn');
+      mobileMirror('m-share', 'share-btn');
+      mobileMirror('m-print', 'print-btn');
+      mobileMirror('m-fs', 'fs-btn');
+
+      on('mobile-more-btn', 'click', (e) => {
+        e.stopPropagation();
+        document.getElementById('mobile-more-menu').classList.toggle('visible');
+      });
+      document.addEventListener('click', (e) => {
+        const menu = document.getElementById('mobile-more-menu');
+        if (!menu.contains(e.target) && e.target.id !== 'mobile-more-btn') {
+          menu.classList.remove('visible');
+        }
       });
 
-      // Initial build
+      // ---- Side panel: tabs + close on outside click ----
+      on('tab-toc', 'click', () => switchPanelTab('toc'));
+      on('tab-thumbs', 'click', () => switchPanelTab('thumbs'));
+      on('tab-search', 'click', () => switchPanelTab('search'));
+      on('tab-bookmarks', 'click', () => switchPanelTab('bookmarks'));
+      document.addEventListener('click', (e) => {
+        const panel = document.getElementById('side-panel');
+        if (!panel.classList.contains('open')) return;
+        if (panel.contains(e.target)) return;
+        if (e.target.closest('.topbar')) return;
+        closePanel();
+      });
+
+      // ---- Search ----
+      let searchDebounce;
+      on('search-input', 'input', (e) => {
+        clearTimeout(searchDebounce);
+        const v = e.target.value;
+        searchDebounce = setTimeout(() => doSearch(v), 200);
+      });
+      on('search-clear', 'click', () => {
+        const inp = document.getElementById('search-input');
+        inp.value = '';
+        doSearch('');
+        inp.focus();
+      });
+
+      // ---- Share modal ----
+      on('share-close-btn', 'click', closeShareModal);
+      on('share-copy-btn', 'click', async () => {
+        const url = document.getElementById('share-url').value;
+        try {
+          if (navigator.clipboard) await navigator.clipboard.writeText(url);
+          else { document.getElementById('share-url').select(); document.execCommand('copy'); }
+          showToast('Link copied');
+        } catch(e) {
+          document.getElementById('share-url').select();
+          showToast('Press Ctrl+C to copy');
+        }
+      });
+      document.getElementById('share-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'share-modal') closeShareModal();
+      });
+
+      // ---- Hash change (back/forward nav) ----
+      window.addEventListener('hashchange', () => {
+        if (pageFlip) applyHashToPage();
+      });
+
+      // ---- Resize handler — skip rebuild on small changes (e.g. fullscreen toggle) ----
+      let resizeTimer;
+      let isBuilding = false;
+      const REBUILD_THRESHOLD = 60; // px — pages need to differ by this much to repaginate
+
+      function maybeRebuild() {
+        if (isBuilding || !hasBuiltOnce) return;
+        const newDims = getDims();
+        const dwChange = Math.abs(newDims.pageW - lastBuiltDims.pageW);
+        const dhChange = Math.abs(newDims.pageH - lastBuiltDims.pageH);
+        const modeChanged = newDims.isMobile !== lastBuiltDims.isMobile;
+        if (!modeChanged && dwChange < REBUILD_THRESHOLD && dhChange < REBUILD_THRESHOLD) {
+          // Small change — don't repaginate; just let CSS/StPageFlip handle the slight scale
+          return;
+        }
+        isBuilding = true;
+        const currIdx = pageFlip ? pageFlip.getCurrentPageIndex() : 0;
+        thumbsRendered = false;
+        // Hide just the book (not full-screen loading) so the page stays responsive
+        const bookEl = document.querySelector('.book-shadow');
+        if (bookEl) bookEl.style.opacity = '0.2';
+        build().then(() => {
+          isBuilding = false;
+          if (bookEl) bookEl.style.opacity = '';
+          if (pageFlip && currIdx > 0) pageFlip.turnToPage(currIdx);
+        }).catch(err => {
+          isBuilding = false;
+          if (bookEl) bookEl.style.opacity = '';
+          console.error('Rebuild failed:', err);
+        });
+      }
+
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(maybeRebuild, 350);
+      });
+
+      // Fullscreen change: don't force a rebuild; just let StPageFlip's existing pages stay.
+      // If dims really did change a lot, the resize event also fires and maybeRebuild handles it.
+      document.addEventListener('fullscreenchange', () => {
+        document.body.classList.toggle('fs', !!document.fullscreenElement);
+      });
+
+      // ---- Init ----
       if (CHAPTERS.length === 0) {
-        document.getElementById('loading').textContent = 'No content found.';
+        showError('No content found.');
       } else {
-        // Defer slightly so layout settles
-        requestAnimationFrame(() => requestAnimationFrame(build));
+        injectSEOContent();
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          build().catch(err => {
+            console.error('Build failed:', err);
+            showError('Something went wrong loading the book.');
+          });
+        }));
       }
     })();
   </script>
