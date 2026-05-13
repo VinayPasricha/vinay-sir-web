@@ -680,13 +680,19 @@
       position: relative;
       box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
       border-radius: 2px;
+      transition: transform 0.35s ease-out;
     }
     /* On cover-only views (first/last page when showCover:true) the .book-shadow
-       container is twice the width of the visible page, so its rectangular
-       box-shadow draws a phantom "page outline" around the empty half. Switch
-       the shadow off here and put a drop-shadow filter on the visible page
-       itself — filter:drop-shadow follows the actual page shape. */
-    .book-shadow.cover-only { box-shadow: none; }
+       container is twice the width of the visible page; the cover sits on the
+       right half (left:pageW), so the visible page ends up offset right of the
+       viewport center. Shift the wrapper left by 25% of its own width
+       (= half a page width) to center the cover horizontally, and swap the
+       rectangular wrapper shadow for a shape-following drop-shadow filter on
+       the page itself so the empty half doesn't render a phantom outline. */
+    .book-shadow.cover-only {
+      box-shadow: none;
+      transform: translateX(-25%);
+    }
     .book-shadow.cover-only .stf__item {
       filter: drop-shadow(0 30px 60px rgba(0,0,0,0.5)) drop-shadow(0 10px 20px rgba(0,0,0,0.3));
     }
