@@ -875,12 +875,8 @@
       display: flex;
       align-items: baseline;
       gap: 10px;
-      cursor: pointer;
-      transition: color 0.2s;
       color: var(--ink-soft);
     }
-    .toc-list li:hover { color: var(--accent); }
-    .toc-list li:hover .toc-dots { border-bottom-color: var(--accent); opacity: 0.7; }
     .toc-list .toc-num {
       flex: 0 0 28px;
       color: var(--accent); font-size: 10.5px; letter-spacing: 1px;
@@ -1677,14 +1673,10 @@
         // Render bookmarks panel
         renderBookmarks();
 
-        // Hook TOC clicks on actual TOC pages inside the book
-        document.querySelectorAll('#book .toc-list li').forEach(li => {
-          li.addEventListener('click', () => {
-            const chIdx = parseInt(li.dataset.chapter, 10);
-            const page = chapterStartPages[chIdx];
-            if (page != null && pageFlip) pageFlip.turnToPage(page);
-          });
-        });
+        // The in-book TOC is purely visual — chapter entries do NOT navigate.
+        // (They used to call turnToPage, but that intercepted normal flip-page
+        // clicks and looked like a random-page jump. Chapter navigation lives
+        // in the side panel TOC, wired in renderPanelTOC.)
 
         // Honor hash like #page=12 if present
         applyHashToPage();
