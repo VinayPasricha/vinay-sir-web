@@ -681,6 +681,15 @@
       box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 10px 20px rgba(0,0,0,0.3);
       border-radius: 2px;
     }
+    /* On cover-only views (first/last page when showCover:true) the .book-shadow
+       container is twice the width of the visible page, so its rectangular
+       box-shadow draws a phantom "page outline" around the empty half. Switch
+       the shadow off here and put a drop-shadow filter on the visible page
+       itself — filter:drop-shadow follows the actual page shape. */
+    .book-shadow.cover-only { box-shadow: none; }
+    .book-shadow.cover-only .stf__item {
+      filter: drop-shadow(0 30px 60px rgba(0,0,0,0.5)) drop-shadow(0 10px 20px rgba(0,0,0,0.3));
+    }
     /* Clip anything that escapes the book box during flip animation. */
     #book {
       position: relative;
@@ -1624,11 +1633,19 @@
         pageInput.max = String(totalPages);
         pageTotal.textContent = `/ ${totalPages}`;
 
+        const bookShadowEl = document.querySelector('.book-shadow');
         function onFlip() {
           const curr = pageFlip.getCurrentPageIndex();
           slider.value = String(curr);
           slider.style.setProperty('--progress', `${(curr / Math.max(1, totalPages - 1)) * 100}%`);
           pageInput.value = String(curr + 1);
+          // Cover-only views (first + last in showCover mode): swap the wrapper
+          // box-shadow for a shape-following filter so the empty companion slot
+          // doesn't render a phantom page outline.
+          if (bookShadowEl) {
+            const isCoverOnly = curr === 0 || curr === totalPages - 1;
+            bookShadowEl.classList.toggle('cover-only', isCoverOnly);
+          }
           updateBookmarkButtonState();
           updateThumbActive();
           updateHash(curr);
