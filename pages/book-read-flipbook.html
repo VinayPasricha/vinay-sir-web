@@ -1658,6 +1658,15 @@
         }
         onFlip();
         pageFlip.on('flip', onFlip);
+        // The cover-only translate shifts the book visually but confuses
+        // StPageFlip's swipe-coordinate math (corner clicks jump to random
+        // pages). Drop cover-only the moment the user starts to interact —
+        // the CSS transition smooths the slide-out before the flip lands.
+        pageFlip.on('changeState', (e) => {
+          if (e.data !== 'read' && bookShadowEl) {
+            bookShadowEl.classList.remove('cover-only');
+          }
+        });
 
         // Build the panel-toc (in the side panel, not on a book page)
         renderPanelTOC();
